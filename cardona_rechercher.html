@@ -532,8 +532,8 @@ function calcPrixForCategory(t, weightVal, cat) {
   const targetCat = cat || (selectedCategories && selectedCategories[0]) || (t.categories_acceptees || [])[0];
   const o = overrides[targetCat];
   if (o && o.unit === 'forfait') return o.value;
-  if (o && o.unit === 'kg') return parseFloat(t.prix || 0) + o.value * weightVal;
-  return parseFloat(t.prix || 0) + parseFloat(t.prix_par_kg || 0) * weightVal;
+  if (o && o.unit === 'kg') return o.value * weightVal;
+  return parseFloat(t.prix_par_kg || 0) * weightVal;
 }
 
 async function searchTransporteurs() {
