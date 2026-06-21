@@ -193,12 +193,17 @@
   <!-- ===================== ACCÈS REFUSÉ ===================== -->
   <div class="step" id="step-gate">
     <div class="gate">
-      <div class="gate-icon">🔒</div>
+      <div class="gate-icon" id="gate-icon">🔒</div>
       <div class="gate-title" id="gate-title">Connexion requise</div>
       <div class="gate-desc" id="gate-desc">Connectez-vous avec un compte transporteur via la page de connexion CARDONA pour publier un trajet.</div>
       <button class="btn-primary" id="gate-logout-btn" style="display:none;margin-top:20px;" onclick="handleGateLogout()">Se déconnecter</button>
       <a class="btn-primary" id="gate-login-link" href="cardona_app.html" style="display:none;margin-top:20px;text-decoration:none;text-align:center;">Aller à la page de connexion</a>
       <a class="btn-primary" id="gate-profile-link" href="cardona_app.html" style="display:none;margin-top:20px;text-decoration:none;text-align:center;">Aller à mon profil</a>
+      <div id="gate-become-block" style="display:none;margin-top:20px;">
+        <button class="btn-primary" style="margin-bottom:10px;" onclick="becomeTransporteur('prive')">Devenir transporteur privé</button>
+        <button class="btn-outline" style="margin-bottom:10px;" onclick="becomeTransporteur('pro')">Devenir transporteur professionnel</button>
+        <a href="cardona_app.html" style="display:block;text-align:center;font-size:13px;color:var(--text-secondary);text-decoration:none;margin-top:6px;">Retour à mon profil</a>
+      </div>
     </div>
   </div>
 
@@ -347,7 +352,11 @@ async function checkAccess() {
   }
   const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
   if (!profile || (profile.role !== 'transporteur' && profile.role !== 'both')) {
-    showGate('Réservé aux transporteurs', `Le compte connecté (${session.user.email}) est enregistré comme expéditeur. Déconnectez-vous puis reconnectez-vous avec un compte transporteur.`, 'logout');
+    showGate(
+      'Devenez transporteur',
+      "Vous pouvez gagner de l'argent en transportant un objet ou un colis pour quelqu'un lors d'un trajet que vous faites déjà — en train, en voiture, en avion, etc. Choisissez le type de profil transporteur qui vous correspond pour commencer à publier vos trajets.",
+      'become'
+    );
     return;
   }
   if (profile.verification_status !== 'verifie') {
@@ -372,14 +381,27 @@ async function checkAccess() {
 }
 
 function showGate(title, desc, action) {
+  document.getElementById('gate-icon').textContent = action === 'become' ? '🚚' : '🔒';
   document.getElementById('gate-title').textContent = title;
   document.getElementById('gate-desc').textContent = desc;
   document.getElementById('gate-logout-btn').style.display = action === 'logout' ? 'block' : 'none';
   document.getElementById('gate-login-link').style.display = action === 'login' ? 'block' : 'none';
   document.getElementById('gate-profile-link').style.display = action === 'profile' ? 'block' : 'none';
+  document.getElementById('gate-become-block').style.display = action === 'become' ? 'block' : 'none';
   document.getElementById('step-gate').classList.add('active');
   document.getElementById('form-wrapper').style.display = 'none';
   document.getElementById('bottom-nav').style.display = 'none';
+}
+
+async function becomeTransporteur(type) {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+  const { error } = await sb.from('profiles').update({ role: 'both', transporteur_type: type }).eq('id', session.user.id);
+  if (error) {
+    // La colonne transporteur_type peut ne pas exister : on retente sans elle
+    await sb.from('profiles').update({ role: 'both' }).eq('id', session.user.id);
+  }
+  checkAccess();
 }
 
 async function handleGateLogout() {
