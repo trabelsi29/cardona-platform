@@ -348,9 +348,14 @@ let currentStep = 1;
 const totalSteps = 6;
 let stopCounter = 0;
 
-function newStop() { stopCounter++; return { id: 'stop' + stopCounter, adresse: '', lat: null, lon: null, date_heure: '', date_heure_fin: '' }; }
+function newStop() { stopCounter++; return { id: 'stop' + stopCounter, adresse: '', lat: null, lon: null, date: '', heure_debut: '', heure_fin: '', date_heure: '', date_heure_fin: '' }; }
 let ramassageStops = [newStop()];
 let distributionStops = [newStop()];
+
+function combineStopDateTime(stop) {
+  stop.date_heure = (stop.date && stop.heure_debut) ? (stop.date + 'T' + stop.heure_debut) : '';
+  stop.date_heure_fin = (stop.date && stop.heure_fin) ? (stop.date + 'T' + stop.heure_fin) : '';
+}
 
 // ============================================================
 // ACCÈS
@@ -491,12 +496,16 @@ function renderStops(type) {
         <div class="suggestions" id="sugg-${stop.id}"></div>
       </div>
       <div class="field">
-        <label>À partir de</label>
-        <input type="datetime-local" value="${stop.date_heure}" onchange="updateStopField('${type}','${stop.id}','date_heure', this.value)">
+        <label>Date</label>
+        <input type="date" value="${stop.date}" onchange="updateStopField('${type}','${stop.id}','date', this.value)">
+      </div>
+      <div class="field">
+        <label>Heure de début</label>
+        <input type="time" value="${stop.heure_debut}" onchange="updateStopField('${type}','${stop.id}','heure_debut', this.value)">
       </div>
       <div class="field" style="margin-bottom:0;">
-        <label>Jusqu'à</label>
-        <input type="datetime-local" value="${stop.date_heure_fin}" onchange="updateStopField('${type}','${stop.id}','date_heure_fin', this.value)">
+        <label>Heure de fin</label>
+        <input type="time" value="${stop.heure_fin}" onchange="updateStopField('${type}','${stop.id}','heure_fin', this.value)">
       </div>
     </div>
   `).join('');
@@ -515,7 +524,11 @@ function removeStop(type, id) {
 }
 function updateStopField(type, id, field, value) {
   const stop = getStopsArray(type).find(s => s.id === id);
-  if (stop) stop[field] = value;
+  if (!stop) return;
+  stop[field] = value;
+  if (field === 'date' || field === 'heure_debut' || field === 'heure_fin') {
+    combineStopDateTime(stop);
+  }
 }
 
 // ---- Autocomplete OpenStreetMap (Nominatim) ----
@@ -558,14 +571,14 @@ function selectSuggestion(type, id, display_name, lat, lon) {
 function validateStep2() {
   if (!selectedMode) { goStep(1); showFormError('Choisissez un moyen de transport.'); return; }
   for (const s of ramassageStops) {
-    if (!s.adresse.trim() || !s.date_heure || !s.date_heure_fin) { showFormError('Renseignez l\u2019adresse, l\u2019heure de début et l\u2019heure de fin pour chaque point de ramassage.'); return; }
+    if (!s.adresse.trim() || !s.date_heure || !s.date_heure_fin) { showFormError('Renseignez l\u2019adresse, la date, l\u2019heure de début et l\u2019heure de fin pour chaque point de ramassage.'); return; }
     if (new Date(s.date_heure_fin) <= new Date(s.date_heure)) { showFormError('L\u2019heure de fin doit être après l\u2019heure de début (ramassage).'); return; }
   }
   goStep(3);
 }
 function validateStep3() {
   for (const s of distributionStops) {
-    if (!s.adresse.trim() || !s.date_heure || !s.date_heure_fin) { showFormError('Renseignez l\u2019adresse, l\u2019heure de début et l\u2019heure de fin pour chaque point de distribution.'); return; }
+    if (!s.adresse.trim() || !s.date_heure || !s.date_heure_fin) { showFormError('Renseignez l\u2019adresse, la date, l\u2019heure de début et l\u2019heure de fin pour chaque point de distribution.'); return; }
     if (new Date(s.date_heure_fin) <= new Date(s.date_heure)) { showFormError('L\u2019heure de fin doit être après l\u2019heure de début (distribution).'); return; }
   }
   goStep(4);
