@@ -76,6 +76,15 @@
   .add-stop-icon { width: 22px; height: 22px; border-radius: 50%; background: #FAF0D7; color: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
 
   .category-pill { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid #e0ddd8; border-radius: 10px; margin-bottom: 8px; background: white; cursor: pointer; font-size: 13px; color: var(--dark); }
+  .cat-price-card { border: 1px solid #e0ddd8; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; background: white; }
+  .cat-price-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 600; color: var(--dark); margin-bottom: 8px; }
+  .cat-price-row { display: flex; align-items: center; gap: 8px; }
+  .cat-price-row input[type="number"] { flex: 1; padding: 9px 10px; border-radius: 8px; border: 1px solid #ddd; font-size: 13px; }
+  .cat-price-unit { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+  .cat-price-hint { font-size: 11px; color: var(--gold); margin-top: 5px; }
+  .cat-unit-toggle { display: flex; gap: 6px; margin-bottom: 6px; }
+  .cat-unit-btn { flex: 1; text-align: center; padding: 6px; border-radius: 7px; border: 1px solid #ddd; font-size: 11.5px; cursor: pointer; color: var(--text-secondary); }
+  .cat-unit-btn.active { border-color: var(--gold); background: #FDF8EE; color: var(--dark); font-weight: 600; }
   .category-pill.selected { border-color: var(--gold); background: #FDF8EE; }
   .category-check { width: 18px; height: 18px; border: 2px solid #bbb; border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; }
   .category-check.checked { border-color: var(--gold); background: var(--gold); }
@@ -274,7 +283,9 @@
       <div class="title">Votre prix</div>
       <div class="subtitle">Tarif de base et tarif au poids</div>
       <div class="field"><label>Prix de base (€)</label><input type="number" id="prix-base" placeholder="10" min="0" step="0.5"></div>
-      <div class="field"><label>Prix par kg (€/kg)</label><input type="number" id="prix-kg" placeholder="2.5" min="0" step="0.1"></div>
+      <div class="field"><label>Prix par kg (€/kg)</label><input type="number" id="prix-kg" placeholder="2.5" min="0" step="0.1" oninput="updateCategoryPriceSuggestions()"></div>
+      <div class="subtitle" style="margin-top:18px;">Tarifs indicatifs par type de colis accepté</div>
+      <div id="category-pricing-list"></div>
       <button class="btn-primary" onclick="validateStep5()">Suivant</button>
     </div>
 
@@ -301,6 +312,8 @@
       <div class="recap-card">
         <div class="recap-row"><span>Prix de base</span><span id="recap-prix-base">—</span></div>
         <div class="recap-row"><span>Prix par kg</span><span id="recap-prix-kg">—</span></div>
+        <div class="recap-section-title" style="margin-top:10px;">Tarifs par type de colis</div>
+        <div id="recap-prix-categories"></div>
       </div>
       <button class="btn-primary" id="publish-btn" onclick="publishTrajet()">Publier le trajet</button>
     </div>
@@ -575,7 +588,99 @@ function toggleCategory(cat) {
 }
 function validateStep4() {
   if (selectedCategories.length === 0) { showFormError('Sélectionnez au moins un type de colis accepté.'); return; }
+  renderCategoryPricing();
   goStep(5);
+}
+
+// ============================================================
+// TARIFICATION PAR CATÉGORIE
+// ============================================================
+const CATEGORY_PRICE_CONFIG = {
+  marchandise: { label: '📦 Marchandises', mode: 'kg' },
+  document:    { label: '📄 Documents', mode: 'forfait' },
+  fragile:     { label: '🔔 Produits fragiles', mode: 'kg', suggestMultiplier: 1.2 },
+  electronique:{ label: '💻 Produits électroniques', mode: 'kg' },
+  autre:       { label: '❓ Autre', mode: 'choice' }
+};
+
+function renderCategoryPricing() {
+  const baseKg = parseFloat(document.getElementById('prix-kg').value) || 0;
+  const container = document.getElementById('category-pricing-list');
+  container.innerHTML = selectedCategories.map(cat => {
+    const cfg = CATEGORY_PRICE_CONFIG[cat];
+    if (!cfg) return '';
+    if (cfg.mode === 'forfait') {
+      return `
+        <div class="cat-price-card" data-cat="${cat}">
+          <div class="cat-price-head">${cfg.label}</div>
+          <div class="cat-price-row">
+            <input type="number" id="cat-price-${cat}" min="0" step="0.5" placeholder="5">
+            <span class="cat-price-unit">€ forfait</span>
+          </div>
+        </div>`;
+    }
+    if (cfg.mode === 'choice') {
+      return `
+        <div class="cat-price-card" data-cat="${cat}">
+          <div class="cat-price-head">${cfg.label}</div>
+          <div class="cat-unit-toggle">
+            <div class="cat-unit-btn active" id="cat-unit-${cat}-kg" onclick="setAutreUnit('kg')">€ / kg</div>
+            <div class="cat-unit-btn" id="cat-unit-${cat}-forfait" onclick="setAutreUnit('forfait')">Forfait €</div>
+          </div>
+          <div class="cat-price-row">
+            <input type="number" id="cat-price-${cat}" min="0" step="0.1" placeholder="${baseKg || 2.5}" value="${baseKg || ''}">
+            <span class="cat-price-unit" id="cat-price-${cat}-unit">€/kg</span>
+          </div>
+        </div>`;
+    }
+    // mode: kg (marchandise, electronique, fragile)
+    const suggested = cfg.suggestMultiplier ? (baseKg * cfg.suggestMultiplier) : baseKg;
+    const hint = cfg.suggestMultiplier
+      ? `<div class="cat-price-hint">Suggestion : +${Math.round((cfg.suggestMultiplier - 1) * 100)}% du prix de base (modifiable)</div>`
+      : '';
+    return `
+      <div class="cat-price-card" data-cat="${cat}">
+        <div class="cat-price-head">${cfg.label}</div>
+        <div class="cat-price-row">
+          <input type="number" id="cat-price-${cat}" min="0" step="0.1" value="${suggested ? suggested.toFixed(2) : ''}" placeholder="${baseKg || 2.5}">
+          <span class="cat-price-unit">€/kg</span>
+        </div>
+        ${hint}
+      </div>`;
+  }).join('');
+}
+
+function setAutreUnit(unit) {
+  const kgBtn = document.getElementById('cat-unit-autre-kg');
+  const forfaitBtn = document.getElementById('cat-unit-autre-forfait');
+  const unitLabel = document.getElementById('cat-price-autre-unit');
+  if (!kgBtn) return;
+  kgBtn.classList.toggle('active', unit === 'kg');
+  forfaitBtn.classList.toggle('active', unit === 'forfait');
+  unitLabel.textContent = unit === 'kg' ? '€/kg' : '€ forfait';
+  document.getElementById('cat-price-autre').dataset.unit = unit;
+}
+
+function updateCategoryPriceSuggestions() {
+  // Ne réécrit que si l'étape 5 est déjà construite
+  if (document.getElementById('category-pricing-list').innerHTML.trim()) {
+    renderCategoryPricing();
+  }
+}
+
+function collectCategoryPrices() {
+  const result = {};
+  selectedCategories.forEach(cat => {
+    const cfg = CATEGORY_PRICE_CONFIG[cat];
+    const input = document.getElementById('cat-price-' + cat);
+    if (!cfg || !input) return;
+    const value = parseFloat(input.value);
+    if (isNaN(value) || value < 0) return;
+    let unit = cfg.mode === 'forfait' ? 'forfait' : 'kg';
+    if (cfg.mode === 'choice') unit = input.dataset.unit || 'kg';
+    result[cat] = { unit, value };
+  });
+  return result;
 }
 
 // ============================================================
@@ -616,6 +721,14 @@ function fillRecap() {
     `<span class="recap-chip">${categoryLabel(c)}</span>`).join('');
   document.getElementById('recap-prix-base').textContent = document.getElementById('prix-base').value + ' €';
   document.getElementById('recap-prix-kg').textContent = document.getElementById('prix-kg').value + ' €/kg';
+  const catPrices = collectCategoryPrices();
+  const detailHtml = Object.keys(catPrices).map(cat => {
+    const cfg = CATEGORY_PRICE_CONFIG[cat];
+    const p = catPrices[cat];
+    const unitLabel = p.unit === 'forfait' ? '€ forfait' : '€/kg';
+    return `<div class="recap-row"><span>${cfg.label}</span><span>${p.value} ${unitLabel}</span></div>`;
+  }).join('');
+  document.getElementById('recap-prix-categories').innerHTML = detailHtml;
 }
 
 // ============================================================
@@ -648,6 +761,7 @@ async function publishTrajet() {
     prix: parseFloat(document.getElementById('prix-base').value),
     prix_par_kg: parseFloat(document.getElementById('prix-kg').value),
     categories_acceptees: selectedCategories,
+    prix_categories: collectCategoryPrices(),
     devise: 'EUR'
   }).select('id').single();
 
@@ -682,6 +796,7 @@ function resetForm() {
   document.querySelectorAll('.category-pill').forEach(el => { el.classList.remove('selected'); el.querySelector('.category-check').classList.remove('checked'); el.querySelector('.category-check').textContent = ''; });
   document.getElementById('prix-base').value = '';
   document.getElementById('prix-kg').value = '';
+  document.getElementById('category-pricing-list').innerHTML = '';
   renderStops('ramassage');
   renderStops('distribution');
   goStep(1);

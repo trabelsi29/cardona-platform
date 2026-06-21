@@ -526,6 +526,16 @@ function categoryLabel(c) {
   return map[c] || c;
 }
 
+// Calcule le prix en tenant compte d'un éventuel tarif personnalisé du transporteur pour la catégorie choisie
+function calcPrixForCategory(t, weightVal, cat) {
+  const overrides = t.prix_categories || {};
+  const targetCat = cat || (selectedCategories && selectedCategories[0]) || (t.categories_acceptees || [])[0];
+  const o = overrides[targetCat];
+  if (o && o.unit === 'forfait') return o.value;
+  if (o && o.unit === 'kg') return parseFloat(t.prix || 0) + o.value * weightVal;
+  return parseFloat(t.prix || 0) + parseFloat(t.prix_par_kg || 0) * weightVal;
+}
+
 async function searchTransporteurs() {
   if (!searchEnvoi.lat || !searchReception.lat) {
     showFormError('Choisissez une adresse dans la liste de suggestions pour les deux champs (pour calculer la distance).');
@@ -598,7 +608,7 @@ async function searchTransporteurs() {
     const ram = m.etapes.filter(e => e.type === 'ramassage').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_ramassage;
     const dist = m.etapes.filter(e => e.type === 'distribution').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_distribution;
     const initials = (transp?.full_name || '??').split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
-    const prixEstime = (parseFloat(t.prix || 0) + parseFloat(t.prix_par_kg || 0) * weight).toFixed(2);
+    const prixEstime = calcPrixForCategory(t, weight).toFixed(2);
     return `
       <div class="t-card" onclick="selectTransporteur(${idx})">
         <div class="t-head">
@@ -635,7 +645,7 @@ function renderFiche() {
   const ramassages = etapes.filter(e => e.type === 'ramassage');
   const distributions = etapes.filter(e => e.type === 'distribution');
   const initials = (transp?.full_name || '??').split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
-  const prixEstime = (parseFloat(t.prix || 0) + parseFloat(t.prix_par_kg || 0) * weight).toFixed(2);
+  const prixEstime = calcPrixForCategory(t, weight).toFixed(2);
 
   document.getElementById('fiche-content').innerHTML = `
     <div class="detail-card">
@@ -677,7 +687,7 @@ function fillRecapEnvoi() {
   document.getElementById('recap-vers').textContent = dist;
   document.getElementById('recap-transporteur').textContent = transp?.full_name || 'Transporteur';
 
-  const prixT = parseFloat(t.prix || 0) + parseFloat(t.prix_par_kg || 0) * weight;
+  const prixT = calcPrixForCategory(t, weight);
   const commission = 2.00;
   document.getElementById('recap-prix-t').textContent = prixT.toFixed(2) + ' €';
   document.getElementById('recap-frais').textContent = commission.toFixed(2) + ' €';
@@ -705,7 +715,7 @@ async function handlePayment() {
   if (!session) { showFormError('Session expirée, reconnectez-vous.'); btn.disabled = false; return; }
 
   const t = selectedTrajet.trajet;
-  const prixT = parseFloat(t.prix || 0) + parseFloat(t.prix_par_kg || 0) * weight;
+  const prixT = calcPrixForCategory(t, weight);
   const commission = 2.00;
   const details = document.getElementById('envoi-details').value.trim();
 
