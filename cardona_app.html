@@ -484,19 +484,33 @@ async function handleAvatarUpload() {
   if (file.size > 5 * 1024 * 1024) { alert('Image trop volumineuse (max 5 Mo).'); return; }
   if (!file.type.startsWith('image/')) { alert('Veuillez choisir une image.'); return; }
 
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { alert('Session expirée, reconnectez-vous.'); return; }
 
   const ext = file.name.split('.').pop();
-  const path = `${user.id}/avatar_${Date.now()}.${ext}`;
+  const path = `${session.user.id}/avatar_${Date.now()}.${ext}`;
 
-  const { error: uploadError } = await sb.storage.from('avatars').upload(path, file, { upsert: true });
-  if (uploadError) { alert('Erreur lors de l\u2019envoi : ' + uploadError.message); return; }
+  // Envoi manuel avec le jeton explicite (contourne un souci de transmission du token par la librairie)
+  const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/avatars/${path}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+      'apikey': SUPABASE_ANON_KEY,
+      'x-upsert': 'true',
+      'Content-Type': file.type
+    },
+    body: file
+  });
 
-  const { data: urlData } = sb.storage.from('avatars').getPublicUrl(path);
-  const avatar_url = urlData.publicUrl;
+  if (!uploadRes.ok) {
+    const errBody = await uploadRes.json().catch(() => ({}));
+    alert('Erreur lors de l\u2019envoi : ' + (errBody.message || uploadRes.statusText));
+    return;
+  }
 
-  const { error: updateError } = await sb.from('profiles').update({ avatar_url }).eq('id', user.id);
+  const avatar_url = `${SUPABASE_URL}/storage/v1/object/public/avatars/${path}`;
+
+  const { error: updateError } = await sb.from('profiles').update({ avatar_url }).eq('id', session.user.id);
   if (updateError) { alert('Photo envoyée, mais erreur de mise à jour du profil : ' + updateError.message); return; }
 
   await loadHome();
