@@ -496,7 +496,6 @@ async function handleAvatarUpload() {
     headers: {
       'Authorization': `Bearer ${session.access_token}`,
       'apikey': SUPABASE_ANON_KEY,
-      'x-upsert': 'true',
       'Content-Type': file.type
     },
     body: file
