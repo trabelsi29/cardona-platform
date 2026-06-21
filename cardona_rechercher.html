@@ -225,7 +225,7 @@
         <div class="suggestions" id="sugg-reception"></div>
       </div>
       <div class="field">
-        <label>Distance maximale que le transporteur peut parcourir pour vous rejoindre (km)</label>
+        <label>Distance maximale que vous pouvez parcourir pour déposer votre colis (km)</label>
         <div class="stepper" style="justify-content:flex-start;gap:14px;">
           <button class="stepper-btn" onclick="changeMaxDistance(-10)">−</button>
           <span class="stepper-value" id="distance-value">40</span>
@@ -546,7 +546,7 @@ async function searchTransporteurs() {
   }
 
   const fallbackNotice = matches.filter(m => m.withinRange).length === 0
-    ? `<div style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;">Aucun transporteur dans ${maxDistanceKm} km — voici les plus proches.</div>`
+    ? `<div style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;">Aucun transporteur à moins de ${maxDistanceKm} km de vous — voici les plus proches.</div>`
     : '';
 
   list.innerHTML = fallbackNotice + allMatchingTrajets.map((m, idx) => {
@@ -567,7 +567,7 @@ async function searchTransporteurs() {
           <div class="t-price">${prixEstime} €</div>
         </div>
         <div class="t-route">${modeLabel(t.mode_transport)} · ${ram} → ${dist}</div>
-        <div class="t-cats">${(t.categories_acceptees || []).map(categoryLabel).join(' · ')} · 📍 ${m.distEnvoi.toFixed(1)} km du point de ramassage</div>
+        <div class="t-cats">${(t.categories_acceptees || []).map(categoryLabel).join(' · ')} · 📍 ${m.distEnvoi.toFixed(1)} km à parcourir pour le ramassage</div>
         <button class="t-select-btn">Sélectionner</button>
       </div>`;
   }).join('');
