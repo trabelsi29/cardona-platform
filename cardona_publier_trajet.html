@@ -490,7 +490,7 @@ function renderStops(type) {
     <div class="stop-card">
       <div class="stop-card-head">
         <span class="stop-card-label">${type === 'ramassage' ? 'Ramassage' : 'Distribution'} ${idx + 1}</span>
-        ${arr.length > 1 ? `<span class="remove-stop" onclick="removeStop('${type}','${stop.id}')">✕ Retirer</span>` : ''}
+        ${arr.length > 1 ? '<span class="remove-stop" onclick="removeStop(\'' + type + '\',\'' + stop.id + '\')">✕ Retirer</span>' : ''}
       </div>
       <div class="field">
         <input type="text" placeholder="Adresse (ville, aéroport, port...)" value="${stop.adresse.replace(/"/g,'&quot;')}"
