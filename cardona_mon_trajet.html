@@ -181,7 +181,9 @@
 
   <div class="copyright">© 2026 CARDONA. Tous droits réservés.</div>
 
-  <div class="bottom-nav" id="bottom-nav" style="display:none;"></div>
+  <div class="bottom-nav" id="bottom-nav" style="display:none;">
+    <!-- nav générée par cardona_nav.js -->
+  </div>
 </div>
 
 <script>
@@ -207,22 +209,7 @@ let userRole = null;
 let myTrajets = [];
 let myReservations = [];
 
-// ── NAV selon rôle ──────────────────────────────────────────────
-function buildNav(role, pendingCount) {
-  const nav = document.getElementById('bottom-nav');
-  nav.style.display = 'flex';
-
-  let html = '';
-
-  if (role === 'both') {
-    html += `<div class="bn-item" onclick="switchToExpediteur()">
-      <span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-mesenvois" src=""></span>
-      <span class="bn-label">Mes envois</span>
-      <span class="bn-underline"></span>
-    </div>`;
-  }
-
-  html += `
+html += `
     <a class="bn-item" href="cardona_publier_trajet.html">
       <span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-publier" src=""></span>
       <span class="bn-label">Publier</span>
@@ -327,7 +314,7 @@ async function chargerDonnees() {
     const pendingCount = myReservations.filter(r => r.statut === 'en_attente').length;
 
     document.getElementById('step-loading').style.display = 'none';
-    buildNav(userRole, pendingCount);
+    
 
     if (myTrajets.length === 0) {
       document.getElementById('step-empty').style.display = 'block';
@@ -529,6 +516,9 @@ async function handleMenuLogout() {
 }
 
 init();
+
+
+buildNav('montrajets');
 </script>
 </body>
 </html>
