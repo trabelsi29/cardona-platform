@@ -399,7 +399,7 @@ function cardHTML(r) {
           <div class="detail-label">Transporteur</div>
           <div class="transporteur-box">${avatarHTML}<div><div class="t-name">${tp.full_name || 'Transporteur'}</div><div class="t-type">${tType}</div></div></div>
         </div>
-        ${r.description ? `<div class="detail-row"><div class="detail-label">Description du colis</div><div class="detail-value">${r.description}</div></div>` : ''}
+        ${r.description ? '<div class="detail-row"><div class="detail-label">Description du colis</div><div class="detail-value">' + r.description + '</div></div>' : ''}
         <div class="detail-prices">
           <div class="detail-row"><div class="detail-label">Prix transporteur</div><div class="detail-value">${r.prix_transporteur ? parseFloat(r.prix_transporteur).toFixed(2) + ' €' : '—'}</div></div>
           <div class="detail-row"><div class="detail-label">Frais service</div><div class="detail-value">${r.frais_service ? parseFloat(r.frais_service).toFixed(2) : '2.00'} €</div></div>
