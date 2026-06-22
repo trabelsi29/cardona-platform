@@ -329,8 +329,8 @@
   </div>
 
   <div class="bottom-nav" id="bottom-nav" style="display:none;">
-    <!-- nav -->
-  </div>
+  <!-- nav -->
+</div>
     <a class="bn-item" href="cardona_mes_trajets.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-mestrajets" src=""><span class="bn-badge" id="bn-badge-mestrajets">0</span></span><span class="bn-label">Mes trajets</span><span class="bn-underline"></span></a>
     <a class="bn-item" href="cardona_app.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-profil" src=""></span><span class="bn-label">Profil</span><span class="bn-underline"></span></a>
   </div>
@@ -388,10 +388,50 @@ async function checkAccess() {
   currentUser = session.user;
   document.getElementById('step-gate').classList.remove('active');
   document.getElementById('form-wrapper').style.display = 'block';
-  // nav gérée par buildNav()
+  // nav buildNav()
   renderStops('ramassage');
   renderStops('distribution');
-  injectNavIcons();
+  async function buildNav(pageName) {
+  var nav = document.getElementById('bottom-nav');
+  if (!nav) return;
+  try {
+    var sessRes = await sb.auth.getSession();
+    var session = sessRes.data && sessRes.data.session;
+    if (!session) { nav.style.display = 'none'; return; }
+    var profRes = await sb.from('profiles').select('role').eq('id', session.user.id).single();
+    var role = (profRes.data && profRes.data.role) || 'expediteur';
+    nav.style.display = 'flex';
+    var items = role === 'expediteur' ? [
+      { id: 'rechercher', label: 'Rechercher', icon: 'rechercher', href: 'cardona_rechercher.html' },
+      { id: 'mesenvois',  label: 'Mes envois',  icon: 'mestrajets', href: 'cardona_mes_envois.html' },
+      { id: 'profil',     label: 'Profil',      icon: 'profil',     href: 'cardona_app.html' },
+    ] : [
+      { id: 'publier',    label: 'Publier',    icon: 'publier',    href: 'cardona_publier_trajet.html' },
+      { id: 'montrajets', label: 'Mon trajet', icon: 'mestrajets', href: 'cardona_mon_trajet.html', badge: true },
+      { id: 'profil',     label: 'Profil',     icon: 'profil',     href: 'cardona_app.html' },
+    ];
+    nav.innerHTML = items.map(function(item) {
+      var active = item.id === pageName ? 'active' : '';
+      var b = item.badge ? '<span class="bn-badge" id="nav-badge">0</span>' : '';
+      return '<a class="bn-item ' + active + '" href="' + item.href + '"><span class="bn-icon-wrap"><img class="bn-icon-img" id="nav-icon-' + item.id + '" src="">' + b + '</span><span class="bn-label">' + item.label + '</span><span class="bn-underline"></span></a>';
+    }).join('');
+    var SRC = (typeof NAV_ICONS !== 'undefined') ? NAV_ICONS : (typeof ICONS !== 'undefined') ? ICONS : {};
+    items.forEach(function(item) {
+      var el = document.getElementById('nav-icon-' + item.id);
+      if (el && SRC[item.icon]) el.src = 'data:image/png;base64,' + SRC[item.icon];
+    });
+    if (role === 'transporteur') {
+      sb.from('trajets').select('id').eq('transporteur_id', session.user.id).then(function(res) {
+        if (!res.data || !res.data.length) return;
+        sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', res.data.map(function(t){return t.id;})).eq('statut', 'en_attente').then(function(r2) {
+          var badge = document.getElementById('nav-badge');
+          if (badge) { badge.textContent = r2.count || 0; badge.classList.toggle('show', (r2.count||0) > 0); }
+        });
+      });
+    }
+  } catch(e) { console.error('buildNav:', e); }
+}
+buildNav('publier');
   updateNavBadge();
   goStep(1);
 }
@@ -406,19 +446,16 @@ function showGate(title, desc, action) {
   document.getElementById('gate-become-block').style.display = action === 'become' ? 'block' : 'none';
   document.getElementById('step-gate').classList.add('active');
   document.getElementById('form-wrapper').style.display = 'none';
-  // nav gérée par buildNav()
+  // nav buildNav()
 }
 
 async function becomeTransporteur(type) {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return;
-  // Rediriger vers profil pour changer le rôle
-    window.location.href = 'cardona_app.html';
-    return;
-    const { error } = await sb.from('profiles').update({ role: 'NEVER', transporteur_type: type }).eq('id', session.user.id);
+  const { error } = await sb.from('profiles').update({ role: 'both', transporteur_type: type }).eq('id', session.user.id);
   if (error) {
     // La colonne transporteur_type peut ne pas exister : on retente sans elle
-    // désactivé — changer le rôle via le profil
+    await sb.from('profiles').update({ role: 'both' }).eq('id', session.user.id);
   }
   checkAccess();
 }
@@ -490,7 +527,7 @@ function renderStops(type) {
     <div class="stop-card">
       <div class="stop-card-head">
         <span class="stop-card-label">${type === 'ramassage' ? 'Ramassage' : 'Distribution'} ${idx + 1}</span>
-        ${arr.length > 1 ? '<span class="remove-stop" onclick="removeStop(\'' + type + '\',\'' + stop.id + '\')">✕ Retirer</span>' : ''}
+        ${arr.length > 1 ? `<span class="remove-stop" onclick="removeStop('${type}','${stop.id}')">✕ Retirer</span>` : ''}
       </div>
       <div class="field">
         <input type="text" placeholder="Adresse (ville, aéroport, port...)" value="${stop.adresse.replace(/"/g,'&quot;')}"
