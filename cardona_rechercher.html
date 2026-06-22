@@ -613,7 +613,7 @@ async function searchTransporteurs() {
     return `
       <div class="t-card" onclick="selectTransporteur(${idx})">
         <div class="t-head">
-          ${transp?.avatar_url ? `<img class="t-avatar" src="${transp.avatar_url}">` : `<div class="t-avatar">${initials}</div>`}
+          ${transp?.avatar_url ? '<img class="t-avatar" src="' + transp.avatar_url + '">' : '<div class="t-avatar">' + (transp?.full_name?.[0] || '?') + '</div>'}
           <div>
             <div class="t-name">${transp?.full_name || 'Transporteur'}</div>
             <div class="t-stars">${transp?.rating ? '⭐ ' + transp.rating : 'Nouveau transporteur'}</div>
@@ -660,11 +660,11 @@ function renderFiche() {
     </div>
     <div class="detail-card">
       <div class="detail-section-title">Ramassage</div>
-      ${ramassages.map(e => `<div class="detail-line">${e.adresse} — de ${formatDateTime(e.date_heure)} à ${formatDateTime(e.date_heure_fin)}</div>`).join('') || `<div class="detail-line">${t.lieu_ramassage}</div>`}
+      ${ramassages.map(e => '<div class="detail-line">' + e.adresse + ' — de ' + formatDateTime(e.date_heure) + ' à ' + formatDateTime(e.date_heure_fin) + '</div>').join('') || `<div class="detail-line">${t.lieu_ramassage}</div>`}
     </div>
     <div class="detail-card">
       <div class="detail-section-title">Distribution</div>
-      ${distributions.map(e => `<div class="detail-line">${e.adresse} — de ${formatDateTime(e.date_heure)} à ${formatDateTime(e.date_heure_fin)}</div>`).join('') || `<div class="detail-line">${t.lieu_distribution}</div>`}
+      ${distributions.map(e => '<div class="detail-line">' + e.adresse + ' — de ' + formatDateTime(e.date_heure) + ' à ' + formatDateTime(e.date_heure_fin) + '</div>').join('') || `<div class="detail-line">${t.lieu_distribution}</div>`}
     </div>
     <div class="detail-card">
       <div class="detail-row"><span>Paiement</span><span>Carte</span></div>
