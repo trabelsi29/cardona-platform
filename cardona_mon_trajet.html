@@ -140,6 +140,7 @@
         <div class="dropdown-menu" id="dropdown-menu">
           <div class="menu-item" onclick="window.location.href='cardona_app.html'">👤 Mon profil</div>
           <div class="menu-item" onclick="window.location.href='cardona_publier_trajet.html'">➕ Publier un trajet</div>
+          <div class="menu-item" id="menu-switch-exp" onclick="switchToExpediteur()" style="display:none;">📦 Mode expéditeur</div>
           <div class="menu-item menu-item-logout" onclick="handleMenuLogout()">↩ Se déconnecter</div>
         </div>
       </div>
@@ -181,8 +182,8 @@
   <div class="copyright">© 2026 CARDONA. Tous droits réservés.</div>
 
   <div class="bottom-nav" id="bottom-nav" style="display:none;">
-    <!-- nav -->
-  </div>
+  <!-- nav -->
+</div>
 </div>
 
 <script>
@@ -229,6 +230,9 @@ async function init() {
   const { data: profile } = await sb.from('profiles').select('role').eq('id', currentUser.id).single();
   userRole = profile?.role || 'transporteur';
 
+  if (userRole === 'NEVER') {
+    document.getElementById('menu-switch-exp').style.display = 'block';
+  }
 
   await chargerDonnees();
 }
@@ -279,7 +283,7 @@ async function chargerDonnees() {
     const pendingCount = myReservations.filter(r => r.statut === 'en_attente').length;
 
     document.getElementById('step-loading').style.display = 'none';
-
+    
     if (myTrajets.length === 0) {
       document.getElementById('step-empty').style.display = 'block';
     } else {
@@ -366,9 +370,14 @@ function render() {
             <div class="stat-value" style="font-size:11px;">${cats}</div>
           </div>
         </div>
-        ${st.cls === 'statut-actif'
-          ? '<div class="trajet-actions"><button class="btn-outline" onclick="window.location.href=\'cardona_publier_trajet.html\'">+ Nouveau trajet</button><button class="btn-danger" onclick="annulerTrajet(\'' + t.id + '\')">Annuler</button></div>'
-          : '<div class="trajet-actions"><a href="cardona_publier_trajet.html" class="btn-primary" style="font-size:13px;padding:10px 18px;">Publier un nouveau trajet</a></div>'}
+        ${st.cls === 'statut-actif' ? `
+        <div class="trajet-actions">
+          <button class="btn-outline" onclick="window.location.href='cardona_publier_trajet.html'">+ Nouveau trajet</button>
+          <button class="btn-danger" onclick="annulerTrajet('${t.id}')">Annuler</button>
+        </div>` : `
+        <div class="trajet-actions">
+          <a href="cardona_publier_trajet.html" class="btn-primary" style="font-size:13px;padding:10px 18px;">Publier un nouveau trajet</a>
+        </div>`}
       </div>`;
 
     // Demandes reçues
@@ -394,8 +403,8 @@ function render() {
           const exp = r._expediteur || {};
           const st2 = statusInfo(r.statut);
           const avatarHTML = exp.avatar_url
-            ? '<img class="exp-avatar" src="' + exp.avatar_url + '" alt="">'
-            : '<div class="exp-avatar">' + initials(exp.full_name) + '</div>';
+            ? `<img class="exp-avatar" src="${exp.avatar_url}" alt="">`
+            : `<div class="exp-avatar">${initials(exp.full_name)}</div>`;
           const cats2 = Array.isArray(r.categories) ? r.categories.map(categoryLabel).join(', ') : categoryLabel(r.categorie);
 
           html += `
@@ -408,13 +417,17 @@ function render() {
               <div class="demande-status ${st2.cls}">${st2.label}</div>
               <div class="demande-divider"></div>
               <div class="demande-detail"><span class="detail-lbl">Colis</span>${cats2} (${r.poids_kg || '—'} kg)</div>
-              ${r.description ? '<div class="demande-detail"><span class="detail-lbl">Note</span>' + r.description + '</div>' : ''}
+              ${r.description ? `<div class="demande-detail"><span class="detail-lbl">Note</span>${r.description}</div>` : ''}
               <div class="demande-divider"></div>
               <div class="demande-price-row">
                 <span class="demande-price-label">Cash à la livraison</span>
                 <span class="demande-price-value">${r.prix_transporteur} €</span>
               </div>
-              ${sec.showActions ? '<div class="reservation-actions"><button class="btn-accept" onclick="updateReservation(\'' + r.id + '\', \'confirme\')">Accepter</button><button class="btn-refuse" onclick="updateReservation(\'' + r.id + '\', \'refuse\')">Refuser</button></div>' : ''}
+              ${sec.showActions ? `
+              <div class="reservation-actions">
+                <button class="btn-accept" onclick="updateReservation('${r.id}', 'confirme')">Accepter</button>
+                <button class="btn-refuse" onclick="updateReservation('${r.id}', 'refuse')">Refuser</button>
+              </div>` : ''}
             </div>`;
         });
       });
@@ -472,17 +485,17 @@ async function handleMenuLogout() {
 
 init();
 
-// ── NAV DYNAMIQUE SELON RÔLE ─────────────────────────────────────
 async function buildNav(pageName) {
-  const nav = document.getElementById('bottom-nav');
+  var nav = document.getElementById('bottom-nav');
   if (!nav) return;
   try {
-    const { data: { session } } = await sb.auth.getSession();
+    var sessRes = await sb.auth.getSession();
+    var session = sessRes.data && sessRes.data.session;
     if (!session) { nav.style.display = 'none'; return; }
-    const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).single();
-    const role = profile?.role || 'expediteur';
+    var profRes = await sb.from('profiles').select('role').eq('id', session.user.id).single();
+    var role = (profRes.data && profRes.data.role) || 'expediteur';
     nav.style.display = 'flex';
-    const items = role === 'expediteur' ? [
+    var items = role === 'expediteur' ? [
       { id: 'rechercher', label: 'Rechercher', icon: 'rechercher', href: 'cardona_rechercher.html' },
       { id: 'mesenvois',  label: 'Mes envois',  icon: 'mestrajets', href: 'cardona_mes_envois.html' },
       { id: 'profil',     label: 'Profil',      icon: 'profil',     href: 'cardona_app.html' },
@@ -491,24 +504,27 @@ async function buildNav(pageName) {
       { id: 'montrajets', label: 'Mon trajet', icon: 'mestrajets', href: 'cardona_mon_trajet.html', badge: true },
       { id: 'profil',     label: 'Profil',     icon: 'profil',     href: 'cardona_app.html' },
     ];
-    nav.innerHTML = items.map(item => {
-      const active = item.id === pageName ? 'active' : '';
-      const b = item.badge ? '<span class="bn-badge" id="nav-badge">0</span>' : '';
-      return `<a class="bn-item ${active}" href="${item.href}"><span class="bn-icon-wrap"><img class="bn-icon-img" id="nav-icon-${item.id}" src="">${b}</span><span class="bn-label">${item.label}</span><span class="bn-underline"></span></a>`;
+    nav.innerHTML = items.map(function(item) {
+      var active = item.id === pageName ? 'active' : '';
+      var b = item.badge ? '<span class="bn-badge" id="nav-badge">0</span>' : '';
+      return '<a class="bn-item ' + active + '" href="' + item.href + '"><span class="bn-icon-wrap"><img class="bn-icon-img" id="nav-icon-' + item.id + '" src="">' + b + '</span><span class="bn-label">' + item.label + '</span><span class="bn-underline"></span></a>';
     }).join('');
-    const SRC = (typeof NAV_ICONS !== 'undefined') ? NAV_ICONS : (typeof ICONS !== 'undefined') ? ICONS : {};
-    items.forEach(item => { const el = document.getElementById('nav-icon-' + item.id); if (el && SRC[item.icon]) el.src = 'data:image/png;base64,' + SRC[item.icon]; });
+    var SRC = (typeof NAV_ICONS !== 'undefined') ? NAV_ICONS : (typeof ICONS !== 'undefined') ? ICONS : {};
+    items.forEach(function(item) {
+      var el = document.getElementById('nav-icon-' + item.id);
+      if (el && SRC[item.icon]) el.src = 'data:image/png;base64,' + SRC[item.icon];
+    });
     if (role === 'transporteur') {
-      const { data: trajets } = await sb.from('trajets').select('id').eq('transporteur_id', session.user.id);
-      if (trajets && trajets.length > 0) {
-        const { count } = await sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', trajets.map(t => t.id)).eq('statut', 'en_attente');
-        const badge = document.getElementById('nav-badge');
-        if (badge) { badge.textContent = count || 0; badge.classList.toggle('show', (count||0) > 0); }
-      }
+      sb.from('trajets').select('id').eq('transporteur_id', session.user.id).then(function(res) {
+        if (!res.data || !res.data.length) return;
+        sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', res.data.map(function(t){return t.id;})).eq('statut', 'en_attente').then(function(r2) {
+          var badge = document.getElementById('nav-badge');
+          if (badge) { badge.textContent = r2.count || 0; badge.classList.toggle('show', (r2.count||0) > 0); }
+        });
+      });
     }
   } catch(e) { console.error('buildNav:', e); }
 }
-
 buildNav('montrajets');
 </script>
 </body>
