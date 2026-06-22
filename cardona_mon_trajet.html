@@ -366,14 +366,9 @@ function render() {
             <div class="stat-value" style="font-size:11px;">${cats}</div>
           </div>
         </div>
-        ${st.cls === 'statut-actif' ? `
-        <div class="trajet-actions">
-          <button class="btn-outline" onclick="window.location.href='cardona_publier_trajet.html'">+ Nouveau trajet</button>
-          <button class="btn-danger" onclick="annulerTrajet('${t.id}')">Annuler</button>
-        </div>` : `
-        <div class="trajet-actions">
-          <a href="cardona_publier_trajet.html" class="btn-primary" style="font-size:13px;padding:10px 18px;">Publier un nouveau trajet</a>
-        </div>`}
+        ${st.cls === 'statut-actif'
+          ? '<div class="trajet-actions"><button class="btn-outline" onclick="window.location.href=\'cardona_publier_trajet.html\'">+ Nouveau trajet</button><button class="btn-danger" onclick="annulerTrajet(\'' + t.id + '\')">Annuler</button></div>'
+          : '<div class="trajet-actions"><a href="cardona_publier_trajet.html" class="btn-primary" style="font-size:13px;padding:10px 18px;">Publier un nouveau trajet</a></div>'}
       </div>`;
 
     // Demandes reçues
@@ -399,8 +394,8 @@ function render() {
           const exp = r._expediteur || {};
           const st2 = statusInfo(r.statut);
           const avatarHTML = exp.avatar_url
-            ? `<img class="exp-avatar" src="${exp.avatar_url}" alt="">`
-            : `<div class="exp-avatar">${initials(exp.full_name)}</div>`;
+            ? '<img class="exp-avatar" src="' + exp.avatar_url + '" alt="">'
+            : '<div class="exp-avatar">' + initials(exp.full_name) + '</div>';
           const cats2 = Array.isArray(r.categories) ? r.categories.map(categoryLabel).join(', ') : categoryLabel(r.categorie);
 
           html += `
@@ -413,17 +408,13 @@ function render() {
               <div class="demande-status ${st2.cls}">${st2.label}</div>
               <div class="demande-divider"></div>
               <div class="demande-detail"><span class="detail-lbl">Colis</span>${cats2} (${r.poids_kg || '—'} kg)</div>
-              ${r.description ? `<div class="demande-detail"><span class="detail-lbl">Note</span>${r.description}</div>` : ''}
+              ${r.description ? '<div class="demande-detail"><span class="detail-lbl">Note</span>' + r.description + '</div>' : ''}
               <div class="demande-divider"></div>
               <div class="demande-price-row">
                 <span class="demande-price-label">Cash à la livraison</span>
                 <span class="demande-price-value">${r.prix_transporteur} €</span>
               </div>
-              ${sec.showActions ? `
-              <div class="reservation-actions">
-                <button class="btn-accept" onclick="updateReservation('${r.id}', 'confirme')">Accepter</button>
-                <button class="btn-refuse" onclick="updateReservation('${r.id}', 'refuse')">Refuser</button>
-              </div>` : ''}
+              ${sec.showActions ? '<div class="reservation-actions"><button class="btn-accept" onclick="updateReservation(\'' + r.id + '\', \'confirme\')">Accepter</button><button class="btn-refuse" onclick="updateReservation(\'' + r.id + '\', \'refuse\')">Refuser</button></div>' : ''}
             </div>`;
         });
       });
