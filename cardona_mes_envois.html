@@ -251,12 +251,7 @@ async function init() {
   const { data: profile } = await sb.from('profiles').select('role').eq('id', currentUser.id).single();
   userRole = profile?.role || 'expediteur';
 
-  // Masquer switchToTransporteur si pas both
-  if (userRole !== 'both') {
-    const switchItem = document.querySelector('.menu-item[onclick="switchToTransporteur()"]');
-    if (switchItem) switchItem.style.display = 'none';
-  }
-  await chargerEnvois();
+    await chargerEnvois();
 }
 
 // ── CHARGER DONNÉES ─────────────────────────────────────────────
