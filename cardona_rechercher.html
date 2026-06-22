@@ -651,7 +651,7 @@ function renderFiche() {
   document.getElementById('fiche-content').innerHTML = `
     <div class="detail-card">
       <div class="detail-profile">
-        ${transp?.avatar_url ? `<img class="t-avatar" style="width:48px;height:48px;" src="${transp.avatar_url}">` : `<div class="t-avatar" style="width:48px;height:48px;font-size:16px;">${initials}</div>`}
+        ${transp?.avatar_url ? '<img class="t-avatar" style="width:48px;height:48px;" src="' + transp.avatar_url + '">' : '<div class="t-avatar" style="width:48px;height:48px;font-size:16px;">' + initials + '</div>'}
         <div>
           <div class="t-name" style="font-size:15px;">${transp?.full_name || 'Transporteur'}</div>
           <div class="t-stars">${transp?.rating ? '⭐ ' + transp.rating : 'Nouveau transporteur'} · ${modeLabel(t.mode_transport)}</div>
