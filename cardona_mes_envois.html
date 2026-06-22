@@ -144,7 +144,7 @@
         <div class="dropdown-menu" id="dropdown-menu">
           <div class="menu-item" onclick="window.location.href='cardona_app.html'">👤 Mon profil</div>
           <div class="menu-item" onclick="window.location.href='cardona_rechercher.html'">🔍 Rechercher un trajet</div>
-          <div class="menu-item" onclick="switchToTransporteur()">🚛 Mode transporteur</div>
+    
           <div class="menu-item menu-item-logout" onclick="handleMenuLogout()">↩ Se déconnecter</div>
         </div>
       </div>
@@ -203,7 +203,7 @@
 
   <!-- BOTTOM NAV — adaptée au rôle -->
   <div class="bottom-nav" id="bottom-nav" style="display:none;" id="bottom-nav">
-    <!-- nav générée par cardona_nav.js -->
+    <!-- nav -->
   </div>
 </div>
 
@@ -230,43 +230,7 @@ let userRole = null;
 let allReservations = [];
 let filtreActif = 'tous';
 
-// Expéditeur ou both
-  let html = '';
-
-  if (role === 'both') {
-    // Icône mode transporteur en premier
-    html += `<div class="bn-item" onclick="switchToTransporteur()">
-      <span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-montrajets" src=""></span>
-      <span class="bn-label">Transporteur</span>
-      <span class="bn-underline"></span>
-    </div>`;
-  }
-
-  html += `
-    <a class="bn-item" href="cardona_rechercher.html">
-      <span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-rechercher" src=""></span>
-      <span class="bn-label">Rechercher</span>
-      <span class="bn-underline"></span>
-    </a>
-    <div class="bn-item active">
-      <span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-mesenvois" src=""></span>
-      <span class="bn-label">Mes envois</span>
-      <span class="bn-underline"></span>
-    </div>
-    <a class="bn-item" href="cardona_app.html">
-      <span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-profil" src=""></span>
-      <span class="bn-label">Profil</span>
-      <span class="bn-underline"></span>
-    </a>`;
-
-  nav.innerHTML = html;
-
-  // Injecter les icônes
-  if (document.getElementById('icon-montrajets')) document.getElementById('icon-montrajets').src = 'data:image/png;base64,' + ICONS.mestrajets;
-  document.getElementById('icon-rechercher').src = 'data:image/png;base64,' + ICONS.rechercher;
-  document.getElementById('icon-mesenvois').src = 'data:image/png;base64,' + ICONS.mestrajets;
-  document.getElementById('icon-profil').src = 'data:image/png;base64,' + ICONS.profil;
-}
+// ── NAV selon rôle ──────────────────────────────────────────────
 
 function switchToTransporteur() {
   document.getElementById('dropdown-menu').classList.remove('open');
@@ -292,8 +256,6 @@ async function init() {
     const switchItem = document.querySelector('.menu-item[onclick="switchToTransporteur()"]');
     if (switchItem) switchItem.style.display = 'none';
   }
-
-  
   await chargerEnvois();
 }
 
@@ -487,6 +449,42 @@ async function handleMenuLogout() {
 
 init();
 
+// ── NAV DYNAMIQUE SELON RÔLE ─────────────────────────────────────
+async function buildNav(pageName) {
+  const nav = document.getElementById('bottom-nav');
+  if (!nav) return;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { nav.style.display = 'none'; return; }
+    const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).single();
+    const role = profile?.role || 'expediteur';
+    nav.style.display = 'flex';
+    const items = role === 'expediteur' ? [
+      { id: 'rechercher', label: 'Rechercher', icon: 'rechercher', href: 'cardona_rechercher.html' },
+      { id: 'mesenvois',  label: 'Mes envois',  icon: 'mestrajets', href: 'cardona_mes_envois.html' },
+      { id: 'profil',     label: 'Profil',      icon: 'profil',     href: 'cardona_app.html' },
+    ] : [
+      { id: 'publier',    label: 'Publier',    icon: 'publier',    href: 'cardona_publier_trajet.html' },
+      { id: 'montrajets', label: 'Mon trajet', icon: 'mestrajets', href: 'cardona_mon_trajet.html', badge: true },
+      { id: 'profil',     label: 'Profil',     icon: 'profil',     href: 'cardona_app.html' },
+    ];
+    nav.innerHTML = items.map(item => {
+      const active = item.id === pageName ? 'active' : '';
+      const b = item.badge ? '<span class="bn-badge" id="nav-badge">0</span>' : '';
+      return `<a class="bn-item ${active}" href="${item.href}"><span class="bn-icon-wrap"><img class="bn-icon-img" id="nav-icon-${item.id}" src="">${b}</span><span class="bn-label">${item.label}</span><span class="bn-underline"></span></a>`;
+    }).join('');
+    const SRC = (typeof NAV_ICONS !== 'undefined') ? NAV_ICONS : (typeof ICONS !== 'undefined') ? ICONS : {};
+    items.forEach(item => { const el = document.getElementById('nav-icon-' + item.id); if (el && SRC[item.icon]) el.src = 'data:image/png;base64,' + SRC[item.icon]; });
+    if (role === 'transporteur') {
+      const { data: trajets } = await sb.from('trajets').select('id').eq('transporteur_id', session.user.id);
+      if (trajets && trajets.length > 0) {
+        const { count } = await sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', trajets.map(t => t.id)).eq('statut', 'en_attente');
+        const badge = document.getElementById('nav-badge');
+        if (badge) { badge.textContent = count || 0; badge.classList.toggle('show', (count||0) > 0); }
+      }
+    }
+  } catch(e) { console.error('buildNav:', e); }
+}
 
 buildNav('mesenvois');
 </script>
