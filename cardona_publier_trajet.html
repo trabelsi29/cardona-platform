@@ -321,7 +321,7 @@
       <div class="success-icon">✅</div>
       <div class="success-title">Trajet de transport publié avec succès !</div>
       <div class="success-desc">Votre trajet est maintenant visible par les expéditeurs. Vous pouvez gérer vos annonces et interagir avec les intéressés depuis la section <strong>Mes trajets</strong>.</div>
-      <a class="btn-primary" href="cardona_mes_trajets.html" style="display:block;text-decoration:none;text-align:center;">Voir mes trajets</a>
+      <a class="btn-primary" href="cardona_mon_trajet.html" style="display:block;text-decoration:none;text-align:center;">Voir mon trajet</a>
       <button class="btn-outline" onclick="resetForm()">Publier un autre trajet</button>
     </div>
   </div>
@@ -329,7 +329,7 @@
   </div>
 
   <div class="bottom-nav" id="bottom-nav" style="display:none;">
-    <!-- nav injectée par cardona_nav.js -->
+    <!-- nav -->
   </div>
     <a class="bn-item" href="cardona_mes_trajets.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-mestrajets" src=""><span class="bn-badge" id="bn-badge-mestrajets">0</span></span><span class="bn-label">Mes trajets</span><span class="bn-underline"></span></a>
     <a class="bn-item" href="cardona_app.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-profil" src=""></span><span class="bn-label">Profil</span><span class="bn-underline"></span></a>
@@ -391,52 +391,8 @@ async function checkAccess() {
   // nav gérée par buildNav()
   renderStops('ramassage');
   renderStops('distribution');
-  
-async function buildNav(pageName) {
-  const nav = document.getElementById('bottom-nav');
-  if (!nav) return;
-  try {
-    const { data: { session } } = await sb.auth.getSession();
-    if (!session) { nav.style.display = 'none'; return; }
-    const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).single();
-    const role = profile?.role || 'expediteur';
-    nav.style.display = 'flex';
-    let items = [];
-    if (role === 'expediteur') {
-      items = [
-        { id: 'rechercher', label: 'Rechercher', icon: 'rechercher', href: 'cardona_rechercher.html' },
-        { id: 'mesenvois',  label: 'Mes envois',  icon: 'mestrajets', href: 'cardona_mes_envois.html' },
-        { id: 'profil',     label: 'Profil',      icon: 'profil',     href: 'cardona_app.html' },
-      ];
-    } else {
-      items = [
-        { id: 'publier',    label: 'Publier',    icon: 'publier',    href: 'cardona_publier_trajet.html' },
-        { id: 'montrajets', label: 'Mon trajet', icon: 'mestrajets', href: 'cardona_mon_trajet.html', badge: true },
-        { id: 'profil',     label: 'Profil',     icon: 'profil',     href: 'cardona_app.html' },
-      ];
-    }
-    nav.innerHTML = items.map(item => {
-      const active = item.id === pageName ? 'active' : '';
-      const badgeHTML = item.badge ? '<span class="bn-badge" id="nav-badge">0</span>' : '';
-      return `<a class="bn-item ${active}" href="${item.href}"><span class="bn-icon-wrap"><img class="bn-icon-img" id="nav-icon-${item.id}" src="">${badgeHTML}</span><span class="bn-label">${item.label}</span><span class="bn-underline"></span></a>`;
-    }).join('');
-    const NAV_SRC = (typeof NAV_ICONS !== 'undefined') ? NAV_ICONS : ICONS;
-    items.forEach(item => {
-      const el = document.getElementById('nav-icon-' + item.id);
-      if (el && NAV_SRC && NAV_SRC[item.icon]) el.src = 'data:image/png;base64,' + NAV_SRC[item.icon];
-    });
-    if (role === 'transporteur') {
-      const { data: trajets } = await sb.from('trajets').select('id').eq('transporteur_id', session.user.id);
-      if (trajets && trajets.length > 0) {
-        const { count } = await sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', trajets.map(t => t.id)).eq('statut', 'en_attente');
-        const badge = document.getElementById('nav-badge');
-        if (badge) { badge.textContent = count || 0; badge.classList.toggle('show', (count||0) > 0); }
-      }
-    }
-  } catch(e) { console.error('buildNav error:', e); }
-}
-buildNav('publier');
-
+  injectNavIcons();
+  updateNavBadge();
   goStep(1);
 }
 
