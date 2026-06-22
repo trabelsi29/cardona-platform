@@ -367,7 +367,7 @@ async function checkAccess() {
     return;
   }
   const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-  if (!profile || (profile.role !== 'transporteur' && profile.role !== 'both')) {
+  if (!profile || profile.role !== 'transporteur') {
     showGate(
       'Devenez transporteur',
       "Vous pouvez gagner de l'argent en transportant un objet ou un colis pour quelqu'un lors d'un trajet que vous faites déjà — en train, en voiture, en avion, etc. Choisissez le type de profil transporteur qui vous correspond pour commencer à publier vos trajets.",
@@ -412,10 +412,13 @@ function showGate(title, desc, action) {
 async function becomeTransporteur(type) {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return;
-  const { error } = await sb.from('profiles').update({ role: 'both', transporteur_type: type }).eq('id', session.user.id);
+  // Rediriger vers profil pour changer le rôle
+    window.location.href = 'cardona_app.html';
+    return;
+    const { error } = await sb.from('profiles').update({ role: 'NEVER', transporteur_type: type }).eq('id', session.user.id);
   if (error) {
     // La colonne transporteur_type peut ne pas exister : on retente sans elle
-    await sb.from('profiles').update({ role: 'both' }).eq('id', session.user.id);
+    // désactivé — changer le rôle via le profil
   }
   checkAccess();
 }
