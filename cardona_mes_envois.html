@@ -203,6 +203,7 @@
 
   <!-- BOTTOM NAV — adaptée au rôle -->
   <div class="bottom-nav" id="bottom-nav" style="display:none;" id="bottom-nav">
+    <!-- nav générée par cardona_nav.js -->
   </div>
 </div>
 
@@ -229,18 +230,7 @@ let userRole = null;
 let allReservations = [];
 let filtreActif = 'tous';
 
-// ── NAV selon rôle ──────────────────────────────────────────────
-function buildNav(role) {
-  const nav = document.getElementById('bottom-nav');
-  nav.style.display = 'flex';
-
-  if (role === 'transporteur') {
-    // Transporteur pur → pas censé être ici, rediriger
-    window.location.href = 'cardona_mon_trajet.html';
-    return;
-  }
-
-  // Expéditeur ou both
+// Expéditeur ou both
   let html = '';
 
   if (role === 'both') {
@@ -303,7 +293,7 @@ async function init() {
     if (switchItem) switchItem.style.display = 'none';
   }
 
-  buildNav(userRole);
+  
   await chargerEnvois();
 }
 
@@ -496,6 +486,9 @@ async function handleMenuLogout() {
 }
 
 init();
+
+
+buildNav('mesenvois');
 </script>
 </body>
 </html>
