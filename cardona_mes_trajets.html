@@ -10,20 +10,18 @@
   :root {
     --gold: #C8902A;
     --gold-dark: #B07D22;
-    --dark: #221b16;
-    --text-secondary: #574f43;
+    --dark: #2C2420;
+    --text-secondary: #6b655e;
   }
-  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #e3e0db; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-x: hidden; }
-  .phone-frame { width: 860px; max-width: 100%; background: #F3F1EC; border-radius: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); height: 780px; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; }
-  .scroll-area { flex: 1; overflow-y: auto; padding: 40px 56px; }
-  .form-inner { max-width: 480px; margin: 0 auto; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #e3e0db; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .phone-frame { width: 720px; max-width: 100%; background: #EEECE8; border-radius: 28px; padding: 36px 80px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); min-height: 640px; }
+  .form-inner { max-width: 380px; margin: 0 auto; }
 
   .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
   .title { font-size: 20px; font-weight: 700; color: var(--dark); }
-  .menu-wrapper { position: relative; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; }
-  .mascot-mini { width: 44px; height: 44px; cursor: pointer; border-radius: 8px; }
-  .menu-caption { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.5px; margin-top: 3px; user-select: none; }
-  .dropdown-menu { display: none; position: absolute; top: 64px; right: 0; background: white; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.18); min-width: 200px; overflow: hidden; z-index: 100; }
+  .menu-wrapper { position: relative; flex-shrink: 0; }
+  .mascot-mini { width: 40px; height: 40px; cursor: pointer; border-radius: 8px; }
+  .dropdown-menu { display: none; position: absolute; top: 48px; right: 0; background: white; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.18); min-width: 200px; overflow: hidden; z-index: 100; }
   .dropdown-menu.open { display: block; }
   .menu-item { padding: 12px 18px; font-size: 13px; color: var(--dark); cursor: pointer; border-bottom: 1px solid #f0f0f0; }
   .menu-item:last-child { border-bottom: none; }
@@ -36,7 +34,7 @@
   .tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 600; cursor: pointer; background: #4a443d; color: white; }
   .tab.active { background: var(--gold); }
 
-  .content-area { min-height: 200px; }
+  .content-area { min-height: 200px; max-height: 480px; overflow-y: auto; padding-right: 2px; }
   .empty-state { text-align: center; padding: 50px 20px; color: var(--text-secondary); }
   .empty-state-icon { font-size: 32px; margin-bottom: 10px; }
 
@@ -51,10 +49,6 @@
   .status-refuse { color: #A32D2D; }
   .status-livre { color: #5F5E5A; }
   .trip-divider { border-top: 1px solid #eee; margin: 10px 0; }
-  .section-title { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; margin: 18px 0 8px; }
-  .section-title:first-child { margin-top: 0; }
-  .trajet-group-header { font-size: 13px; font-weight: 600; color: var(--dark); background: #e9e6e1; border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; display: flex; justify-content: space-between; }
-  .trajet-group-date { color: var(--text-secondary); font-weight: 400; }
   .trip-route { font-size: 16px; font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
   .trip-detail { font-size: 13px; color: var(--dark); margin-bottom: 2px; }
   .trip-detail-label { color: var(--text-secondary); display: inline-block; min-width: 70px; }
@@ -72,43 +66,26 @@
   .gate-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
   .btn-primary { width: 100%; padding: 14px; border-radius: 10px; border: none; background: var(--gold); color: white; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; display: block; text-align: center; }
 
-  .bottom-nav { display: flex; border-top: 1px solid #e3e0db; flex-shrink: 0; padding: 12px 8px 10px; background: #ffffff; z-index: 50; }
-  .bn-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; text-decoration: none; cursor: pointer; padding: 4px; }
+  .bottom-nav { display: flex; border-top: 1px solid #e3e0db; margin-top: 18px; padding-top: 10px; }
+  .bn-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; text-decoration: none; cursor: pointer; padding: 4px; }
   .bn-icon-wrap { position: relative; display: inline-block; }
-  .bn-icon-img { width: 26px; height: 26px; object-fit: contain; opacity: 0.75; filter: grayscale(1) brightness(0.7); }
+  .bn-icon-img { width: 24px; height: 24px; object-fit: contain; opacity: 0.75; filter: grayscale(1) brightness(0.7); }
   .bn-item.active .bn-icon-img { opacity: 1; filter: brightness(0); }
-  .bn-label { font-size: 11.5px; color: #aaa; }
-  .bn-item.active .bn-label { color: var(--dark); font-weight: 700; }
-  .bn-item .bn-underline { width: 18px; height: 3px; border-radius: 2px; background: transparent; margin-top: 2px; }
-  .bn-item.active .bn-underline { background: var(--gold); }
+  .bn-label { font-size: 10px; color: #aaa; }
+  .bn-item.active .bn-label { color: var(--gold); font-weight: 600; }
   .bn-badge { position: absolute; top: -6px; right: -9px; background: #E24B4A; color: white; font-size: 9px; min-width: 15px; height: 15px; border-radius: 8px; display: none; align-items: center; justify-content: center; padding: 0 3px; font-weight: 700; }
   .bn-badge.show { display: flex; }
 
   @media (max-width: 640px) {
     body { padding: 0; align-items: stretch; }
-    .phone-frame { width: 100%; max-width: 100%; height: 100vh; height: 100dvh; max-height: none; border-radius: 0; box-shadow: none; }
-    .scroll-area { padding: 24px 20px; }
+    .phone-frame { width: 100%; max-width: 100%; min-height: 100vh; border-radius: 0; padding: 24px 20px; box-shadow: none; }
     .form-inner { max-width: 100%; }
-  }  .phone-frame { position: relative; z-index: 1; }
-
-  /* ===================== BUREAU : texte un peu plus grand pour la lisibilité ===================== */
-  @media (min-width: 641px) {
-    .title { font-size: 18px; }
-    .subtitle { font-size: 14px; }
-    .field label { font-size: 13px; }
-    .field input, .field textarea { font-size: 14.5px; }
-    .btn-primary, .btn-outline, .btn-pay { font-size: 15px; }
-    .cat-label, .category-pill { font-size: 15px; }
-    .cat-desc { font-size: 12px; }
-    .detail-row, .trip-detail, .home-row { font-size: 14px; }
-    .t-name, .trip-person { font-size: 14px; }
   }
 </style>
 </head>
 <body>
 
 <div class="phone-frame">
-  <div class="scroll-area">
   <div class="form-inner">
 
   <div class="step" id="step-gate" style="display:none;">
@@ -125,7 +102,6 @@
       <div class="title">Mes trajets</div>
       <div class="menu-wrapper">
         <img class="mascot-mini" id="menu-trigger" src="" alt="Menu" onclick="toggleMenu()">
-        <div class="menu-caption">MENU</div>
         <div class="dropdown-menu" id="dropdown-menu">
           <div class="menu-item" onclick="menuPlaceholder('Conditions générales')">Conditions générales</div>
           <div class="menu-item" onclick="menuPlaceholder('Messagerie')">Messagerie</div>
@@ -144,16 +120,15 @@
     </div>
 
     <div class="content-area" id="content-area"><div class="empty-state">Chargement…</div></div>
+
+    <div class="bottom-nav">
+      <a class="bn-item" href="cardona_rechercher.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-rechercher" src=""></span><span class="bn-label">Rechercher</span></a>
+      <a class="bn-item" href="cardona_publier_trajet.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-publier" src=""></span><span class="bn-label">Publier</span></a>
+      <div class="bn-item active"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-mestrajets" src=""><span class="bn-badge" id="bn-badge-mestrajets">0</span></span><span class="bn-label">Mes trajets</span></div>
+      <a class="bn-item" href="cardona_app.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-profil" src=""></span><span class="bn-label">Profil</span></a>
+    </div>
   </div>
 
-  </div>
-  </div>
-
-  <div class="bottom-nav" id="bottom-nav" style="display:none;">
-    <a class="bn-item" href="cardona_rechercher.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-rechercher" src=""></span><span class="bn-label">Rechercher</span><span class="bn-underline"></span></a>
-    <a class="bn-item" href="cardona_publier_trajet.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-publier" src=""></span><span class="bn-label">Publier</span><span class="bn-underline"></span></a>
-    <div class="bn-item active"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-mestrajets" src=""><span class="bn-badge" id="bn-badge-mestrajets">0</span></span><span class="bn-label">Mes trajets</span><span class="bn-underline"></span></div>
-    <a class="bn-item" href="cardona_app.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-profil" src=""></span><span class="bn-label">Profil</span><span class="bn-underline"></span></a>
   </div>
 </div>
 
@@ -183,45 +158,18 @@ function injectIcons() {
   document.getElementById('menu-trigger').src = 'data:image/png;base64,' + ICONS.logo;
 }
 
-let userRole = null;
-
 async function checkAccess() {
   injectIcons();
   const { data: { session } } = await sb.auth.getSession();
   if (!session) {
     document.getElementById('step-gate').style.display = 'block';
     document.getElementById('main-content').style.display = 'none';
-    document.getElementById('bottom-nav').style.display = 'none';
     return;
   }
   currentUser = session.user;
   document.getElementById('step-gate').style.display = 'none';
   document.getElementById('main-content').style.display = 'block';
-  document.getElementById('bottom-nav').style.display = 'flex';
-
-  const { data: profile } = await sb.from('profiles').select('role').eq('id', currentUser.id).single();
-  userRole = profile?.role || 'expediteur';
-  setupTabsForRole();
-
   await loadAll();
-}
-
-function setupTabsForRole() {
-  const tabsEl = document.querySelector('.tabs');
-  const subtitleEl = document.querySelector('.subtitle');
-  if (userRole === 'both') {
-    tabsEl.style.display = 'flex';
-    subtitleEl.style.display = 'block';
-    activeTab = 'expediteur';
-  } else if (userRole === 'transporteur') {
-    tabsEl.style.display = 'none';
-    subtitleEl.style.display = 'none';
-    activeTab = 'transporteur';
-  } else {
-    tabsEl.style.display = 'none';
-    subtitleEl.style.display = 'none';
-    activeTab = 'expediteur';
-  }
 }
 
 function toggleMenu() { document.getElementById('dropdown-menu').classList.toggle('open'); }
@@ -316,83 +264,49 @@ async function loadAll() {
   render();
 }
 
-function renderReservationCard(r, person, personLabel, showActions) {
-  const t = r._trajet;
-  const st = statusInfo(r.statut);
-  const ram = t ? t.lieu_ramassage : '—';
-  const dist = t ? t.lieu_distribution : '—';
-  return `
-    <div class="trip-card">
-      <div class="trip-head">
-        <div><div class="trip-ncc">NCC : ${r.ncc}</div></div>
-        ${person?.avatar_url ? `<img class="trip-avatar" src="${person.avatar_url}">` : `<div class="trip-avatar">${initials(person?.full_name)}</div>`}
-      </div>
-      <div class="trip-person">${person?.full_name || personLabel}</div>
-      <div class="trip-status ${st.cls}">${st.label}</div>
-      <div class="trip-divider"></div>
-      <div class="trip-detail"><span class="trip-detail-label">Colis</span>${categoryLabel(r.categorie)} (${r.poids_kg || '—'}Kg)</div>
-      <div class="trip-divider"></div>
-      <div class="trip-price-row">
-        <span class="trip-price-label">Cash à la livraison</span>
-        <span class="trip-price-value">${r.prix_transporteur} €</span>
-      </div>
-      ${showActions && r.statut === 'en_attente' ? `
-        <div class="reservation-actions">
-          <button class="btn-accept" onclick="updateReservation('${r.id}', 'confirme')">Accepter</button>
-          <button class="btn-refuse" onclick="updateReservation('${r.id}', 'refuse')">Refuser</button>
-        </div>` : ''}
-    </div>`;
-}
-
 function render() {
   const area = document.getElementById('content-area');
+  const list = activeTab === 'expediteur' ? expediteurReservations : transporteurReservations;
 
-  if (activeTab === 'expediteur') {
-    if (expediteurReservations.length === 0) {
-      area.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📦</div>Aucun envoi pour l'instant.</div>`;
-      return;
-    }
-    area.innerHTML = expediteurReservations.map(r => renderReservationCard(r, r._transporteur, 'Transporteur', false)).join('');
+  if (list.length === 0) {
+    area.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📦</div>${activeTab === 'expediteur' ? "Aucun envoi pour l'instant." : "Aucune demande reçue pour l'instant."}</div>`;
     return;
   }
 
-  // --- Côté transporteur : regroupé par trajet (route + date), séparé À traiter / Acceptées ---
-  if (transporteurReservations.length === 0) {
-    area.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📦</div>Aucune demande reçue pour l'instant.</div>`;
-    return;
-  }
-
-  const groups = {};
-  transporteurReservations.forEach(r => {
+  area.innerHTML = list.map(r => {
     const t = r._trajet;
-    const key = t ? t.id : 'inconnu';
-    if (!groups[key]) groups[key] = { trajet: t, items: [] };
-    groups[key].items.push(r);
-  });
+    const person = activeTab === 'expediteur' ? r._transporteur : r._expediteur;
+    const st = statusInfo(r.statut);
+    const ram = t ? t.lieu_ramassage : '—';
+    const dist = t ? t.lieu_distribution : '—';
 
-  const sections = [
-    { title: 'À traiter', filter: r => r.statut === 'en_attente', showActions: true },
-    { title: 'Acceptées', filter: r => r.statut === 'confirme' || r.statut === 'en_cours', showActions: false },
-    { title: 'Autres', filter: r => !['en_attente', 'confirme', 'en_cours'].includes(r.statut), showActions: false },
-  ];
-
-  let html = '';
-  sections.forEach(section => {
-    const groupEntries = Object.values(groups)
-      .map(g => ({ trajet: g.trajet, items: g.items.filter(section.filter) }))
-      .filter(g => g.items.length > 0);
-
-    if (groupEntries.length === 0) return;
-
-    html += `<div class="section-title">${section.title}</div>`;
-    groupEntries.forEach(g => {
-      const t = g.trajet;
-      html += `<div class="trajet-group-header">${modeLabel(t?.mode_transport)} ${t ? t.lieu_ramassage + ' → ' + t.lieu_distribution : 'Trajet'} <span class="trajet-group-date">${formatDate(t?.date_ramassage)}</span></div>`;
-      html += g.items.map(r => renderReservationCard(r, r._expediteur, 'Expéditeur', section.showActions)).join('');
-    });
-  });
-
-  area.innerHTML = html;
+    return `
+      <div class="trip-card">
+        <div class="trip-head">
+          <div>
+            <div class="trip-ncc">NCC : ${r.ncc}</div>
+          </div>
+          ${person?.avatar_url ? `<img class="trip-avatar" src="${person.avatar_url}">` : `<div class="trip-avatar">${initials(person?.full_name)}</div>`}
+        </div>
+        <div class="trip-person">👤 ${person?.full_name || (activeTab === 'expediteur' ? 'Transporteur' : 'Expéditeur')}</div>
+        <div class="trip-status ${st.cls}">${st.label}</div>
+        <div class="trip-divider"></div>
+        <div class="trip-route">${ram} ${modeLabel(t?.mode_transport)} ${dist}</div>
+        <div class="trip-detail"><span class="trip-detail-label">Colis</span>${categoryLabel(r.categorie)} (${r.poids_kg || '—'}Kg)</div>
+        <div class="trip-detail"><span class="trip-detail-label">Départ</span>${formatDate(t?.date_ramassage)}</div>
+        <div class="trip-detail"><span class="trip-detail-label">Arrivé</span>${formatDate(t?.date_distribution)}</div>
+        <div class="trip-divider"></div>
+        <div class="trip-price-row">
+          <span class="trip-price-label">💵 Cash à la livraison</span>
+          <span class="trip-price-value">${r.prix_transporteur} €</span>
+        </div>
+        ${activeTab === 'transporteur' && r.statut === 'en_attente' ? `
+          <div class="reservation-actions">
+            <button class="btn-accept" onclick="updateReservation('${r.id}', 'confirme')">✓ Accepter</button>
+            <button class="btn-refuse" onclick="updateReservation('${r.id}', 'refuse')">✕ Refuser</button>
+          </div>` : ''}
+      </div>`;
+  }).join('');
 }
 
 async function updateReservation(reservationId, statut) {
