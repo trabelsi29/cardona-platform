@@ -194,13 +194,8 @@
     .t-name, .trip-person { font-size: 14px; }
   }
 
-  .btn-switch-role {
-    width: 100%; padding: 11px 16px; border-radius: 10px; margin-top: 12px;
-    border: 1.5px solid var(--gold); background: transparent;
-    color: var(--gold); font-size: 13px; font-weight: 600;
-    cursor: pointer; font-family: inherit; transition: all 0.2s;
-  }
-  .btn-switch-role:hover { background: var(--gold); color: white; }
+  .btn-switch-role { width:100%; padding:11px 16px; border-radius:10px; margin-top:12px; border:1.5px solid var(--gold); background:transparent; color:var(--gold); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; }
+  .btn-switch-role:hover { background:var(--gold); color:white; }
 </style>
 </head>
 <body>
@@ -504,8 +499,8 @@ async function loadHome() {
   document.getElementById('home-phone').textContent = profile?.phone || '—';
   document.getElementById('home-since').textContent = profile?.created_at ? new Date(profile.created_at).toLocaleDateString('fr-FR') : '—';
   document.getElementById('home-role-display').textContent = roleLabel(profile?.role);
-  const _tgt = profile?.role === 'expediteur' ? 'Transporteur' : 'Expéditeur';
-  const _lbl = document.getElementById('switch-target-label');
+  var _tgt = profile?.role === 'expediteur' ? 'Transporteur' : 'Expéditeur';
+  var _lbl = document.getElementById('switch-target-label');
   if (_lbl) _lbl.textContent = _tgt;
 
   const avatarImg = document.getElementById('avatar-img');
@@ -686,8 +681,6 @@ const NAV_ICONS = {
   mestrajets: 'iVBORw0KGgoAAAANSUhEUgAAADYAAAAiCAYAAAAUAipQAAABsUlEQVR4nO2Y3W2DMBRGjzrBHYERMoJHYIN6g3SDZoNmA7xBR2CEjJAR0g3SBxuFwHUwEP4kjoR4cLD9+dgoF5geA/wCl3DPZxhzMgT4Bm7AXbmuoT1bZnr9MUBJO0gJnPDWmm2rtSjodm7AGR+2zgFwyu9XY9EQt3PEB36FAD/K84tYFPrZifWRoy/K7BZNZCKpdsBvwdiinEK7AJaZzmJzkHfZKUObRJ49oJ/Fsuf8o2iv6k9eb48D3Xa6EPxu0Oy9hdj+vwMFD3PCcDt1DH5HaONNEsyEyykDXZWJDLETWxSDP3uTBavIwkBXZSJ3/GtcEvo26HaqRan3YZkhWHNyDt2idhaFbjsalpmDVWTELRb4M3YmzY6GZaFgdQy6xVQ7GpYVBKvIeLaYakfDsqJgFY7HlhyKpUewjxEDrZo92NbYg22NPdjW2INtjT3Y1kgJ9hfuBb6+kqkmE0Hw9duxMZ/RfNGunwrSSv4KR/8/wQa9fjv16KOTHP9dr1lTXUiz6EgLJgyrrkeT4VesWSV3WXS8DmYYV12/lZx0i452MGEhO6lkdFt0PH+HPDOxnX9rTz1UhTfwLwAAAABJRU5ErkJggg==',
   profil: 'iVBORw0KGgoAAAANSUhEUgAAADsAAAAhCAYAAABnaNNOAAADdklEQVR4nN2ZT1LbMBTGvyeYyZhN0xPUPUHdEzS9QXoCwgkwC8bYG8ImngyL5gaFE5CegHAC3Bu4NzCrMEOs14WfwKUJlf+RaX8bS0HS02fZ0vMHoSa+7/f39vb2mXkAwAPgyp8yACkRJXmeX06n00XdGG1DdTpFUXTKzD6AvkXzVGv9eTqdpnVitUklsb7v9x3HuUaxkgAAZk4BLJj5JwAQUR/AByIaPOs+iuP4ssFcG1NJbBiGVwCGUk201kebHtMgCFwAI6XUqflNVnht+9fAWuzJycmIiL5Jdb5cLg9ms1n2t35RFHnMfI3ikU/jOH5fa6YtoGwbEpFZodRWKABMJpMEwJlU3TAM9yvNsEWsxAZBMMDTbju2FWqI43iGYpcGgFGVvm1iJZaIhqa8XC6/1wnEzGZzGvi+368zRlNsxX4AAGZeVF3V0hgLU+71el6dMZpi+866ck3rBtJaJ6ZMRO7mlt1RSaw5S+tQTiqY2a07ThOsd+P/gUpiJTv6Z7EVm8r1Td1AURR5pry7u3tbd5wm2IpNAGBNvmuN1toz5dVqdVd3nCbYir2Rqys5b2VKNyrbVn5sJVZrPS9VR1WDyA3aBwBmnr/YuEOsxMqxsQAApdRh1QxIKXVoyqVM6tWx3o211iaZ7zuO8+3FxiVkVX2gyMC2+YlnLVYmOZfqMIqi082tC4IgcJVS16bOzAdVJ9gmlc7ZXq93ADmGmHkchuHXTW2DIBiIUBconoxtWzOVPajSarnyU0pEs4eHhxulVKaU8lBsRkPTR4SOm0+3GVZigyBw5ejwiOgdgAHszDZDgsJ4+wFga+/tRrFilR4y8xAlg60lMiKav7bVulZsFEWHzDzGn6uXAUiZOQFwx8wZEaXrxlBKvcnz/G3Jbexj/U1baK0PXuN9/k2sWKVXKB5TAMVxwcw3Ozs7c/GTaiPjD5h5SERlLyoDcCb2TWc8ipWJ3KK08cgdX3QRWPaB8TPRnXrLj2LDMLzAU0p3eX9/79e1YKogR9QV5JVZrVYfz8/Pky5iEfCnJxzH8Zcugm1CvGXz2beI4/hzF3EUABCRyV1TrfVRF4FeYjKZJKV0dCDWbeso+aj2AEBrfbmtLMdxnBnEWy7/y6RNVJ7nw1L9oosgNozH46z0ReR1EUMppT5JOdl27gpxRAD0j4+PvbYH/wUHUHZ6p5wUogAAAABJRU5ErkJggg==',
 };
-
-// ── NAV DYNAMIQUE SELON RÔLE ─────────────────────────────────────
 async function buildNav(pageName) {
   const nav = document.getElementById('bottom-nav');
   if (!nav) return;
@@ -709,24 +702,24 @@ async function buildNav(pageName) {
     nav.innerHTML = items.map(item => {
       const active = item.id === 'profil' ? 'active' : '';
       const b = item.badge ? '<span class="bn-badge" id="nav-badge">0</span>' : '';
-      return `<a class="bn-item ${active}" href="${item.href}"><span class="bn-icon-wrap"><img class="bn-icon-img" id="nav-icon-${item.id}" src="">${b}</span><span class="bn-label">${item.label}</span><span class="bn-underline"></span></a>`;
+      return '<a class="bn-item ' + active + '" href="' + item.href + '"><span class="bn-icon-wrap"><img class="bn-icon-img" id="nav-icon-' + item.id + '" src="">' + b + '</span><span class="bn-label">' + item.label + '</span><span class="bn-underline"></span></a>';
     }).join('');
-    items.forEach(item => { const el = document.getElementById('nav-icon-' + item.id); if (el && NAV_ICONS[item.icon]) el.src = 'data:image/png;base64,' + NAV_ICONS[item.icon]; });
+    items.forEach(function(item) {
+      var el = document.getElementById('nav-icon-' + item.id);
+      if (el && NAV_ICONS[item.icon]) el.src = 'data:image/png;base64,' + NAV_ICONS[item.icon];
+    });
+    if (role === 'transporteur') {
+      sb.from('trajets').select('id').eq('transporteur_id', session.user.id).then(function(res) {
+        var trajets = res.data;
+        if (!trajets || !trajets.length) return;
+        sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', trajets.map(function(t){return t.id;})).eq('statut', 'en_attente').then(function(r2) {
+          var badge = document.getElementById('nav-badge');
+          if (badge) { badge.textContent = r2.count || 0; badge.classList.toggle('show', (r2.count||0) > 0); }
+        });
+      });
+    }
   } catch(e) { console.error('buildNav:', e); }
 }
-
-async function handleSwitchRole() {
-  const { data: { user } } = await sb.auth.getUser();
-  if (!user) return;
-  const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single();
-  const newRole = profile?.role === 'expediteur' ? 'transporteur' : 'expediteur';
-  const newLabel = newRole === 'expediteur' ? 'Expéditeur' : 'Transporteur';
-  if (!confirm('Basculer vers le mode ' + newLabel + ' ?')) return;
-  const { error } = await sb.from('profiles').update({ role: newRole }).eq('id', user.id);
-  if (error) { alert('Erreur : ' + error.message); return; }
-  window.location.reload();
-}
-
 buildNav('profil');
 
 sb.auth.getSession().then(({ data: { session } }) => {
@@ -739,6 +732,20 @@ setTimeout(() => {
   const splash = document.getElementById('splash-screen');
   if (splash) { splash.classList.add('fade-out'); setTimeout(() => splash.remove(), 500); }
 }, 2500);
+
+async function handleSwitchRole() {
+  var res = await sb.auth.getUser();
+  var user = res.data && res.data.user;
+  if (!user) return;
+  var pres = await sb.from('profiles').select('role').eq('id', user.id).single();
+  var currentRole = pres.data && pres.data.role;
+  var newRole = currentRole === 'expediteur' ? 'transporteur' : 'expediteur';
+  var newLabel = newRole === 'expediteur' ? 'Expéditeur' : 'Transporteur';
+  if (!confirm('Basculer vers le mode ' + newLabel + ' ?')) return;
+  var upd = await sb.from('profiles').update({ role: newRole }).eq('id', user.id);
+  if (upd.error) { alert('Erreur : ' + upd.error.message); return; }
+  window.location.reload();
+}
 </script>
 </body>
 </html>
