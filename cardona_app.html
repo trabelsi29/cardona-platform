@@ -452,7 +452,7 @@ async function loadHome() {
   }
 
   // Carte de vérification : uniquement utile pour les transporteurs (ou profils mixtes)
-  const needsVerif = profile?.role === 'transporteur' || profile?.role === 'both';
+  const needsVerif = profile?.role === 'transporteur';
   document.getElementById('verif-card').style.display = needsVerif ? 'block' : 'none';
 
   const status = profile?.verification_status || 'non_soumis';
