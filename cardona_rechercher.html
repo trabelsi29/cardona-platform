@@ -332,8 +332,8 @@
   </div>
 
   <div class="bottom-nav" id="bottom-nav" style="display:none;">
-    <!-- nav -->
-  </div>
+  <!-- nav -->
+</div>
     <a class="bn-item" href="cardona_publier_trajet.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-publier" src=""></span><span class="bn-label">Publier</span><span class="bn-underline"></span></a>
     <a class="bn-item" href="cardona_mes_trajets.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-mestrajets" src=""><span class="bn-badge" id="bn-badge-mestrajets">0</span></span><span class="bn-label">Mes trajets</span><span class="bn-underline"></span></a>
     <a class="bn-item" href="cardona_app.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-profil" src=""></span><span class="bn-label">Profil</span><span class="bn-underline"></span></a>
@@ -381,7 +381,7 @@ async function checkAccess() {
     document.getElementById('gate-action-link').href = 'cardona_app.html';
     document.getElementById('step-gate').classList.add('active');
     document.getElementById('form-wrapper').style.display = 'none';
-    // nav gérée par buildNav()
+    // nav buildNav()
     return;
   }
 
@@ -399,14 +399,14 @@ async function checkAccess() {
     document.getElementById('gate-action-link').href = 'cardona_app.html';
     document.getElementById('step-gate').classList.add('active');
     document.getElementById('form-wrapper').style.display = 'none';
-    // nav gérée par buildNav()
+    // nav buildNav()
     return;
   }
 
   currentUser = session.user;
   document.getElementById('step-gate').classList.remove('active');
   document.getElementById('form-wrapper').style.display = 'block';
-  // nav gérée par buildNav()
+  // nav buildNav()
   injectNavIcons();
   updateNavBadge();
   goStep(1);
@@ -613,7 +613,7 @@ async function searchTransporteurs() {
     return `
       <div class="t-card" onclick="selectTransporteur(${idx})">
         <div class="t-head">
-          ${transp?.avatar_url ? '<img class="t-avatar" src="' + transp.avatar_url + '">' : '<div class="t-avatar">' + (transp?.full_name?.[0] || '?') + '</div>'}
+          ${transp?.avatar_url ? `<img class="t-avatar" src="${transp.avatar_url}">` : `<div class="t-avatar">${initials}</div>`}
           <div>
             <div class="t-name">${transp?.full_name || 'Transporteur'}</div>
             <div class="t-stars">${transp?.rating ? '⭐ ' + transp.rating : 'Nouveau transporteur'}</div>
@@ -651,7 +651,7 @@ function renderFiche() {
   document.getElementById('fiche-content').innerHTML = `
     <div class="detail-card">
       <div class="detail-profile">
-        ${transp?.avatar_url ? '<img class="t-avatar" style="width:48px;height:48px;" src="' + transp.avatar_url + '">' : '<div class="t-avatar" style="width:48px;height:48px;font-size:16px;">' + initials + '</div>'}
+        ${transp?.avatar_url ? `<img class="t-avatar" style="width:48px;height:48px;" src="${transp.avatar_url}">` : `<div class="t-avatar" style="width:48px;height:48px;font-size:16px;">${initials}</div>`}
         <div>
           <div class="t-name" style="font-size:15px;">${transp?.full_name || 'Transporteur'}</div>
           <div class="t-stars">${transp?.rating ? '⭐ ' + transp.rating : 'Nouveau transporteur'} · ${modeLabel(t.mode_transport)}</div>
@@ -660,11 +660,11 @@ function renderFiche() {
     </div>
     <div class="detail-card">
       <div class="detail-section-title">Ramassage</div>
-      ${ramassages.map(e => '<div class="detail-line">' + e.adresse + ' — de ' + formatDateTime(e.date_heure) + ' à ' + formatDateTime(e.date_heure_fin) + '</div>').join('') || `<div class="detail-line">${t.lieu_ramassage}</div>`}
+      ${ramassages.map(e => `<div class="detail-line">${e.adresse} — de ${formatDateTime(e.date_heure)} à ${formatDateTime(e.date_heure_fin)}</div>`).join('') || `<div class="detail-line">${t.lieu_ramassage}</div>`}
     </div>
     <div class="detail-card">
       <div class="detail-section-title">Distribution</div>
-      ${distributions.map(e => '<div class="detail-line">' + e.adresse + ' — de ' + formatDateTime(e.date_heure) + ' à ' + formatDateTime(e.date_heure_fin) + '</div>').join('') || `<div class="detail-line">${t.lieu_distribution}</div>`}
+      ${distributions.map(e => `<div class="detail-line">${e.adresse} — de ${formatDateTime(e.date_heure)} à ${formatDateTime(e.date_heure_fin)}</div>`).join('') || `<div class="detail-line">${t.lieu_distribution}</div>`}
     </div>
     <div class="detail-card">
       <div class="detail-row"><span>Paiement</span><span>Carte</span></div>
@@ -752,18 +752,17 @@ const NAV_ICONS = {
   mestrajets: 'iVBORw0KGgoAAAANSUhEUgAAADYAAAAiCAYAAAAUAipQAAABsUlEQVR4nO2Y3W2DMBRGjzrBHYERMoJHYIN6g3SDZoNmA7xBR2CEjJAR0g3SBxuFwHUwEP4kjoR4cLD9+dgoF5geA/wCl3DPZxhzMgT4Bm7AXbmuoT1bZnr9MUBJO0gJnPDWmm2rtSjodm7AGR+2zgFwyu9XY9EQt3PEB36FAD/K84tYFPrZifWRoy/K7BZNZCKpdsBvwdiinEK7AJaZzmJzkHfZKUObRJ49oJ/Fsuf8o2iv6k9eb48D3Xa6EPxu0Oy9hdj+vwMFD3PCcDt1DH5HaONNEsyEyykDXZWJDLETWxSDP3uTBavIwkBXZSJ3/GtcEvo26HaqRan3YZkhWHNyDt2idhaFbjsalpmDVWTELRb4M3YmzY6GZaFgdQy6xVQ7GpYVBKvIeLaYakfDsqJgFY7HlhyKpUewjxEDrZo92NbYg22NPdjW2INtjT3Y1kgJ9hfuBb6+kqkmE0Hw9duxMZ/RfNGunwrSSv4KR/8/wQa9fjv16KOTHP9dr1lTXUiz6EgLJgyrrkeT4VesWSV3WXS8DmYYV12/lZx0i452MGEhO6lkdFt0PH+HPDOxnX9rTz1UhTfwLwAAAABJRU5ErkJggg==',
   profil: 'iVBORw0KGgoAAAANSUhEUgAAADsAAAAhCAYAAABnaNNOAAADdklEQVR4nN2ZT1LbMBTGvyeYyZhN0xPUPUHdEzS9QXoCwgkwC8bYG8ImngyL5gaFE5CegHAC3Bu4NzCrMEOs14WfwKUJlf+RaX8bS0HS02fZ0vMHoSa+7/f39vb2mXkAwAPgyp8yACkRJXmeX06n00XdGG1DdTpFUXTKzD6AvkXzVGv9eTqdpnVitUklsb7v9x3HuUaxkgAAZk4BLJj5JwAQUR/AByIaPOs+iuP4ssFcG1NJbBiGVwCGUk201kebHtMgCFwAI6XUqflNVnht+9fAWuzJycmIiL5Jdb5cLg9ms1n2t35RFHnMfI3ikU/jOH5fa6YtoGwbEpFZodRWKABMJpMEwJlU3TAM9yvNsEWsxAZBMMDTbju2FWqI43iGYpcGgFGVvm1iJZaIhqa8XC6/1wnEzGZzGvi+368zRlNsxX4AAGZeVF3V0hgLU+71el6dMZpi+866ck3rBtJaJ6ZMRO7mlt1RSaw5S+tQTiqY2a07ThOsd+P/gUpiJTv6Z7EVm8r1Td1AURR5pry7u3tbd5wm2IpNAGBNvmuN1toz5dVqdVd3nCbYir2Rqys5b2VKNyrbVn5sJVZrPS9VR1WDyA3aBwBmnr/YuEOsxMqxsQAApdRh1QxIKXVoyqVM6tWx3o211iaZ7zuO8+3FxiVkVX2gyMC2+YlnLVYmOZfqMIqi082tC4IgcJVS16bOzAdVJ9gmlc7ZXq93ADmGmHkchuHXTW2DIBiIUBconoxtWzOVPajSarnyU0pEs4eHhxulVKaU8lBsRkPTR4SOm0+3GVZigyBw5ejwiOgdgAHszDZDgsJ4+wFga+/tRrFilR4y8xAlg60lMiKav7bVulZsFEWHzDzGn6uXAUiZOQFwx8wZEaXrxlBKvcnz/G3Jbexj/U1baK0PXuN9/k2sWKVXKB5TAMVxwcw3Ozs7c/GTaiPjD5h5SERlLyoDcCb2TWc8ipWJ3KK08cgdX3QRWPaB8TPRnXrLj2LDMLzAU0p3eX9/79e1YKogR9QV5JVZrVYfz8/Pky5iEfCnJxzH8Zcugm1CvGXz2beI4/hzF3EUABCRyV1TrfVRF4FeYjKZJKV0dCDWbeso+aj2AEBrfbmtLMdxnBnEWy7/y6RNVJ7nw1L9oosgNozH46z0ReR1EUMppT5JOdl27gpxRAD0j4+PvbYH/wUHUHZ6p5wUogAAAABJRU5ErkJggg==',
 };
-
-// ── NAV DYNAMIQUE SELON RÔLE ─────────────────────────────────────
 async function buildNav(pageName) {
-  const nav = document.getElementById('bottom-nav');
+  var nav = document.getElementById('bottom-nav');
   if (!nav) return;
   try {
-    const { data: { session } } = await sb.auth.getSession();
+    var sessRes = await sb.auth.getSession();
+    var session = sessRes.data && sessRes.data.session;
     if (!session) { nav.style.display = 'none'; return; }
-    const { data: profile } = await sb.from('profiles').select('role').eq('id', session.user.id).single();
-    const role = profile?.role || 'expediteur';
+    var profRes = await sb.from('profiles').select('role').eq('id', session.user.id).single();
+    var role = (profRes.data && profRes.data.role) || 'expediteur';
     nav.style.display = 'flex';
-    const items = role === 'expediteur' ? [
+    var items = role === 'expediteur' ? [
       { id: 'rechercher', label: 'Rechercher', icon: 'rechercher', href: 'cardona_rechercher.html' },
       { id: 'mesenvois',  label: 'Mes envois',  icon: 'mestrajets', href: 'cardona_mes_envois.html' },
       { id: 'profil',     label: 'Profil',      icon: 'profil',     href: 'cardona_app.html' },
@@ -772,23 +771,27 @@ async function buildNav(pageName) {
       { id: 'montrajets', label: 'Mon trajet', icon: 'mestrajets', href: 'cardona_mon_trajet.html', badge: true },
       { id: 'profil',     label: 'Profil',     icon: 'profil',     href: 'cardona_app.html' },
     ];
-    nav.innerHTML = items.map(item => {
-      const active = item.id === pageName ? 'active' : '';
-      const b = item.badge ? '<span class="bn-badge" id="nav-badge">0</span>' : '';
-      return `<a class="bn-item ${active}" href="${item.href}"><span class="bn-icon-wrap"><img class="bn-icon-img" id="nav-icon-${item.id}" src="">${b}</span><span class="bn-label">${item.label}</span><span class="bn-underline"></span></a>`;
+    nav.innerHTML = items.map(function(item) {
+      var active = item.id === pageName ? 'active' : '';
+      var b = item.badge ? '<span class="bn-badge" id="nav-badge">0</span>' : '';
+      return '<a class="bn-item ' + active + '" href="' + item.href + '"><span class="bn-icon-wrap"><img class="bn-icon-img" id="nav-icon-' + item.id + '" src="">' + b + '</span><span class="bn-label">' + item.label + '</span><span class="bn-underline"></span></a>';
     }).join('');
-    items.forEach(item => { const el = document.getElementById('nav-icon-' + item.id); if (el && NAV_ICONS[item.icon]) el.src = 'data:image/png;base64,' + NAV_ICONS[item.icon]; });
+    var SRC = (typeof NAV_ICONS !== 'undefined') ? NAV_ICONS : (typeof ICONS !== 'undefined') ? ICONS : {};
+    items.forEach(function(item) {
+      var el = document.getElementById('nav-icon-' + item.id);
+      if (el && SRC[item.icon]) el.src = 'data:image/png;base64,' + SRC[item.icon];
+    });
     if (role === 'transporteur') {
-      const { data: trajets } = await sb.from('trajets').select('id').eq('transporteur_id', session.user.id);
-      if (trajets && trajets.length > 0) {
-        const { count } = await sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', trajets.map(t => t.id)).eq('statut', 'en_attente');
-        const badge = document.getElementById('nav-badge');
-        if (badge) { badge.textContent = count || 0; badge.classList.toggle('show', (count||0) > 0); }
-      }
+      sb.from('trajets').select('id').eq('transporteur_id', session.user.id).then(function(res) {
+        if (!res.data || !res.data.length) return;
+        sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', res.data.map(function(t){return t.id;})).eq('statut', 'en_attente').then(function(r2) {
+          var badge = document.getElementById('nav-badge');
+          if (badge) { badge.textContent = r2.count || 0; badge.classList.toggle('show', (r2.count||0) > 0); }
+        });
+      });
     }
   } catch(e) { console.error('buildNav:', e); }
 }
-
 buildNav('rechercher');
 
 checkAccess();
