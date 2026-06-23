@@ -402,12 +402,7 @@
   </div>
 
   <div class="footer-copyright" style="text-align:center;font-size:10.5px;color:var(--text-secondary);padding:6px 0;flex-shrink:0;background:white;">© 2026 CARDONA. Tous droits réservés.</div>
-  <div class="bottom-nav" id="bottom-nav" style="display:none;">
-    <a class="bn-item" href="cardona_rechercher.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-rechercher" src=""></span><span class="bn-label">Rechercher</span><span class="bn-underline"></span></a>
-    <a class="bn-item" href="cardona_publier_trajet.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-publier" src=""></span><span class="bn-label">Publier</span><span class="bn-underline"></span></a>
-    <a class="bn-item" href="cardona_mes_trajets.html"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-mestrajets" src=""><span class="bn-badge" id="bn-badge-mestrajets">0</span></span><span class="bn-label">Mes trajets</span><span class="bn-underline"></span></a>
-    <div class="bn-item active"><span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-profil" src=""></span><span class="bn-label">Profil</span><span class="bn-underline"></span></div>
-  </div>
+  <div class="bottom-nav" id="bottom-nav" style="display:none;"><!-- nav injectée dynamiquement --></div>
 </div>
 
 <script>
@@ -609,6 +604,7 @@ async function loadHome() {
 
   document.getElementById('home-name').textContent = profile?.full_name || user.email;
   document.getElementById('home-role').textContent = roleLabel(profile?.role);
+  buildNav(profile?.role || 'expediteur');
   document.getElementById('home-fullname').textContent = profile?.full_name || '—';
   document.getElementById('home-email').textContent = user.email;
   document.getElementById('home-phone').textContent = profile?.phone || '—';
@@ -799,23 +795,48 @@ const NAV_ICONS = {
   mestrajets: 'iVBORw0KGgoAAAANSUhEUgAAADYAAAAiCAYAAAAUAipQAAABsUlEQVR4nO2Y3W2DMBRGjzrBHYERMoJHYIN6g3SDZoNmA7xBR2CEjJAR0g3SBxuFwHUwEP4kjoR4cLD9+dgoF5geA/wCl3DPZxhzMgT4Bm7AXbmuoT1bZnr9MUBJO0gJnPDWmm2rtSjodm7AGR+2zgFwyu9XY9EQt3PEB36FAD/K84tYFPrZifWRoy/K7BZNZCKpdsBvwdiinEK7AJaZzmJzkHfZKUObRJ49oJ/Fsuf8o2iv6k9eb48D3Xa6EPxu0Oy9hdj+vwMFD3PCcDt1DH5HaONNEsyEyykDXZWJDLETWxSDP3uTBavIwkBXZSJ3/GtcEvo26HaqRan3YZkhWHNyDt2idhaFbjsalpmDVWTELRb4M3YmzY6GZaFgdQy6xVQ7GpYVBKvIeLaYakfDsqJgFY7HlhyKpUewjxEDrZo92NbYg22NPdjW2INtjT3Y1kgJ9hfuBb6+kqkmE0Hw9duxMZ/RfNGunwrSSv4KR/8/wQa9fjv16KOTHP9dr1lTXUiz6EgLJgyrrkeT4VesWSV3WXS8DmYYV12/lZx0i452MGEhO6lkdFt0PH+HPDOxnX9rTz1UhTfwLwAAAABJRU5ErkJggg==',
   profil: 'iVBORw0KGgoAAAANSUhEUgAAADsAAAAhCAYAAABnaNNOAAADdklEQVR4nN2ZT1LbMBTGvyeYyZhN0xPUPUHdEzS9QXoCwgkwC8bYG8ImngyL5gaFE5CegHAC3Bu4NzCrMEOs14WfwKUJlf+RaX8bS0HS02fZ0vMHoSa+7/f39vb2mXkAwAPgyp8yACkRJXmeX06n00XdGG1DdTpFUXTKzD6AvkXzVGv9eTqdpnVitUklsb7v9x3HuUaxkgAAZk4BLJj5JwAQUR/AByIaPOs+iuP4ssFcG1NJbBiGVwCGUk201kebHtMgCFwAI6XUqflNVnht+9fAWuzJycmIiL5Jdb5cLg9ms1n2t35RFHnMfI3ikU/jOH5fa6YtoGwbEpFZodRWKABMJpMEwJlU3TAM9yvNsEWsxAZBMMDTbju2FWqI43iGYpcGgFGVvm1iJZaIhqa8XC6/1wnEzGZzGvi+368zRlNsxX4AAGZeVF3V0hgLU+71el6dMZpi+866ck3rBtJaJ6ZMRO7mlt1RSaw5S+tQTiqY2a07ThOsd+P/gUpiJTv6Z7EVm8r1Td1AURR5pry7u3tbd5wm2IpNAGBNvmuN1toz5dVqdVd3nCbYir2Rqys5b2VKNyrbVn5sJVZrPS9VR1WDyA3aBwBmnr/YuEOsxMqxsQAApdRh1QxIKXVoyqVM6tWx3o211iaZ7zuO8+3FxiVkVX2gyMC2+YlnLVYmOZfqMIqi082tC4IgcJVS16bOzAdVJ9gmlc7ZXq93ADmGmHkchuHXTW2DIBiIUBconoxtWzOVPajSarnyU0pEs4eHhxulVKaU8lBsRkPTR4SOm0+3GVZigyBw5ejwiOgdgAHszDZDgsJ4+wFga+/tRrFilR4y8xAlg60lMiKav7bVulZsFEWHzDzGn6uXAUiZOQFwx8wZEaXrxlBKvcnz/G3Jbexj/U1baK0PXuN9/k2sWKVXKB5TAMVxwcw3Ozs7c/GTaiPjD5h5SERlLyoDcCb2TWc8ipWJ3KK08cgdX3QRWPaB8TPRnXrLj2LDMLzAU0p3eX9/79e1YKogR9QV5JVZrVYfz8/Pky5iEfCnJxzH8Zcugm1CvGXz2beI4/hzF3EUABCRyV1TrfVRF4FeYjKZJKV0dCDWbeso+aj2AEBrfbmtLMdxnBnEWy7/y6RNVJ7nw1L9oosgNozH46z0ReR1EUMppT5JOdl27gpxRAD0j4+PvbYH/wUHUHZ6p5wUogAAAABJRU5ErkJggg==',
 };
-function injectNavIcons() {
-  document.getElementById('icon-rechercher').src = 'data:image/png;base64,' + NAV_ICONS.rechercher;
-  document.getElementById('icon-publier').src = 'data:image/png;base64,' + NAV_ICONS.publier;
-  document.getElementById('icon-mestrajets').src = 'data:image/png;base64,' + NAV_ICONS.mestrajets;
-  document.getElementById('icon-profil').src = 'data:image/png;base64,' + NAV_ICONS.profil;
+async function buildNav(role) {
+  var nav = document.getElementById('bottom-nav');
+  if (!nav) return;
+  var items = [];
+  if (role === 'expediteur') {
+    items = [
+      { id: 'rechercher', label: 'Rechercher', icon: 'rechercher', href: 'cardona_rechercher.html' },
+      { id: 'mestrajets', label: 'Mes trajets', icon: 'mestrajets', href: 'cardona_mes_trajets.html', badge: true },
+      { id: 'profil',     label: 'Profil',      icon: 'profil',     href: '#', active: true },
+    ];
+  } else {
+    items = [
+      { id: 'publier',    label: 'Publier',     icon: 'publier',    href: 'cardona_publier_trajet.html' },
+      { id: 'mestrajets', label: 'Mes trajets', icon: 'mestrajets', href: 'cardona_mes_trajets.html', badge: true },
+      { id: 'profil',     label: 'Profil',      icon: 'profil',     href: '#', active: true },
+    ];
+  }
+  nav.innerHTML = items.map(function(it) {
+    var activeClass = it.active ? ' active' : '';
+    var tag = it.href === '#' ? 'div' : 'a';
+    var hrefAttr = it.href !== '#' ? ' href="' + it.href + '"' : '';
+    var badgeHTML = it.badge ? '<span class="bn-badge" id="bn-badge-mestrajets">0</span>' : '';
+    return '<' + tag + ' class="bn-item' + activeClass + '"' + hrefAttr + '>'
+      + '<span class="bn-icon-wrap"><img class="bn-icon-img" id="icon-' + it.id + '" src="">' + badgeHTML + '</span>'
+      + '<span class="bn-label">' + it.label + '</span>'
+      + '<span class="bn-underline"></span>'
+      + '</' + tag + '>';
+  }).join('');
+  items.forEach(function(it) {
+    var el = document.getElementById('icon-' + it.id);
+    if (el && NAV_ICONS[it.icon]) el.src = 'data:image/png;base64,' + NAV_ICONS[it.icon];
+  });
+  if (role === 'transporteur') {
+    sb.from('trajets').select('id').eq('transporteur_id', (await sb.auth.getSession()).data.session.user.id).then(function(r1) {
+      if (!r1.data || !r1.data.length) return;
+      sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', r1.data.map(function(t) { return t.id; })).eq('statut', 'en_attente').then(function(r2) {
+        var badge = document.getElementById('bn-badge-mestrajets');
+        if (badge) { badge.textContent = r2.count || 0; badge.classList.toggle('show', (r2.count || 0) > 0); }
+      });
+    });
+  }
 }
-async function updateNavBadge() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) return;
-  const { data: myTrajets } = await sb.from('trajets').select('id').eq('transporteur_id', session.user.id);
-  if (!myTrajets || myTrajets.length === 0) return;
-  const { count } = await sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', myTrajets.map(t => t.id)).eq('statut', 'en_attente');
-  const badge = document.getElementById('bn-badge-mestrajets');
-  if (badge) { badge.textContent = count || 0; badge.classList.toggle('show', (count || 0) > 0); }
-}
-injectNavIcons();
-updateNavBadge();
 injectWelcomeIcons();
 
 sb.auth.getSession().then(({ data: { session } }) => {
