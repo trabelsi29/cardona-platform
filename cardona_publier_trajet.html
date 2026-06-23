@@ -281,7 +281,7 @@
       <div class="success-icon">✅</div>
       <div class="success-title">Trajet de transport publié avec succès !</div>
       <div class="success-desc">Votre trajet est maintenant visible par les expéditeurs. Vous pouvez gérer vos annonces et interagir avec les intéressés depuis la section <strong>Mes trajets</strong>.</div>
-      <a class="btn-primary" href="cardona_mon_trajet.html" style="display:block;text-decoration:none;text-align:center;">Voir mon trajet</a>
+      <a class="btn-primary" href="cardona_mes_trajets.html" style="display:block;text-decoration:none;text-align:center;">Voir mes trajets</a>
       <button class="btn-outline" onclick="resetForm()">Publier un autre trajet</button>
     </div>
 
@@ -322,7 +322,7 @@ async function checkAccess() {
     return;
   }
   const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-  if (!profile || profile.role !== 'transporteur') {
+  if (!profile || (profile.role !== 'transporteur' && profile.role !== 'both')) {
     showGate('Réservé aux transporteurs', `Le compte connecté (${session.user.email}) est enregistré comme expéditeur. Déconnectez-vous puis reconnectez-vous avec un compte transporteur.`, 'logout');
     return;
   }
