@@ -38,7 +38,7 @@
     padding: 0;
   }
   .mascot { width: 130px; height: auto; display: block; margin: 0 auto 24px; }
-  .scroll-area { flex: 1; overflow-y: auto; padding: 44px 80px; box-sizing: border-box; }
+  .scroll-area { flex: 1; overflow-y: auto; padding: 32px 80px; box-sizing: border-box; }
   .form-inner { max-width: 480px; margin: 0 auto; width: 100%; }
   .view { display: none; }
   .view.active { display: block; }
@@ -195,21 +195,21 @@
   }
 
   /* ── WELCOME SCREEN ── */
-  .welcome-hero { text-align: center; padding: 2px 0 8px; }
+  .welcome-hero { text-align: center; padding: 0; }
   .welcome-mascot { width: 52px; height: auto; display: block; margin: 0 auto 7px; }
   .welcome-title { font-size: 17px; font-weight: 800; color: var(--dark); margin-bottom: 5px; }
   .welcome-tagline { font-size: 11.5px; color: var(--text-secondary); line-height: 1.42; max-width: 290px; margin: 0 auto 10px; }
   .welcome-tagline strong { color: var(--dark); font-weight: 600; }
   .welcome-sep { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; color: var(--text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
   .welcome-sep::before, .welcome-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  .btn-role { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px 14px; border-radius: 14px; border: 2px solid var(--border); background: white; cursor: pointer; margin-bottom: 10px; text-align: left; transition: border-color 0.18s, box-shadow 0.18s; }
+  .btn-role { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 12px; border: 2px solid var(--border); background: white; cursor: pointer; margin-bottom: 8px; text-align: left; transition: border-color 0.18s, box-shadow 0.18s; }
   .btn-role:hover { border-color: var(--gold); box-shadow: 0 4px 14px rgba(200,144,42,0.13); }
   .btn-role-icon { width: 42px; height: 42px; border-radius: 11px; background: var(--bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .btn-role-icon img { width: 24px; height: 24px; object-fit: contain; }
   .btn-role-title { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
   .btn-role-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.35; }
   .btn-role-arrow { font-size: 20px; color: var(--gold); flex-shrink: 0; margin-left: auto; }
-  .welcome-login { text-align: center; margin-top: 12px; font-size: 13px; color: var(--text-secondary); }
+  .welcome-login { text-align: center; margin-top: 8px; font-size: 13px; color: var(--text-secondary); }
   .welcome-login span { color: var(--gold); font-weight: 600; cursor: pointer; }
   @media (max-width: 640px) {
     .welcome-title { font-size: 19px; }
@@ -413,7 +413,7 @@ function switchView(id) {
 
   // Sur l'accueil, on cache le grand logo central (remplacé par le mini-logo en haut à droite)
   const brandLogo = document.getElementById('brand-logo');
-  if (brandLogo) brandLogo.style.display = (id === 'home') ? 'none' : 'block';
+  if (brandLogo) brandLogo.style.display = 'none'; // logo géré par welcome-mascot
   document.getElementById('bottom-nav').style.display = (id === 'home') ? 'flex' : 'none';
   if (id === 'home') {
     const trigger = document.getElementById('menu-trigger');
