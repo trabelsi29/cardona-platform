@@ -199,24 +199,15 @@ async function checkAccess() {
   setupTabsForRole();
 
   await loadAll();
+  buildNav(userRole === 'transporteur' ? 'mestrajets' : 'mesenvois');
 }
 
 function setupTabsForRole() {
   const tabsEl = document.querySelector('.tabs');
   const subtitleEl = document.querySelector('.subtitle');
-  if (userRole === 'both') {
-    tabsEl.style.display = 'flex';
-    subtitleEl.style.display = 'block';
-    activeTab = 'expediteur';
-  } else if (userRole === 'transporteur') {
-    tabsEl.style.display = 'none';
-    subtitleEl.style.display = 'none';
-    activeTab = 'transporteur';
-  } else {
-    tabsEl.style.display = 'none';
-    subtitleEl.style.display = 'none';
-    activeTab = 'expediteur';
-  }
+  if (tabsEl) tabsEl.style.display = 'none';
+  if (subtitleEl) subtitleEl.style.display = 'none';
+  activeTab = userRole === 'transporteur' ? 'transporteur' : 'expediteur';
 }
 
 function toggleMenu() { document.getElementById('dropdown-menu').classList.toggle('open'); }
@@ -475,20 +466,6 @@ async function buildNav(activePage) {
   return role;
 }
 
-// Construire nav avec bonne icône active selon rôle
-async function initNavMesTrajets() {
-  var sessRes = await sb.auth.getSession();
-  if (!sessRes.data.session) { window.location.href = 'cardona_app.html'; return; }
-  var uid = sessRes.data.session.user.id;
-  var profRes = await sb.from('profiles').select('role').eq('id', uid).single();
-  var role = profRes.data && profRes.data.role;
-  if (role === 'expediteur') {
-    buildNav('mesenvois');
-  } else {
-    buildNav('mestrajets');
-  }
-}
-initNavMesTrajets();
 </script>
 </body>
 </html>
