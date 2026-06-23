@@ -215,6 +215,12 @@
     .welcome-title { font-size: 19px; }
     .btn-role { padding: 13px 14px; }
   }
+
+  .btn-danger-sm { display:inline-block; padding:6px 12px; border-radius:8px; border:1.5px solid #d9534f; background:transparent; color:#d9534f; font-size:12px; font-weight:500; cursor:pointer; font-family:inherit; margin-top:6px; transition:all 0.15s; }
+  .btn-danger-sm:hover { background:#d9534f; color:white; }
+  .btn-switch { width:100%; padding:11px 16px; border-radius:10px; margin-top:10px; border:1.5px solid var(--gold); background:transparent; color:var(--gold); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.2s; text-align:left; display:flex; align-items:center; justify-content:space-between; }
+  .btn-switch:hover { background:var(--gold); color:white; }
+  .verif-required { font-size:12px; color:#d9534f; background:#fdf2f2; border-radius:8px; padding:10px 12px; margin-top:8px; line-height:1.5; }
 </style>
 </head>
 <body>
@@ -337,17 +343,20 @@
         <div class="home-name" id="home-name">—</div>
         <div class="home-role" id="home-role">—</div>
         <div class="avatar-hint">Photo de profil facultative</div>
+        <button class="btn-danger-sm" id="btn-delete-avatar" onclick="handleDeleteAvatar()" style="display:none;">Supprimer la photo</button>
       </div>
     </div>
 
     <div class="home-card" id="verif-card">
-      <div class="card-title">Vérification du profil</div>
-
+      <div class="card-title">Verification du profil</div>
       <div id="verif-status-line" style="margin:8px 0 12px;"></div>
+      <div id="verif-required-msg" class="verif-required" style="display:none;">
+        Verification requise — Envoyez une piece d identite pour acceder a toutes les fonctionnalites de CARDONA.
+      </div>
       <div id="verif-doc-list" style="margin-bottom:12px;"></div>
       <div id="verif-upload-zone">
         <div class="field">
-          <label>Pièce d'identité (recto/verso, PDF ou image)</label>
+          <label>Piece d identite (recto/verso, PDF ou image)</label>
           <input type="file" id="verif-file" accept="image/*,application/pdf">
         </div>
         <button class="btn-primary" id="verif-upload-btn" onclick="handleUploadDoc()">Envoyer mes documents</button>
@@ -364,8 +373,12 @@
         <div class="home-row"><span>Nom & Prénom</span><span id="home-fullname">—</span></div>
         <div class="home-row"><span>Email</span><span id="home-email">—</span></div>
         <div class="home-row"><span>Téléphone</span><span id="home-phone">—</span></div>
-        <div class="home-row"><span>Type de profil</span><span id="home-role-display">—</span></div>
+        <div class="home-row"><span>Type de compte</span><span id="home-role-display" style="font-weight:600;">—</span></div>
         <div class="home-row"><span>Membre depuis</span><span id="home-since">—</span></div>
+        <button class="btn-switch" id="btn-switch-role" onclick="handleSwitchRole()">
+          <span id="switch-role-label">Passer en mode</span>
+          <span>&#8250;</span>
+        </button>
       </div>
       <div id="info-edit" style="display:none;">
         <div class="field"><label>Nom & Prénom</label><input type="text" id="edit-fullname"></div>
@@ -375,7 +388,6 @@
           <div class="role-options">
             <div class="role-pill" data-role="expediteur" onclick="selectEditRole('expediteur')">Expéditeur</div>
             <div class="role-pill" data-role="transporteur" onclick="selectEditRole('transporteur')">Transporteur</div>
-            <div class="role-pill" data-role="both" onclick="selectEditRole('both')">Les deux</div>
           </div>
         </div>
         <button class="btn-primary" onclick="handleUpdateInfo()">Mettre à jour</button>
@@ -548,6 +560,30 @@ async function handleForgotPassword() {
   showError('login-error', 'Un email de réinitialisation a été envoyé si ce compte existe.');
 }
 
+async function handleDeleteAvatar() {
+  if (!confirm('Supprimer votre photo de profil ?')) return;
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return;
+  const { error } = await sb.from('profiles').update({ avatar_url: null }).eq('id', session.user.id);
+  if (error) { alert('Erreur : ' + error.message); return; }
+  document.getElementById('avatar-img').style.display = 'none';
+  document.getElementById('avatar-placeholder').style.display = 'flex';
+  document.getElementById('btn-delete-avatar').style.display = 'none';
+}
+
+async function handleSwitchRole() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+  const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single();
+  const cur = profile && profile.role;
+  const newRole = cur === 'expediteur' ? 'transporteur' : 'expediteur';
+  const newLabel = newRole === 'expediteur' ? 'Expediteur' : 'Transporteur';
+  if (!confirm('Passer en mode ' + newLabel + ' ?')) return;
+  const { error } = await sb.from('profiles').update({ role: newRole }).eq('id', user.id);
+  if (error) { alert('Erreur : ' + error.message); return; }
+  window.location.reload();
+}
+
 async function handleLogout() {
   await sb.auth.signOut();
   switchView('login');
@@ -578,6 +614,12 @@ async function loadHome() {
   document.getElementById('home-phone').textContent = profile?.phone || '—';
   document.getElementById('home-since').textContent = profile?.created_at ? new Date(profile.created_at).toLocaleDateString('fr-FR') : '—';
   document.getElementById('home-role-display').textContent = roleLabel(profile?.role);
+  var btnDel = document.getElementById('btn-delete-avatar');
+  if (btnDel) btnDel.style.display = profile && profile.avatar_url ? 'inline-block' : 'none';
+  var switchLbl = document.getElementById('switch-role-label');
+  if (switchLbl) { var otherRole = profile && profile.role === 'expediteur' ? 'Transporteur' : 'Expediteur'; switchLbl.textContent = 'Passer en mode ' + otherRole; }
+  var verifMsg = document.getElementById('verif-required-msg');
+  if (verifMsg) verifMsg.style.display = (!profile || !profile.verification_status || profile.verification_status === 'non_soumis') ? 'block' : 'none';
 
   const avatarImg = document.getElementById('avatar-img');
   const avatarPlaceholder = document.getElementById('avatar-placeholder');
