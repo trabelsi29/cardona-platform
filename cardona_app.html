@@ -274,9 +274,9 @@
 
   <!-- ===================== CONNEXION ===================== -->
   <div class="view" id="view-login">
-    <div style="text-align:center;margin-bottom:20px;">
-      <div style="font-size:20px;font-weight:800;color:var(--dark);">Connexion</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Bienvenue sur CARDONA</div>
+    <div style="text-align:center;margin-bottom:16px;">
+      <img src="assets/cardona-logo.gif" style="width:52px;height:auto;display:block;margin:0 auto 8px;" alt="CARDONA">
+      <div style="font-size:19px;font-weight:800;color:var(--dark);">Connexion</div>
     </div>
     <div class="error-box" id="login-error"></div>
     <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="vous@exemple.com"></div>
@@ -288,6 +288,10 @@
 
   <!-- ===================== INSCRIPTION ===================== -->
   <div class="view" id="view-signup">
+    <div style="text-align:center;margin-bottom:14px;">
+      <img src="assets/cardona-logo.gif" style="width:52px;height:auto;display:block;margin:0 auto 6px;" alt="CARDONA">
+      <div style="font-size:19px;font-weight:800;color:var(--dark);">Créer un compte</div>
+    </div>
     <div class="error-box" id="signup-error"></div>
     <div class="field"><label>Nom & Prénom</label><input type="text" id="signup-name" placeholder="Nom & Prénom"></div>
     <div class="field"><label>Email</label><input type="email" id="signup-email" placeholder="vous@exemple.com"></div>
@@ -863,10 +867,14 @@ sb.auth.getSession().then(({ data: { session } }) => {
 
 document.getElementById('login-password').addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
 
-setTimeout(() => {
-  const splash = document.getElementById('splash-screen');
-  if (splash) { splash.classList.add('fade-out'); setTimeout(() => splash.remove(), 500); }
-}, 2500);
+// Cacher le splash : immédiatement si session active, sinon après 2500ms
+sb.auth.getSession().then(function(res) {
+  var delay = (res.data && res.data.session) ? 0 : 2500;
+  setTimeout(function() {
+    var splash = document.getElementById('splash-screen');
+    if (splash) { splash.classList.add('fade-out'); setTimeout(function() { if(splash.parentNode) splash.remove(); }, 500); }
+  }, delay);
+});
 </script>
 </body>
 </html>
