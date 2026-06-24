@@ -667,12 +667,15 @@ function formatDateTime(v) {
 
 function fillRecap() {
   document.getElementById('recap-mode').textContent = modeLabel(selectedMode);
-  document.getElementById('recap-ramassage').innerHTML = ramassageStops.map(s =>
-    `<div class="recap-line">${s.adresse} — de ${formatDateTime(s.date_heure)} à ${formatDateTime(s.date_heure_fin)}</div>`).join('');
-  document.getElementById('recap-distribution').innerHTML = distributionStops.map(s =>
-    `<div class="recap-line">${s.adresse} — de ${formatDateTime(s.date_heure)} à ${formatDateTime(s.date_heure_fin)}</div>`).join('');
-  document.getElementById('recap-categories').innerHTML = selectedCategories.map(c =>
-    `<span class="recap-chip">${categoryLabel(c)}</span>`).join('');
+  document.getElementById('recap-ramassage').innerHTML = ramassageStops.map(function(s) {
+    return '<div class="recap-line">' + s.adresse + ' — de ' + formatDateTime(s.date_heure) + ' à ' + formatDateTime(s.date_heure_fin) + '</div>';
+  }).join('');
+  document.getElementById('recap-distribution').innerHTML = distributionStops.map(function(s) {
+    return '<div class="recap-line">' + s.adresse + ' — de ' + formatDateTime(s.date_heure) + ' à ' + formatDateTime(s.date_heure_fin) + '</div>';
+  }).join('');
+  document.getElementById('recap-categories').innerHTML = selectedCategories.map(function(cat) {
+    return '<span class="recap-chip">' + categoryLabel(cat) + '</span>';
+  }).join('');
   var recapPrix = document.getElementById('recap-prix-base');
   if (recapPrix && window._prixCategories) {
     var lines = Object.keys(window._prixCategories).map(function(cat) {
