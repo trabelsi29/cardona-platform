@@ -193,6 +193,12 @@
   .prix-type-btn { flex:1; padding:7px; border-radius:8px; border:1.5px solid var(--border); background:transparent; font-size:12px; cursor:pointer; color:var(--text-secondary); }
   .prix-type-btn.active { border-color:var(--gold); color:var(--gold); background:#fdf8ee; font-weight:600; }
 
+
+  .radio-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border);background:white;cursor:pointer;margin-bottom:8px;transition:all 0.15s;}
+  .radio-item.selected{border-color:var(--gold);background:#FDF8EE;}
+  .radio-item span{font-size:14px;font-weight:500;color:var(--dark);}
+  .radio-circle{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all 0.15s;}
+  .radio-item.selected .radio-circle{border-color:var(--gold);background:var(--gold);}
   .mod-section{background:white;border-radius:14px;padding:18px;margin-bottom:14px;border:1px solid var(--border);}
   .mod-section-title{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;}
   .form-row{display:flex;gap:12px;}
@@ -231,13 +237,11 @@
       <div class="error-box" id="form-error" style="display:none;"></div>
       <div class="mod-section">
         <div class="mod-section-title">Mode de transport</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <div class="mode-pill" data-mode="avion" onclick="selectMode('avion')">✈ Avion</div>
-          <div class="mode-pill" data-mode="camion_fourgon" onclick="selectMode('camion_fourgon')">🚛 Camion</div>
-          <div class="mode-pill" data-mode="voiture" onclick="selectMode('voiture')">🚗 Voiture</div>
-          <div class="mode-pill" data-mode="train_bus" onclick="selectMode('train_bus')">🚆 Train/Bus</div>
-          <div class="mode-pill" data-mode="autre" onclick="selectMode('autre')">❓ Autre</div>
-        </div>
+        <div class="radio-item" data-value="avion" onclick="selectMode('avion')"><span>✈ Avion</span><div class="radio-circle"></div></div>
+        <div class="radio-item" data-value="camion_fourgon" onclick="selectMode('camion_fourgon')"><span>🚛 Camion/fourgon</span><div class="radio-circle"></div></div>
+        <div class="radio-item" data-value="voiture" onclick="selectMode('voiture')"><span>🚗 Voiture</span><div class="radio-circle"></div></div>
+        <div class="radio-item" data-value="train_bus" onclick="selectMode('train_bus')"><span>🚆 Train/bus</span><div class="radio-circle"></div></div>
+        <div class="radio-item" data-value="autre" onclick="selectMode('autre')"><span>❓ Autre</span><div class="radio-circle"></div></div>
       </div>
       <div class="mod-section">
         <div class="mod-section-title">Lieux</div>
@@ -293,7 +297,7 @@ var CAT_INFO={
   marchandise:{label:"Marchandises",defaultType:"kg"},
   document:{label:"Documents",defaultType:"forfait"},
   fragile:{label:"Produits fragiles",defaultType:"kg"},
-  electronique:{label:"Produits electroniques",defaultType:"kg"},
+  electronique:{label:"Produits electroniques",defaultType:"forfait"},
   autre:{label:"Autre",defaultType:"kg"}
 };
 
@@ -323,7 +327,12 @@ async function init(){
 
 function selectMode(mode){
   selectedMode=mode;
-  document.querySelectorAll(".mode-pill").forEach(function(p){p.classList.toggle("selected",p.dataset.mode===mode);});
+  document.querySelectorAll(".radio-item").forEach(function(p){
+    var ok=p.dataset.value===mode;
+    p.classList.toggle("selected",ok);
+    var rc=p.querySelector(".radio-circle");
+    if(rc){if(ok)rc.style.background="var(--gold)";else rc.style.background="";}
+  });
 }
 
 function toggleCat(cat){
