@@ -371,8 +371,7 @@ async function checkAccess() {
   renderStops('ramassage');
   renderStops('distribution');
   injectNavIcons();
-  updateNavBadge();
-  goStep(1);
+    goStep(1);
 }
 
 function showGate(title, desc, action) {
@@ -682,22 +681,11 @@ function resetForm() {
   goStep(1);
 }
 
-// ============================================================
-// ICÔNES DE NAVIGATION + BADGE DE NOTIFICATION
-// ============================================================
 function injectNavIcons() {
-  document.getElementById('icon-rechercher').src = 'data:image/png;base64,' + NAV_ICONS.rechercher;
-  document.getElementById('icon-publier').src = 'data:image/png;base64,' + NAV_ICONS.publier;
-  document.getElementById('icon-mestrajets').src = 'data:image/png;base64,' + NAV_ICONS.mestrajets;
-  document.getElementById('icon-profil').src = 'data:image/png;base64,' + NAV_ICONS.profil;
+  var mt = document.getElementById('menu-trigger');
+  if (mt && typeof NAV_ICONS !== 'undefined') mt.src = 'data:image/png;base64,' + NAV_ICONS.logo;
 }
-async function updateNavBadge() {
-  const { data: trajets } = await sb.from('trajets').select('id').eq('transporteur_id', currentUser.id);
-  if (!trajets || trajets.length === 0) return;
-  const { count } = await sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', trajets.map(t => t.id)).eq('statut', 'en_attente');
-  const badge = document.getElementById('bn-badge-mestrajets');
-  if (badge) { badge.textContent = count || 0; badge.classList.toggle('show', (count || 0) > 0); }
-}
+// updateNavBadge remplacé par buildNav
 
 checkAccess();
 
