@@ -171,6 +171,7 @@
   .modal-row .modal-section { flex:1; }
   .prix-cat-ligne { display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px solid #e8e4de; }
   .prix-cat-ligne:last-child { border-bottom:none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -211,7 +212,7 @@
       <div class="tab" id="tab-transporteur" onclick="switchTab('transporteur')">Transporteur (<span id="count-transporteur">0</span>)</div>
     </div>
 
-    <div class="content-area" id="content-area"><div class="empty-state">Chargement…</div></div>
+    <div class="content-area" id="content-area"><div style="text-align:center;padding:40px;"><div style="width:24px;height:24px;border:3px solid #e0ddd8;border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;"></div></div></div>
   </div>
 
   </div>
@@ -381,7 +382,12 @@ function toggleAccordion(trajetId) {
 }
 
 function modifierTrajet(trajetId) {
-  alert('Modification du trajet bientot disponible.');
+  if (!confirm('Annuler ce trajet ? Les réservations en attente seront refusées.')) return;
+  sb.from('trajets').update({ statut: 'annule' }).eq('id', trajetId).then(function() {
+    sb.from('reservations').update({ statut: 'refuse' }).eq('trajet_id', trajetId).eq('statut', 'en_attente').then(function() {
+      loadAll();
+    });
+  });
 }
 
 
