@@ -193,32 +193,27 @@
   .prix-type-btn { flex:1; padding:7px; border-radius:8px; border:1.5px solid var(--border); background:transparent; font-size:12px; cursor:pointer; color:var(--text-secondary); }
   .prix-type-btn.active { border-color:var(--gold); color:var(--gold); background:#fdf8ee; font-weight:600; }
 
-
-  .radio-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border);background:white;cursor:pointer;margin-bottom:8px;transition:all 0.15s;}
-  .radio-item.selected{border-color:var(--gold);background:#FDF8EE;}
-  .radio-item span{font-size:14px;font-weight:500;color:var(--dark);}
-  .radio-circle{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all 0.15s;}
-  .radio-item.selected .radio-circle{border-color:var(--gold);background:var(--gold);}
-  .mod-section{background:white;border-radius:14px;padding:18px;margin-bottom:14px;border:1px solid var(--border);}
-  .mod-section-title{font-size:13px;font-weight:700;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;}
-  .form-row{display:flex;gap:12px;}
-  .form-row .field{flex:1;}
-  .prix-cat-block{background:#f9f7f4;border-radius:10px;padding:12px 14px;margin-bottom:8px;}
-  .prix-cat-title{font-size:13px;font-weight:600;color:var(--dark);margin-bottom:8px;}
-  .prix-cat-row{display:flex;align-items:center;gap:10px;}
-  .prix-cat-row input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--border);font-size:14px;}
-  .prix-cat-row label{font-size:12px;color:var(--text-secondary);white-space:nowrap;}
-  .btn-save{width:100%;padding:14px;border-radius:12px;border:none;background:var(--gold);color:white;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;}
-  .btn-save:hover{opacity:.88;}
-  .btn-annuler-trajet{width:100%;padding:12px;border-radius:12px;border:1.5px solid #d9534f;background:white;color:#d9534f;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;}
-  .success-msg{background:#e8f5ef;color:#2e7d5e;border-radius:10px;padding:12px 16px;font-size:13px;font-weight:600;margin-bottom:14px;display:none;}
-  @keyframes spin{to{transform:rotate(360deg);}}
+  .mod-section { background:white; border-radius:14px; padding:18px; margin-bottom:14px; border:1px solid var(--border); }
+  .mod-section-title { font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; }
+  .form-row { display:flex; gap:12px; }
+  .form-row .field { flex:1; min-width:0; }
+  .prix-cat-block { background:#f9f7f4; border-radius:10px; padding:12px 14px; margin-bottom:8px; }
+  .prix-cat-title { font-size:13px; font-weight:600; color:var(--dark); margin-bottom:8px; }
+  .prix-cat-row { display:flex; align-items:center; gap:10px; }
+  .prix-cat-row input { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--border); font-size:14px; font-family:inherit; }
+  .prix-cat-row label { font-size:12px; color:var(--text-secondary); white-space:nowrap; }
+  .btn-save { width:100%; padding:14px; border-radius:12px; border:none; background:var(--gold); color:white; font-size:15px; font-weight:700; cursor:pointer; margin-top:8px; font-family:inherit; }
+  .btn-save:hover { opacity:.88; }
+  .btn-annuler-trajet { width:100%; padding:12px; border-radius:12px; border:1.5px solid #d9534f; background:white; color:#d9534f; font-size:14px; font-weight:600; cursor:pointer; margin-top:8px; font-family:inherit; }
+  .success-msg { background:#e8f5ef; color:#2e7d5e; border-radius:10px; padding:12px 16px; font-size:13px; font-weight:600; margin-bottom:14px; display:none; }
+  @keyframes spin { to { transform:rotate(360deg); } }
 </style>
 </head>
 <body>
 <div class="phone-frame">
   <div class="scroll-area">
     <div class="form-inner">
+
       <div class="topbar">
         <button class="back-btn" onclick="history.back()">←</button>
         <div class="menu-wrapper">
@@ -231,31 +226,39 @@
           </div>
         </div>
       </div>
+
       <div style="font-size:20px;font-weight:800;color:var(--dark);margin-bottom:4px;">Modifier le trajet</div>
       <div style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;" id="trajet-subtitle">Chargement…</div>
+
       <div id="success-msg" class="success-msg">✅ Trajet mis à jour !</div>
       <div class="error-box" id="form-error" style="display:none;"></div>
+
+      <!-- MODE TRANSPORT -->
       <div class="mod-section">
         <div class="mod-section-title">Mode de transport</div>
         <div class="radio-item" data-value="avion" onclick="selectMode('avion')"><span>✈ Avion</span><div class="radio-circle"></div></div>
-        <div class="radio-item" data-value="camion_fourgon" onclick="selectMode('camion_fourgon')"><span>🚛 Camion/fourgon</span><div class="radio-circle"></div></div>
+        <div class="radio-item" data-value="camion_fourgon" onclick="selectMode('camion_fourgon')"><span>🚛 Camion / Fourgon</span><div class="radio-circle"></div></div>
         <div class="radio-item" data-value="voiture" onclick="selectMode('voiture')"><span>🚗 Voiture</span><div class="radio-circle"></div></div>
-        <div class="radio-item" data-value="train_bus" onclick="selectMode('train_bus')"><span>🚆 Train/bus</span><div class="radio-circle"></div></div>
+        <div class="radio-item" data-value="train_bus" onclick="selectMode('train_bus')"><span>🚆 Train / Bus</span><div class="radio-circle"></div></div>
         <div class="radio-item" data-value="autre" onclick="selectMode('autre')"><span>❓ Autre</span><div class="radio-circle"></div></div>
       </div>
+
+      <!-- LIEUX -->
       <div class="mod-section">
         <div class="mod-section-title">Lieux</div>
         <div class="field">
           <label>Lieu de ramassage</label>
-          <input type="text" id="lieu-ramassage" placeholder="Ville, adresse…" oninput="handleAddr('ramassage',this.value)">
+          <input type="text" id="lieu-ramassage" placeholder="Ville, adresse, aéroport…" oninput="handleAddr('ramassage', this.value)" autocomplete="off">
           <div class="suggestions" id="sugg-ramassage"></div>
         </div>
         <div class="field">
           <label>Lieu de distribution</label>
-          <input type="text" id="lieu-distribution" placeholder="Ville, adresse…" oninput="handleAddr('distribution',this.value)">
+          <input type="text" id="lieu-distribution" placeholder="Ville, adresse, aéroport…" oninput="handleAddr('distribution', this.value)" autocomplete="off">
           <div class="suggestions" id="sugg-distribution"></div>
         </div>
       </div>
+
+      <!-- DATES -->
       <div class="mod-section">
         <div class="mod-section-title">Dates</div>
         <div class="form-row">
@@ -263,6 +266,8 @@
           <div class="field"><label>Date de distribution</label><input type="datetime-local" id="date-distribution"></div>
         </div>
       </div>
+
+      <!-- CATEGORIES -->
       <div class="mod-section">
         <div class="mod-section-title">Types de colis acceptés</div>
         <div class="category-pill" data-cat="marchandise" onclick="toggleCat('marchandise')"><div class="category-check"></div>📦 Marchandises</div>
@@ -271,183 +276,279 @@
         <div class="category-pill" data-cat="electronique" onclick="toggleCat('electronique')"><div class="category-check"></div>💻 Produits électroniques</div>
         <div class="category-pill" data-cat="autre" onclick="toggleCat('autre')"><div class="category-check"></div>❓ Autre</div>
       </div>
+
+      <!-- PRIX -->
       <div class="mod-section">
         <div class="mod-section-title">Tarifs par catégorie</div>
-        <div id="prix-container"></div>
+        <div id="prix-container"><div style="font-size:13px;color:var(--text-secondary);">Sélectionnez les types de colis ci-dessus.</div></div>
       </div>
-      <button class="btn-save" onclick="sauvegarder()">💾 Sauvegarder</button>
+
+      <button class="btn-save" onclick="sauvegarder()">💾 Sauvegarder les modifications</button>
       <button class="btn-annuler-trajet" onclick="annulerTrajet()">Annuler ce trajet</button>
+
     </div>
   </div>
-  <div class="copyright">© 2026 CARDONA. Tous droits réservés.</div>
+  <div class="footer-copyright" style="text-align:center;font-size:10.5px;color:var(--text-secondary);padding:6px 0;flex-shrink:0;background:white;">© 2026 CARDONA. Tous droits réservés.</div>
   <div class="bottom-nav" id="bottom-nav" style="display:none;"></div>
 </div>
+
 <script>
-const SUPABASE_URL='https://daptohjruyxafskpmqeb.supabase.co';
-const SUPABASE_ANON_KEY='sb_publishable_plDYJLGRhTIPT-kwPW2ljA_-48Mv7S3';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const SUPABASE_URL = 'https://daptohjruyxafskpmqeb.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_plDYJLGRhTIPT-kwPW2ljA_-48Mv7S3';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 const NAV_ICONS = {
   rechercher: 'iVBORw0KGgoAAAANSUhEUgAAADgAAAAoCAYAAACrUDmFAAADfUlEQVR4nO2ZwW3bMBSGf9JGguRSdQNtUHeCqhPEnSDJBFVPjHSJc4lE5FBngroTNJmg7gbqBFU30ClBEImvBz81quvElEUVLpAfMEwL4nv8QEqP/C3gQGEYevv7+4cARkQUAPD4AwA5gFwIcVVV1bXWOneR01aiS2ellC+l/Ahg3KLbHMAsSZLPXXLbamPAKIo+AggblwoiupJSZkT00xhTAMBgMHhljHkthHgDwP+dWIhZVVVnfc9oa0CetS8ARnwpBzC5vb29nk6nxZq+gRDiVAgR1H3Lsnx3cXGRtR2HrVoBMtxX8EwQ0WWapmHbpCcnJ0dCiFOOU5Rl+bYvSNnq5sXM+Vgsx+NN4AAgTdOZMeYtFrPvDYfDr0opf5NY62QNGMfxKXhZEtGHNE1nXRJrrfMmpJTyU5d4j8lqifLS/AEAxpgzrfXE1QCUUgEvewD4kCTJ1FVswHIGpZQTbuYu4QBAaz0norpknLqMDVgA8rNxyD8nrgcAAERUx/WUUoHL2GsBG6/0oq/izLVwzvkOn7y5pWwADwCAiL65TLxC15xv7DKozTPoc+K5y8TLasT3XJYMG8ARABhjMldJV2lnZyev28YYz1XcVoW+T00mk6JuSyk9V3GtAYfD4QtXSf+lbABzAKiq6mWfA4njeLSc04VsADP+Hj1xT2cRkc/NwuURygbwG+C+Pq3QGACIKHMZdC2gMeaKm853GbW4LBwAi4Owy9hrAZu7DCml870iAAwGg0MsPJzCGON0Q2H1FjXGnHEziKJo7HIASimfiELOc+nawrAC1FrPwbMI4JOrnUYYhh4flTws3pwzF3Gbsq6DxphjPBxOO5/AwzD09vb2ftsfALI+DChrQK11LoR4B6AA4DNksElSpZTPcKPG5XEcx85P9a1dtTiOR0RUezOt7D82iN/zM+etHJAQs/Pz8+O243pMG/miy+4aaw5gVpbl9/v7+7y2EJVSvhAikFK+IaIx/nS8M6wwjV1CdnK2l+w/WxXGmMu7u7vpdDotoiia4cExeBiYI8hOgLUY9ABAgNVLryCiTEp5dXNz83nZIO4T0glgU2EYeru7u6PGpdzm+ewL0jlgF/UBuTUHXgBIkuQIwF/GFhEdbVpCtgoQeBqS/9Fqpa0DBB6HBHDUNtZWAgKPQhZt42wtILCAJKJL/pnxVvFZz3rWf6Rf3Ht7exofYFYAAAAASUVORK5CYII=',
   publier: 'iVBORw0KGgoAAAANSUhEUgAAADAAAAAmCAYAAACCjRgBAAAAzElEQVR4nO3YsQ2CUBSF4cOloHWEN4JuoJPoFo8NCB0j6CS6ibqBHR3XRhJAEwt5Hk3Ol1BACPf9IRSPDInEGIOZHQGgbdtV0zS3FHMsxUMfQn8URbFMNSRlwFcogE0BbApgUwCbAtgUwKYANgWwZcOTwTYwcJbz1mW6PR29gTzPF/jdxQMvtqfZ9I6yLHfuHj6dZGYBwBYA3H3v7tcZnnmuquowvPYUMJcY47r/K9F13aau61OKOX//ESuATQFsCmBTAJsC2BTApgC2O/utKoxuLnZHAAAAAElFTkSuQmCC',
   mestrajets: 'iVBORw0KGgoAAAANSUhEUgAAADYAAAAiCAYAAAAUAipQAAABsUlEQVR4nO2Y3W2DMBRGjzrBHYERMoJHYIN6g3SDZoNmA7xBR2CEjJAR0g3SBxuFwHUwEP4kjoR4cLD9+dgoF5geA/wCl3DPZxhzMgT4Bm7AXbmuoT1bZnr9MUBJO0gJnPDWmm2rtSjodm7AGR+2zgFwyu9XY9EQt3PEB36FAD/K84tYFPrZifWRoy/K7BZNZCKpdsBvwdiinEK7AJaZzmJzkHfZKUObRJ49oJ/Fsuf8o2iv6k9eb48D3Xa6EPxu0Oy9hdj+vwMFD3PCcDt1DH5HaONNEsyEyykDXZWJDLETWxSDP3uTBavIwkBXZSJ3/GtcEvo26HaqRan3YZkhWHNyDt2idhaFbjsalpmDVWTELRb4M3YmzY6GZaFgdQy6xVQ7GpYVBKvIeLaYakfDsqJgFY7HlhyKpUewjxEDrZo92NbYg22NPdjW2INtjT3Y1kgJ9hfuBb6+kqkmE0Hw9duxMZ/RfNGunwrSSv4KR/8/wQa9fjv16KOTHP9dr1lTXUiz6EgLJgyrrkeT4VesWSV3WXS8DmYYV12/lZx0i452MGEhO6lkdFt0PH+HPDOxnX9rTz1UhTfwLwAAAABJRU5ErkJggg==',
   profil: 'iVBORw0KGgoAAAANSUhEUgAAADsAAAAhCAYAAABnaNNOAAADdklEQVR4nN2ZT1LbMBTGvyeYyZhN0xPUPUHdEzS9QXoCwgkwC8bYG8ImngyL5gaFE5CegHAC3Bu4NzCrMEOs14WfwKUJlf+RaX8bS0HS02fZ0vMHoSa+7/f39vb2mXkAwAPgyp8yACkRJXmeX06n00XdGG1DdTpFUXTKzD6AvkXzVGv9eTqdpnVitUklsb7v9x3HuUaxkgAAZk4BLJj5JwAQUR/AByIaPOs+iuP4ssFcG1NJbBiGVwCGUk201kebHtMgCFwAI6XUqflNVnht+9fAWuzJycmIiL5Jdb5cLg9ms1n2t35RFHnMfI3ikU/jOH5fa6YtoGwbEpFZodRWKABMJpMEwJlU3TAM9yvNsEWsxAZBMMDTbju2FWqI43iGYpcGgFGVvm1iJZaIhqa8XC6/1wnEzGZzGvi+368zRlNsxX4AAGZeVF3V0hgLU+71el6dMZpi+866ck3rBtJaJ6ZMRO7mlt1RSaw5S+tQTiqY2a07ThOsd+P/gUpiJTv6Z7EVm8r1Td1AURR5pry7u3tbd5wm2IpNAGBNvmuN1toz5dVqdVd3nCbYir2Rqys5b2VKNyrbVn5sJVZrPS9VR1WDyA3aBwBmnr/YuEOsxMqxsQAApdRh1QxIKXVoyqVM6tWx3o211iaZ7zuO8+3FxiVkVX2gyMC2+YlnLVYmOZfqMIqi082tC4IgcJVS16bOzAdVJ9gmlc7ZXq93ADmGmHkchuHXTW2DIBiIUBconoxtWzOVPajSarnyU0pEs4eHhxulVKaU8lBsRkPTR4SOm0+3GVZigyBw5ejwiOgdgAHszDZDgsJ4+wFga+/tRrFilR4y8xAlg60lMiKav7bVulZsFEWHzDzGn6uXAUiZOQFwx8wZEaXrxlBKvcnz/G3Jbexj/U1baK0PXuN9/k2sWKVXKB5TAMVxwcw3Ozs7c/GTaiPjD5h5SERlLyoDcCb2TWc8ipWJ3KK08cgdX3QRWPaB8TPRnXrLj2LDMLzAU0p3eX9/79e1YKogR9QV5JVZrVYfz8/Pky5iEfCnJxzH8Zcugm1CvGXz2beI4/hzF3EUABCRyV1TrfVRF4FeYjKZJKV0dCDWbeso+aj2AEBrfbmtLMdxnBnEWy7/y6RNVJ7nw1L9oosgNozH46z0ReR1EUMppT5JOdl27gpxRAD0j4+PvbYH/wUHUHZ6p5wUogAAAABJRU5ErkJggg==',
 };
-var trajetId=null,trajetData=null,selectedMode=null,selectedCats=[],prixTypes={};
-var CAT_INFO={
-  marchandise:{label:"Marchandises",defaultType:"kg"},
-  document:{label:"Documents",defaultType:"forfait"},
-  fragile:{label:"Produits fragiles",defaultType:"kg"},
-  electronique:{label:"Produits electroniques",defaultType:"forfait"},
-  autre:{label:"Autre",defaultType:"kg"}
+
+var trajetId = null, trajetData = null;
+var selectedMode = null;
+var selectedCats = [];
+var prixTypes = {};
+
+var CAT_INFO = {
+  marchandise:  { label: "Marchandises",           unit: "kg",      unitLabel: "€/kg" },
+  document:     { label: "Documents",              unit: "forfait", unitLabel: "€ (forfait)" },
+  fragile:      { label: "Produits fragiles",      unit: "kg",      unitLabel: "€/kg" },
+  electronique: { label: "Produits électroniques", unit: "forfait", unitLabel: "€ (forfait)" },
+  autre:        { label: "Autre",                  unit: "kg",      unitLabel: "€/kg" }
 };
 
-async function init(){
-  var params=new URLSearchParams(window.location.search);
-  trajetId=params.get("id");
-  if(!trajetId){window.location.href="cardona_mes_trajets.html";return;}
-  var sessRes=await sb.auth.getSession();
-  if(!sessRes.data.session){window.location.href="cardona_app.html";return;}
-  var res=await sb.from("trajets").select("*").eq("id",trajetId).single();
-  if(res.error||!res.data){window.location.href="cardona_mes_trajets.html";return;}
-  trajetData=res.data;
-  document.getElementById("trajet-subtitle").textContent=(trajetData.lieu_ramassage||"").split(",")[0]+" → "+(trajetData.lieu_distribution||"").split(",")[0];
-  selectMode(trajetData.mode_transport);
-  document.getElementById("lieu-ramassage").value=trajetData.lieu_ramassage||"";
-  document.getElementById("lieu-distribution").value=trajetData.lieu_distribution||"";
-  if(trajetData.date_ramassage)document.getElementById("date-ramassage").value=trajetData.date_ramassage.slice(0,16);
-  if(trajetData.date_distribution)document.getElementById("date-distribution").value=trajetData.date_distribution.slice(0,16);
-  selectedCats=Array.isArray(trajetData.categories_acceptees)?trajetData.categories_acceptees:[];
-  selectedCats.forEach(function(cat){
-    var el=document.querySelector(".category-pill[data-cat=\""+cat+"\"]");
-    if(el)el.classList.add("selected");
+// ── INIT ─────────────────────────────────────────────────────────
+async function init() {
+  var params = new URLSearchParams(window.location.search);
+  trajetId = params.get("id");
+  if (!trajetId) { window.location.href = "cardona_mes_trajets.html"; return; }
+
+  var sessRes = await sb.auth.getSession();
+  if (!sessRes.data.session) { window.location.href = "cardona_app.html"; return; }
+
+  var res = await sb.from("trajets").select("*").eq("id", trajetId).single();
+  if (res.error || !res.data) { window.location.href = "cardona_mes_trajets.html"; return; }
+  trajetData = res.data;
+
+  var ville1 = (trajetData.lieu_ramassage || "").split(",")[0].trim();
+  var ville2 = (trajetData.lieu_distribution || "").split(",")[0].trim();
+  document.getElementById("trajet-subtitle").textContent = ville1 + " → " + ville2;
+
+  // Mode transport
+  if (trajetData.mode_transport) selectMode(trajetData.mode_transport);
+
+  // Lieux
+  document.getElementById("lieu-ramassage").value = trajetData.lieu_ramassage || "";
+  document.getElementById("lieu-distribution").value = trajetData.lieu_distribution || "";
+
+  // Dates
+  if (trajetData.date_ramassage) {
+    document.getElementById("date-ramassage").value = trajetData.date_ramassage.slice(0, 16);
+  }
+  if (trajetData.date_distribution) {
+    document.getElementById("date-distribution").value = trajetData.date_distribution.slice(0, 16);
+  }
+
+  // Catégories
+  selectedCats = Array.isArray(trajetData.categories_acceptees) ? trajetData.categories_acceptees : [];
+  selectedCats.forEach(function(cat) {
+    var el = document.querySelector(".category-pill[data-cat='" + cat + "']");
+    if (el) {
+      el.classList.add("selected");
+      var check = el.querySelector(".category-check");
+      if (check) check.classList.add("checked");
+    }
   });
+
   buildPrixForm(trajetData.prix_categories);
   buildNav("mestrajets");
 }
 
-function selectMode(mode){
-  selectedMode=mode;
-  document.querySelectorAll(".radio-item").forEach(function(p){
-    var ok=p.dataset.value===mode;
-    p.classList.toggle("selected",ok);
-    var rc=p.querySelector(".radio-circle");
-    if(rc){if(ok)rc.style.background="var(--gold)";else rc.style.background="";}
+// ── MODE TRANSPORT ────────────────────────────────────────────────
+function selectMode(mode) {
+  selectedMode = mode;
+  document.querySelectorAll(".radio-item").forEach(function(p) {
+    var ok = p.dataset.value === mode;
+    p.classList.toggle("selected", ok);
+    var rc = p.querySelector(".radio-circle");
+    if (rc) rc.classList.toggle("checked", ok);
   });
 }
 
-function toggleCat(cat){
-  var idx=selectedCats.indexOf(cat);
-  if(idx>-1)selectedCats.splice(idx,1);else selectedCats.push(cat);
-  document.querySelectorAll(".category-pill").forEach(function(p){p.classList.toggle("selected",selectedCats.includes(p.dataset.cat));});
-  buildPrixForm(trajetData?trajetData.prix_categories:null);
+// ── CATÉGORIES ────────────────────────────────────────────────────
+function toggleCat(cat) {
+  var idx = selectedCats.indexOf(cat);
+  if (idx > -1) selectedCats.splice(idx, 1);
+  else selectedCats.push(cat);
+
+  document.querySelectorAll(".category-pill").forEach(function(p) {
+    var ok = selectedCats.includes(p.dataset.cat);
+    p.classList.toggle("selected", ok);
+    var ch = p.querySelector(".category-check");
+    if (ch) ch.classList.toggle("checked", ok);
+  });
+  buildPrixForm(trajetData ? trajetData.prix_categories : null);
 }
 
-function buildPrixForm(existing){
-  var container=document.getElementById("prix-container");
-  if(selectedCats.length===0){container.innerHTML="<div style=\"font-size:13px;color:var(--text-secondary)\">Selectionnez les types de colis ci-dessus.</div>";return;}
-  container.innerHTML="";
-  selectedCats.forEach(function(cat){
-    var info=CAT_INFO[cat]||{label:cat,defaultType:"kg"};
-    var ex=existing&&existing[cat];
-    var val=ex?(ex.value!==undefined?ex.value:ex.prix||""):"";
-    var type=ex?(ex.unit||ex.type||info.defaultType):info.defaultType;
-    prixTypes[cat]=type;
-    var block=document.createElement("div");
-    block.className="prix-cat-block";
-    block.innerHTML="<div class=\"prix-cat-title\">"+info.label+"</div><div class=\"prix-cat-row\"><input type=\"number\" id=\"prix-"+cat+"\" value=\""+val+"\" placeholder=\"0.00\" min=\"0\" step=\"0.5\"><label>"+(type==="forfait"?"€ forfait":"€/kg")+"</label></div>";
+// ── PRIX ──────────────────────────────────────────────────────────
+function buildPrixForm(existing) {
+  var container = document.getElementById("prix-container");
+  if (selectedCats.length === 0) {
+    container.innerHTML = "<div style='font-size:13px;color:var(--text-secondary)'>Sélectionnez les types de colis ci-dessus.</div>";
+    return;
+  }
+  container.innerHTML = "";
+  selectedCats.forEach(function(cat) {
+    var info = CAT_INFO[cat] || { label: cat, unit: "kg", unitLabel: "€/kg" };
+    var ex = existing && existing[cat];
+    var val = ex ? (ex.value !== undefined ? ex.value : (ex.prix || "")) : "";
+    var unit = ex ? (ex.unit || ex.type || info.unit) : info.unit;
+    prixTypes[cat] = unit;
+
+    var block = document.createElement("div");
+    block.className = "prix-cat-block";
+    var unitLabel = unit === "forfait" ? "€ (forfait)" : "€/kg";
+    block.innerHTML = "<div class='prix-cat-title'>" + info.label + "</div>"
+      + "<div class='prix-cat-row'>"
+      + "<input type='number' id='prix-" + cat + "' value='" + val + "' placeholder='0.00' min='0' step='0.5'>"
+      + "<label>" + unitLabel + "</label>"
+      + "</div>";
     container.appendChild(block);
   });
 }
 
-function handleAddr(which,val){
-  if(val.length<2){document.getElementById("sugg-"+which).innerHTML="";return;}
-  fetch("https://nominatim.openstreetmap.org/search?format=json&q="+encodeURIComponent(val)+"&limit=4")
-    .then(function(r){return r.json();})
-    .then(function(results){
-      var sugg=document.getElementById("sugg-"+which);
-      sugg.innerHTML=results.map(function(r){
-        var name=r.display_name;
-        var lat=r.lat;
-        var lon=r.lon;
-        var btn=document.createElement("div");
-        btn.className="suggestion-item";
-        btn.textContent=name;
-        btn.onclick=function(){
-          document.getElementById("lieu-"+which).value=name;
-          sugg.innerHTML="";
+// ── AUTOCOMPLETE ADRESSES ─────────────────────────────────────────
+function handleAddr(which, val) {
+  var suggEl = document.getElementById("sugg-" + which);
+  if (val.length < 2) { suggEl.innerHTML = ""; return; }
+  fetch("https://nominatim.openstreetmap.org/search?format=json&q=" + encodeURIComponent(val) + "&limit=5&addressdetails=1")
+    .then(function(r) { return r.json(); })
+    .then(function(results) {
+      suggEl.innerHTML = "";
+      results.forEach(function(r) {
+        var div = document.createElement("div");
+        div.className = "suggestion-item";
+        div.textContent = r.display_name;
+        var name = r.display_name;
+        div.onclick = function() {
+          document.getElementById("lieu-" + which).value = name;
+          suggEl.innerHTML = "";
         };
-        return btn.outerHTML;
-      }).join("");
+        suggEl.appendChild(div);
+      });
     });
 }
 
-async function sauvegarder(){
-  var errEl=document.getElementById("form-error");
-  errEl.style.display="none";
-  if(!selectedMode){errEl.textContent="Selectionnez un mode de transport.";errEl.style.display="block";return;}
-  if(selectedCats.length===0){errEl.textContent="Selectionnez au moins un type de colis.";errEl.style.display="block";return;}
-  var prixCategories={};
-  for(var i=0;i<selectedCats.length;i++){
-    var cat=selectedCats[i];
-    var el=document.getElementById("prix-"+cat);
-    if(!el||el.value===""||parseFloat(el.value)<0){errEl.textContent="Indiquez un prix pour chaque type de colis.";errEl.style.display="block";return;}
-    prixCategories[cat]={value:parseFloat(el.value),unit:prixTypes[cat]||"kg"};
+// ── SAUVEGARDER ───────────────────────────────────────────────────
+async function sauvegarder() {
+  var errEl = document.getElementById("form-error");
+  errEl.style.display = "none";
+
+  if (!selectedMode) {
+    errEl.textContent = "Sélectionnez un mode de transport.";
+    errEl.style.display = "block"; return;
   }
-  var updates={
-    mode_transport:selectedMode,
-    lieu_ramassage:document.getElementById("lieu-ramassage").value,
-    lieu_distribution:document.getElementById("lieu-distribution").value,
-    date_ramassage:document.getElementById("date-ramassage").value||null,
-    date_distribution:document.getElementById("date-distribution").value||null,
-    categories_acceptees:selectedCats,
-    prix_categories:prixCategories
+  if (selectedCats.length === 0) {
+    errEl.textContent = "Sélectionnez au moins un type de colis.";
+    errEl.style.display = "block"; return;
+  }
+
+  var prixCat = {};
+  for (var i = 0; i < selectedCats.length; i++) {
+    var cat = selectedCats[i];
+    var el = document.getElementById("prix-" + cat);
+    if (!el || el.value === "" || parseFloat(el.value) < 0) {
+      errEl.textContent = "Indiquez un prix pour : " + (CAT_INFO[cat] || {label:cat}).label;
+      errEl.style.display = "block"; return;
+    }
+    prixCat[cat] = { value: parseFloat(el.value), unit: prixTypes[cat] || "kg" };
+  }
+
+  var updates = {
+    mode_transport:       selectedMode,
+    lieu_ramassage:       document.getElementById("lieu-ramassage").value,
+    lieu_distribution:    document.getElementById("lieu-distribution").value,
+    date_ramassage:       document.getElementById("date-ramassage").value || null,
+    date_distribution:    document.getElementById("date-distribution").value || null,
+    categories_acceptees: selectedCats,
+    prix_categories:      prixCat
   };
-  var res=await sb.from("trajets").update(updates).eq("id",trajetId);
-  if(res.error){errEl.textContent="Erreur : "+res.error.message;errEl.style.display="block";return;}
+
+  var res = await sb.from("trajets").update(updates).eq("id", trajetId);
+  if (res.error) {
+    errEl.textContent = "Erreur : " + res.error.message;
+    errEl.style.display = "block"; return;
+  }
+
   await notifierExpediteurs("modifie");
-  document.getElementById("success-msg").style.display="block";
-  window.scrollTo(0,0);
-  setTimeout(function(){window.location.href="cardona_mes_trajets.html";},2000);
+  document.getElementById("success-msg").style.display = "block";
+  window.scrollTo(0, 0);
+  setTimeout(function() { window.location.href = "cardona_mes_trajets.html"; }, 2000);
 }
 
-async function notifierExpediteurs(type){
-  var res=await sb.from("reservations").select("expediteur_id,ncc").eq("trajet_id",trajetId).in("statut",["en_attente","confirme"]);
-  if(res.error||!res.data||res.data.length===0)return;
-  var lieu=(trajetData.lieu_ramassage||"").split(",")[0]+" → "+(trajetData.lieu_distribution||"").split(",")[0];
-  var msg=type==="modifie"?"Le trajet "+lieu+" a ete modifie.":"Le trajet "+lieu+" a ete annule.";
-  var notifs=res.data.map(function(r){return{user_id:r.expediteur_id,trajet_id:trajetId,reservation_ncc:r.ncc,type:"trajet_"+type,message:msg,lu:false};});
+// ── NOTIFIER ──────────────────────────────────────────────────────
+async function notifierExpediteurs(type) {
+  var res = await sb.from("reservations").select("expediteur_id,ncc")
+    .eq("trajet_id", trajetId).in("statut", ["en_attente", "confirme"]);
+  if (res.error || !res.data || !res.data.length) return;
+  var lieu = (trajetData.lieu_ramassage || "").split(",")[0] + " → " + (trajetData.lieu_distribution || "").split(",")[0];
+  var msg = type === "modifie"
+    ? "Le trajet " + lieu + " a ete modifie. Verifiez les nouvelles informations."
+    : "Le trajet " + lieu + " a ete annule.";
+  var notifs = res.data.map(function(r) {
+    return { user_id: r.expediteur_id, trajet_id: trajetId, reservation_ncc: r.ncc, type: "trajet_" + type, message: msg, lu: false };
+  });
   await sb.from("notifications").insert(notifs);
 }
 
-async function annulerTrajet(){
-  if(!confirm("Annuler ce trajet ?"))return;
-  await sb.from("trajets").update({statut:"annule"}).eq("id",trajetId);
-  await sb.from("reservations").update({statut:"refuse"}).eq("trajet_id",trajetId).eq("statut","en_attente");
+// ── ANNULER ───────────────────────────────────────────────────────
+async function annulerTrajet() {
+  if (!confirm("Annuler ce trajet ?")) return;
+  await sb.from("trajets").update({ statut: "annule" }).eq("id", trajetId);
+  await sb.from("reservations").update({ statut: "refuse" }).eq("trajet_id", trajetId).eq("statut", "en_attente");
   await notifierExpediteurs("annule");
-  window.location.href="cardona_mes_trajets.html";
+  window.location.href = "cardona_mes_trajets.html";
 }
 
-document.getElementById("menu-trigger").addEventListener("click",function(){document.getElementById("dropdown-menu").classList.toggle("open");});
-document.addEventListener("click",function(e){if(!e.target.closest(".menu-wrapper"))document.getElementById("dropdown-menu").classList.remove("open");});
-async function handleLogout(){await sb.auth.signOut();window.location.href="cardona_app.html";}
+// ── MENU ──────────────────────────────────────────────────────────
+document.getElementById("menu-trigger").addEventListener("click", function() {
+  document.getElementById("dropdown-menu").classList.toggle("open");
+});
+document.addEventListener("click", function(e) {
+  if (!e.target.closest(".menu-wrapper")) {
+    document.getElementById("dropdown-menu").classList.remove("open");
+  }
+});
+async function handleLogout() { await sb.auth.signOut(); window.location.href = "cardona_app.html"; }
 
-async function buildNav(activePage){
-  var nav=document.getElementById("bottom-nav");
-  if(!nav)return;
-  var sessRes=await sb.auth.getSession();
-  if(!sessRes.data.session){nav.style.display="none";return;}
-  var profRes=await sb.from("profiles").select("role").eq("id",sessRes.data.session.user.id).single();
-  var role=(profRes.data&&profRes.data.role)||"transporteur";
-  nav.style.display="flex";
-  var items=role==="expediteur"
-    ?[{id:"rechercher",label:"Rechercher",icon:"rechercher",href:"cardona_rechercher.html"},{id:"mesenvois",label:"Mes envois",icon:"mestrajets",href:"cardona_mes_envois.html"},{id:"profil",label:"Profil",icon:"profil",href:"cardona_app.html"}]
-    :[{id:"publier",label:"Publier",icon:"publier",href:"cardona_publier_trajet.html"},{id:"mestrajets",label:"Mes trajets",icon:"mestrajets",href:"cardona_mes_trajets.html",badge:true},{id:"profil",label:"Profil",icon:"profil",href:"cardona_app.html"}];
-  nav.innerHTML=items.map(function(it){var a=it.id===activePage?" active":"";var b=it.badge?"<span class=\"bn-badge\" id=\"nav-badge\">0</span>":"";return"<a class=\"bn-item"+a+"\" href=\""+it.href+"\"><span class=\"bn-icon-wrap\"><img class=\"bn-icon-img\" id=\"ni-"+it.id+"\" src=\"\">"+b+"</span><span class=\"bn-label\">"+it.label+"</span><span class=\"bn-underline\"></span></a>";}).join("");
-  items.forEach(function(it){var e=document.getElementById("ni-"+it.id);if(e&&NAV_ICONS[it.icon])e.src="data:image/png;base64,"+NAV_ICONS[it.icon];});
+// ── NAV ───────────────────────────────────────────────────────────
+async function buildNav(activePage) {
+  var nav = document.getElementById("bottom-nav");
+  if (!nav) return;
+  var sessRes = await sb.auth.getSession();
+  if (!sessRes.data.session) { nav.style.display = "none"; return; }
+  var profRes = await sb.from("profiles").select("role").eq("id", sessRes.data.session.user.id).single();
+  var role = (profRes.data && profRes.data.role) || "transporteur";
+  nav.style.display = "flex";
+  var items = role === "expediteur"
+    ? [{ id:"rechercher", label:"Rechercher", icon:"rechercher", href:"cardona_rechercher.html" },
+       { id:"mesenvois",  label:"Mes envois",  icon:"mestrajets", href:"cardona_mes_envois.html" },
+       { id:"profil",     label:"Profil",      icon:"profil",     href:"cardona_app.html" }]
+    : [{ id:"publier",    label:"Publier",    icon:"publier",    href:"cardona_publier_trajet.html" },
+       { id:"mestrajets", label:"Mes trajets", icon:"mestrajets", href:"cardona_mes_trajets.html", badge:true },
+       { id:"profil",     label:"Profil",     icon:"profil",     href:"cardona_app.html" }];
+  nav.innerHTML = items.map(function(it) {
+    var a = it.id === activePage ? " active" : "";
+    var b = it.badge ? "<span class='bn-badge' id='nav-badge'>0</span>" : "";
+    return "<a class='bn-item" + a + "' href='" + it.href + "'><span class='bn-icon-wrap'><img class='bn-icon-img' id='ni-" + it.id + "' src=''>" + b + "</span><span class='bn-label'>" + it.label + "</span><span class='bn-underline'></span></a>";
+  }).join("");
+  items.forEach(function(it) {
+    var e = document.getElementById("ni-" + it.id);
+    if (e && NAV_ICONS[it.icon]) e.src = "data:image/png;base64," + NAV_ICONS[it.icon];
+  });
 }
 
 init();
-
 </script>
 </body>
 </html>
