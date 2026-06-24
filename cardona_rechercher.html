@@ -118,6 +118,12 @@
   .btn-pay:hover { background: #167C5C; }
   .btn-pay:disabled { background: #ccc; cursor: not-allowed; }
 
+
+  .code-reservation { text-align:center; margin:20px 0; }
+  .code-label { font-size:12px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+  .code-value { font-size:42px; font-weight:900; color:var(--dark); letter-spacing:4px; font-family:monospace; background:#f0edd8; border-radius:12px; padding:16px 24px; display:inline-block; border:2px solid #c4bd97; }
+  .code-hint { font-size:12px; color:var(--text-secondary); margin-top:8px; }
+
   .success-icon { font-size: 56px; text-align: center; margin: 24px 0 16px; }
   .success-title { font-size: 18px; font-weight: 700; text-align: center; color: var(--dark); margin-bottom: 14px; line-height: 1.4; }
   .success-desc { font-size: 13px; color: var(--text-secondary); text-align: center; line-height: 1.6; margin-bottom: 22px; }
@@ -327,9 +333,14 @@
     <!-- STEP 7 : succès -->
     <div class="step" id="step-7">
       <div class="success-icon">✅</div>
-      <div class="success-title">Réservation envoyée avec succès !</div>
-      <div class="success-desc">Nous avons reçu votre demande de réservation. Le transporteur que vous avez choisi sera notifié. Attendez sa confirmation, qui vous parviendra dans les plus brefs délais.</div>
-      <a class="btn-primary" href="cardona_mes_trajets.html" style="display:block;text-decoration:none;text-align:center;">Mes envois</a>
+      <div class="success-title">Réservation envoyée !</div>
+      <div class="code-reservation">
+        <div class="code-label">Votre code de retrait</div>
+        <div class="code-value" id="reservation-code-display">—</div>
+        <div class="code-hint">Communiquez ce code à la personne qui récupère le colis</div>
+      </div>
+      <div class="success-desc" style="margin-top:8px;">Le transporteur a été notifié. Vous retrouverez ce code dans <strong>Mes envois</strong>.</div>
+      <a class="btn-primary" href="cardona_mes_envois.html" style="display:block;text-decoration:none;text-align:center;margin-top:14px;">Voir mes envois</a>
       <button class="btn-outline" onclick="resetForm()">Nouvelle recherche</button>
     </div>
   </div>
@@ -779,6 +790,9 @@ async function handlePayment() {
     return;
   }
 
+  var codeEl = document.getElementById("reservation-code-display");
+  if (codeEl && resaData) codeEl.textContent = resaData.ncc || reservationCode;
+  else if (codeEl) codeEl.textContent = reservationCode;
   goStep(7);
 }
 
