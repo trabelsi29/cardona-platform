@@ -115,6 +115,47 @@
   .trajet-demandes { font-size:12px; color:var(--text-secondary); margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
   .demandes-count { font-weight:700; color:var(--gold); }
   .section-label { font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.06em; margin:16px 0 8px; }
+
+  /* ── Trajets transporteur ── */
+  .trajet-card-main { background:white; border-radius:14px; margin-bottom:14px; overflow:hidden; border:1px solid var(--border); box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+  .trajet-card-header { padding:14px 16px; display:flex; align-items:flex-start; justify-content:space-between; gap:10px; cursor:pointer; }
+  .trajet-card-header:hover { background:#fafaf8; }
+  .trajet-info { flex:1; }
+  .trajet-mode-route { font-size:14px; font-weight:700; color:var(--dark); margin-bottom:3px; }
+  .trajet-meta { font-size:12px; color:var(--text-secondary); }
+  .trajet-right { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+  .trajet-status { font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; }
+  .status-actif { background:#e8f5ef; color:#2e7d5e; border:1px solid #b2d9c6; }
+  .status-expire { background:#f0f0f0; color:#888; border:1px solid #ddd; }
+  .trajet-modify-btn { font-size:11px; color:var(--gold); background:none; border:1px solid var(--gold); border-radius:8px; padding:3px 10px; cursor:pointer; white-space:nowrap; }
+  .trajet-modify-btn:hover { background:var(--gold); color:white; }
+  .trajet-accordion { border-top:1px solid var(--border); }
+  .trajet-accordion-toggle { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; cursor:pointer; background:#fafaf8; }
+  .trajet-accordion-toggle:hover { background:#f5f3ee; }
+  .accordion-label { font-size:12px; font-weight:600; color:var(--text-secondary); }
+  .accordion-badge-pending { font-size:11px; color:#d9534f; font-weight:700; margin-left:6px; }
+  .accordion-arrow { font-size:14px; color:var(--text-secondary); transition:transform 0.2s; }
+  .accordion-arrow.open { transform:rotate(90deg); }
+  .trajet-reservations { display:none; }
+  .trajet-reservations.open { display:block; }
+  .resa-card { padding:14px 16px; border-top:1px solid #f0f0f0; }
+  .resa-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .resa-ncc { font-size:13px; font-weight:700; color:var(--dark); }
+  .resa-avatar { width:36px; height:36px; border-radius:50%; background:var(--gold); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+  .resa-name { font-size:13px; font-weight:600; color:var(--dark); }
+  .resa-status { font-size:12px; margin:4px 0 8px; }
+  .resa-status.en_attente { color:#b97a20; }
+  .resa-status.confirme { color:#2e7d5e; }
+  .resa-status.refuse { color:#d9534f; }
+  .resa-details { font-size:12px; color:var(--text-secondary); margin-bottom:8px; }
+  .resa-price { font-size:15px; font-weight:700; color:var(--dark); text-align:right; }
+  .resa-actions { display:flex; gap:8px; margin-top:10px; }
+  .btn-accept { flex:1; padding:9px; border-radius:8px; border:none; background:#2e7d5e; color:white; font-size:12px; font-weight:600; cursor:pointer; }
+  .btn-accept:hover { opacity:0.88; }
+  .btn-refuse-sm { flex:1; padding:9px; border-radius:8px; border:1px solid #d9534f; background:white; color:#d9534f; font-size:12px; font-weight:600; cursor:pointer; }
+  .btn-refuse-sm:hover { background:#fde8e8; }
+  .empty-trajets { text-align:center; padding:40px 20px; }
+  .empty-trajets a { color:var(--gold); font-weight:600; text-decoration:none; }
 </style>
 </head>
 <body>
@@ -416,20 +457,13 @@ function render() {
   area.innerHTML = html;
 }
 
-async function updateReservation(reservationId, statut) {
-  const { data: reservation, error } = await sb.from('reservations').update({ statut }).eq('id', reservationId).select('frais_service').single();
+async function updateStatut(reservationId, statut) {
+  const { error } = await sb.from('reservations').update({ statut }).eq('id', reservationId);
   if (error) { alert('Erreur : ' + error.message); return; }
-
   if (statut === 'confirme') {
-    const { error: paiementError } = await sb.from('paiements').insert({
-      reservation_id: reservationId,
-      montant: reservation.frais_service || 2.00,
-      methode: 'carte',
-      statut: 'paye'
-    });
-    if (paiementError) alert('Réservation confirmée, mais erreur lors du prélèvement de la commission : ' + paiementError.message);
+    const { data: resa } = await sb.from('reservations').select('frais_service').eq('id', reservationId).single();
+    await sb.from('paiements').insert({ reservation_id: reservationId, montant: resa?.frais_service || 2, methode: 'carte', statut: 'paye' });
   }
-
   await loadAll();
 }
 
