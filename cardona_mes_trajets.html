@@ -156,6 +156,21 @@
   .btn-refuse-sm:hover { background:#fde8e8; }
   .empty-trajets { text-align:center; padding:40px 20px; }
   .empty-trajets a { color:var(--gold); font-weight:600; text-decoration:none; }
+
+  /* ── Modale détail trajet ── */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(34,27,22,0.5); z-index:200; align-items:flex-end; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal-sheet { background:#F3F1EC; border-radius:20px 20px 0 0; width:100%; max-width:860px; max-height:80vh; overflow-y:auto; padding:24px 32px 32px; }
+  .modal-handle { width:40px; height:4px; background:#d0ccc6; border-radius:2px; margin:0 auto 20px; }
+  .modal-title { font-size:17px; font-weight:700; color:var(--dark); margin-bottom:16px; }
+  .modal-close { position:absolute; top:16px; right:20px; background:none; border:none; font-size:22px; cursor:pointer; color:var(--text-secondary); }
+  .modal-section { margin-bottom:14px; }
+  .modal-label { font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-secondary); margin-bottom:4px; }
+  .modal-value { font-size:14px; color:var(--dark); font-weight:500; }
+  .modal-row { display:flex; gap:24px; margin-bottom:12px; }
+  .modal-row .modal-section { flex:1; }
+  .prix-cat-ligne { display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px solid #e8e4de; }
+  .prix-cat-ligne:last-child { border-bottom:none; }
 </style>
 </head>
 <body>
@@ -351,6 +366,12 @@ async function loadAll() {
 
   render();
 }
+
+function shorten(addr) {
+  if (!addr) return '—';
+  return addr.split(',')[0].trim();
+}
+
 function toggleAccordion(trajetId) {
   var resa = document.getElementById('resa-' + trajetId);
   var arrow = document.getElementById('arrow-' + trajetId);
@@ -547,6 +568,65 @@ async function buildNav(activePage) {
   return role;
 }
 
+
+function voirDetail(event, trajetId) {
+  event.stopPropagation();
+  var t = myTrajets.find(function(x) { return x.id === trajetId; });
+  if (!t) return;
+
+  var modeLabels = { avion: '✈ Avion', camion_fourgon: '🚛 Camion/Fourgon', voiture: '🚗 Voiture', train_bus: '🚆 Train/Bus', autre: '❓ Autre' };
+  var catLabels = { marchandise: 'Marchandises', document: 'Documents', fragile: 'Produits fragiles', electronique: 'Produits électroniques', autre: 'Autre' };
+  var dateRam = t.date_ramassage ? new Date(t.date_ramassage).toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '—';
+  var dateDist = t.date_distribution ? new Date(t.date_distribution).toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '—';
+
+  document.getElementById('modal-trajet-title').textContent = shorten(t.lieu_ramassage) + ' → ' + shorten(t.lieu_distribution);
+
+  var cats = Array.isArray(t.categories_acceptees) ? t.categories_acceptees : [];
+  var prixCat = t.prix_categories || {};
+
+  var prixHtml = '';
+  if (Object.keys(prixCat).length > 0) {
+    prixHtml = '<div class="modal-section"><div class="modal-label">Tarifs</div>';
+    Object.keys(prixCat).forEach(function(cat) {
+      var p = prixCat[cat];
+      var label = catLabels[cat] || cat;
+      var prix = typeof p === 'object' ? p.prix + (p.type === 'forfait' ? ' € (forfait)' : ' €/kg') : p + ' €';
+      prixHtml += '<div class="prix-cat-ligne"><span>' + label + '</span><span style="font-weight:600;">' + prix + '</span></div>';
+    });
+    prixHtml += '</div>';
+  } else if (cats.length > 0) {
+    prixHtml = '<div class="modal-section"><div class="modal-label">Catégories acceptées</div><div class="modal-value">' + cats.map(function(c){return catLabels[c]||c;}).join(', ') + '</div></div>';
+  }
+
+  var content = '<div class="modal-row">'
+    + '<div class="modal-section"><div class="modal-label">Mode de transport</div><div class="modal-value">' + (modeLabels[t.mode_transport] || t.mode_transport || '—') + '</div></div>'
+    + '<div class="modal-section"><div class="modal-label">Statut</div><div class="modal-value">' + (t.statut || '—') + '</div></div>'
+    + '</div>'
+    + '<div class="modal-row">'
+    + '<div class="modal-section"><div class="modal-label">🟢 Ramassage</div><div class="modal-value">' + (t.lieu_ramassage || '—') + '</div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">📅 ' + dateRam + '</div></div>'
+    + '<div class="modal-section"><div class="modal-label">🔴 Distribution</div><div class="modal-value">' + (t.lieu_distribution || '—') + '</div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">📅 ' + dateDist + '</div></div>'
+    + '</div>'
+    + prixHtml;
+
+  document.getElementById('modal-trajet-content').innerHTML = content;
+  document.getElementById('modal-detail').classList.add('open');
+}
+
+function fermerDetail(event) {
+  if (event.target === document.getElementById('modal-detail')) {
+    document.getElementById('modal-detail').classList.remove('open');
+  }
+}
 </script>
+
+<!-- MODALE DÉTAIL TRAJET -->
+<div class="modal-overlay" id="modal-detail" onclick="fermerDetail(event)">
+  <div class="modal-sheet" id="modal-sheet">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="document.getElementById('modal-detail').classList.remove('open')">×</button>
+    <div class="modal-title" id="modal-trajet-title">Détail du trajet</div>
+    <div id="modal-trajet-content"></div>
+  </div>
+</div>
 </body>
 </html>
