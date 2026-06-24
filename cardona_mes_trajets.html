@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CARDONA — Mes trajets</title>
+<title>CARDONA — Mes trajets / Mes envois</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -122,7 +122,7 @@
 
   <div id="main-content" style="display:none;">
     <div class="topbar">
-      <div class="title">Mes trajets</div>
+      <div class="title" id="page-title">Mes trajets</div>
       <div class="menu-wrapper">
         <img class="mascot-mini" id="menu-trigger" src="" alt="Menu" onclick="toggleMenu()">
         <div class="menu-caption">MENU</div>
@@ -194,6 +194,9 @@ async function checkAccess() {
 
   const { data: profile } = await sb.from('profiles').select('role').eq('id', currentUser.id).single();
   userRole = profile?.role || 'expediteur';
+  // Mettre à jour le titre selon le rôle
+  var titleEl = document.getElementById('page-title');
+  if (titleEl) titleEl.textContent = userRole === 'transporteur' ? 'Mes trajets' : 'Mes envois';
   setupTabsForRole();
 
   await loadAll();
