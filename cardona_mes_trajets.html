@@ -382,12 +382,7 @@ function toggleAccordion(trajetId) {
 }
 
 function modifierTrajet(trajetId) {
-  if (!confirm('Annuler ce trajet ? Les réservations en attente seront refusées.')) return;
-  sb.from('trajets').update({ statut: 'annule' }).eq('id', trajetId).then(function() {
-    sb.from('reservations').update({ statut: 'refuse' }).eq('trajet_id', trajetId).eq('statut', 'en_attente').then(function() {
-      loadAll();
-    });
-  });
+  window.location.href = "cardona_modifier_trajet.html?id=" + trajetId;
 }
 
 
