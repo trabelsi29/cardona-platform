@@ -103,6 +103,18 @@
     .detail-row, .trip-detail, .home-row { font-size: 14px; }
     .t-name, .trip-person { font-size: 14px; }
   }
+
+  .trajet-publie-card { background:white; border-radius:14px; padding:16px; margin-bottom:12px; border:1px solid var(--border); }
+  .trajet-publie-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
+  .trajet-route { font-size:15px; font-weight:700; color:var(--dark); }
+  .trajet-date { font-size:12px; color:var(--text-secondary); margin-top:3px; }
+  .trajet-mode { font-size:20px; }
+  .trajet-badge { font-size:11px; padding:3px 10px; border-radius:20px; font-weight:600; }
+  .badge-actif { background:#e8f5ef; color:#2e7d5e; border:1px solid #b2d9c6; }
+  .badge-expire { background:#f0f0f0; color:#888; border:1px solid #ddd; }
+  .trajet-demandes { font-size:12px; color:var(--text-secondary); margin-top:8px; padding-top:8px; border-top:1px solid var(--border); }
+  .demandes-count { font-weight:700; color:var(--gold); }
+  .section-label { font-size:12px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.06em; margin:16px 0 8px; }
 </style>
 </head>
 <body>
@@ -161,6 +173,7 @@ let currentUser = null;
 let activeTab = 'expediteur';
 let expediteurReservations = [];
 let transporteurReservations = [];
+let myTrajets = [];
 
 const ICONS = {
   rechercher: 'iVBORw0KGgoAAAANSUhEUgAAADgAAAAoCAYAAACrUDmFAAADfUlEQVR4nO2ZwW3bMBSGf9JGguRSdQNtUHeCqhPEnSDJBFVPjHSJc4lE5FBngroTNJmg7gbqBFU30ClBEImvBz81quvElEUVLpAfMEwL4nv8QEqP/C3gQGEYevv7+4cARkQUAPD4AwA5gFwIcVVV1bXWOneR01aiS2ellC+l/Ahg3KLbHMAsSZLPXXLbamPAKIo+AggblwoiupJSZkT00xhTAMBgMHhljHkthHgDwP+dWIhZVVVnfc9oa0CetS8ARnwpBzC5vb29nk6nxZq+gRDiVAgR1H3Lsnx3cXGRtR2HrVoBMtxX8EwQ0WWapmHbpCcnJ0dCiFOOU5Rl+bYvSNnq5sXM+Vgsx+NN4AAgTdOZMeYtFrPvDYfDr0opf5NY62QNGMfxKXhZEtGHNE1nXRJrrfMmpJTyU5d4j8lqifLS/AEAxpgzrfXE1QCUUgEvewD4kCTJ1FVswHIGpZQTbuYu4QBAaz0norpknLqMDVgA8rNxyD8nrgcAAERUx/WUUoHL2GsBG6/0oq/izLVwzvkOn7y5pWwADwCAiL65TLxC15xv7DKozTPoc+K5y8TLasT3XJYMG8ARABhjMldJV2lnZyev28YYz1XcVoW+T00mk6JuSyk9V3GtAYfD4QtXSf+lbABzAKiq6mWfA4njeLSc04VsADP+Hj1xT2cRkc/NwuURygbwG+C+Pq3QGACIKHMZdC2gMeaKm853GbW4LBwAi4Owy9hrAZu7DCml870iAAwGg0MsPJzCGON0Q2H1FjXGnHEziKJo7HIASimfiELOc+nawrAC1FrPwbMI4JOrnUYYhh4flTws3pwzF3Gbsq6DxphjPBxOO5/AwzD09vb2ftsfALI+DChrQK11LoR4B6AA4DNksElSpZTPcKPG5XEcx85P9a1dtTiOR0RUezOt7D82iN/zM+etHJAQs/Pz8+O243pMG/miy+4aaw5gVpbl9/v7+7y2EJVSvhAikFK+IaIx/nS8M6wwjV1CdnK2l+w/WxXGmMu7u7vpdDotoiia4cExeBiYI8hOgLUY9ABAgNVLryCiTEp5dXNz83nZIO4T0glgU2EYeru7u6PGpdzm+ewL0jlgF/UBuTUHXgBIkuQIwF/GFhEdbVpCtgoQeBqS/9Fqpa0DBB6HBHDUNtZWAgKPQhZt42wtILCAJKJL/pnxVvFZz3rWf6Rf3Ht7exofYFYAAAAASUVORK5CYII=',
@@ -278,8 +291,9 @@ async function loadAll() {
   }
 
   // --- Côté transporteur : demandes reçues sur mes trajets ---
-  const { data: myTrajets } = await sb.from('trajets').select('*').eq('transporteur_id', currentUser.id);
-  if (myTrajets && myTrajets.length > 0) {
+  const { data: trajetsData } = await sb.from('trajets').select('*').eq('transporteur_id', currentUser.id).order('date_ramassage', { ascending: false });
+  myTrajets = trajetsData || [];
+  if (myTrajets.length > 0) {
     const ids = myTrajets.map(t => t.id);
     const { data: received } = await sb.from('reservations').select('*').in('trajet_id', ids).order('created_at', { ascending: false });
     transporteurReservations = received || [];
@@ -337,11 +351,37 @@ function render() {
     return;
   }
 
-  // --- Côté transporteur : regroupé par trajet (route + date), séparé À traiter / Acceptées ---
-  if (transporteurReservations.length === 0) {
-    area.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📦</div>Aucune demande reçue pour l'instant.</div>`;
+  // --- Côté transporteur : mes trajets publiés + demandes reçues ---
+  if (myTrajets.length === 0) {
+    area.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🚛</div>Aucun trajet publié pour l\'instant.<br><br><a href="cardona_publier_trajet.html" style="color:var(--gold);font-weight:600;">Publier un trajet</a></div>';
     return;
   }
+  // Afficher d\'abord les trajets publiés
+  var trajetsHtml = '<div class="section-label">Mes trajets publiés</div>';
+  myTrajets.forEach(function(t) {
+    var dateRam = t.date_ramassage ? new Date(t.date_ramassage).toLocaleDateString("fr-FR", {day:"numeric",month:"long",year:"numeric"}) : "—";
+    var isExpire = t.date_ramassage && new Date(t.date_ramassage) < new Date();
+    var badge = isExpire ? '<span class="trajet-badge badge-expire">Expiré</span>' : '<span class="trajet-badge badge-actif">Actif</span>';
+    var modeIcons = { avion: "✈", camion_fourgon: "🚛", voiture: "🚗", train_bus: "🚆", autre: "❓" };
+    var modeIcon = modeIcons[t.mode_transport] || "🚗";
+    var nbDemandes = transporteurReservations.filter(function(r) { return r.trajet_id === t.id; }).length;
+    var nbAttente = transporteurReservations.filter(function(r) { return r.trajet_id === t.id && r.statut === "en_attente"; }).length;
+    trajetsHtml += '<div class="trajet-publie-card">';
+    trajetsHtml += '<div class="trajet-publie-header"><div><div class="trajet-route">' + modeIcon + ' ' + (t.lieu_ramassage || "—") + ' → ' + (t.lieu_distribution || "—") + '</div><div class="trajet-date">📅 ' + dateRam + '</div></div>' + badge + '</div>';
+    if (nbDemandes > 0) {
+      trajetsHtml += '<div class="trajet-demandes"><span class="demandes-count">' + nbDemandes + ' demande' + (nbDemandes > 1 ? "s" : "") + '</span>' + (nbAttente > 0 ? ' · <span style="color:#d9534f;font-weight:600;">' + nbAttente + ' en attente</span>' : '') + '</div>';
+    } else {
+      trajetsHtml += '<div class="trajet-demandes">Aucune demande reçue</div>';
+    }
+    trajetsHtml += '</div>';
+  });
+  // Puis les demandes reçues
+  if (transporteurReservations.length === 0) {
+    area.innerHTML = trajetsHtml;
+    return;
+  }
+  trajetsHtml += '<div class="section-label">Demandes reçues</div>';
+  area.innerHTML = trajetsHtml;
 
   const groups = {};
   transporteurReservations.forEach(r => {
