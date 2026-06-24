@@ -586,16 +586,26 @@ function voirDetail(event, trajetId) {
 
   var prixHtml = '';
   if (Object.keys(prixCat).length > 0) {
-    prixHtml = '<div class="modal-section"><div class="modal-label">Tarifs</div>';
+    prixHtml = '<div class="modal-section"><div class="modal-label">Tarifs par catégorie</div>';
     Object.keys(prixCat).forEach(function(cat) {
       var p = prixCat[cat];
       var label = catLabels[cat] || cat;
-      var prix = typeof p === 'object' ? p.prix + (p.type === 'forfait' ? ' € (forfait)' : ' €/kg') : p + ' €';
-      prixHtml += '<div class="prix-cat-ligne"><span>' + label + '</span><span style="font-weight:600;">' + prix + '</span></div>';
+      var prix;
+      // Format ancien : {unit:"kg", value:5} ou Format nouveau : {type:"kg", prix:5}
+      if (typeof p === 'object') {
+        var val = p.value !== undefined ? p.value : p.prix;
+        var unit = p.unit || p.type || 'kg';
+        prix = val + (unit === 'forfait' ? ' € (forfait)' : ' €/kg');
+      } else {
+        prix = p + ' €';
+      }
+      prixHtml += '<div class="prix-cat-ligne"><span>' + label + '</span><span style="font-weight:600;color:var(--gold);">' + prix + '</span></div>';
     });
     prixHtml += '</div>';
   } else if (cats.length > 0) {
-    prixHtml = '<div class="modal-section"><div class="modal-label">Catégories acceptées</div><div class="modal-value">' + cats.map(function(c){return catLabels[c]||c;}).join(', ') + '</div></div>';
+    prixHtml = '<div class="modal-section"><div class="modal-label">Catégories acceptées</div><div class="modal-value">' + cats.map(function(cat){return catLabels[cat]||cat;}).join(', ') + '</div></div>';
+  } else {
+    prixHtml = '<div class="modal-section"><div class="modal-label">Tarifs</div><div class="modal-value" style="color:var(--text-secondary);">Non renseignés</div></div>';
   }
 
   var content = '<div class="modal-row">'
