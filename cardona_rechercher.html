@@ -255,8 +255,8 @@
         <label>Villes où vous pouvez déposer votre envoi <span style="font-size:11px;color:var(--text-secondary);">(facultatif)</span></label>
         <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Ajoutez les villes proches de vous où vous pouvez vous déplacer pour remettre votre envoi à un transporteur.</div>
         <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <input type="text" id="ville-depot-input" placeholder="Ex: Lyon, Marseille…" style="flex:1;" oninput="handleVilleDepotInput(this.value)">
-          <button class="btn-secondary" onclick="addVilleDepot()" style="white-space:nowrap;padding:0 14px;">+ Ajouter</button>
+          <input type="text" id="ville-depot-input" placeholder="Saisissez une ville…" style="flex:1;" oninput="handleVilleDepotInput(this.value)">
+          <button onclick="addVilleDepot()" style="white-space:nowrap;padding:0 16px;height:100%;border-radius:10px;border:1.5px solid var(--gold);background:transparent;color:var(--gold);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='var(--gold)';this.style.color='white';" onmouseout="this.style.background='transparent';this.style.color='var(--gold)';">+ Ajouter</button>
         </div>
         <div class="suggestions" id="sugg-ville-depot"></div>
         <div id="villes-depot-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;"></div>
