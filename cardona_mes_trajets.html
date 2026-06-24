@@ -289,13 +289,7 @@ async function loadAll() {
     transporteurReservations = [];
   }
 
-  document.getElementById('count-expediteur').textContent = expediteurReservations.length;
-  document.getElementById('count-transporteur').textContent = transporteurReservations.length;
-
-  const pendingCount = transporteurReservations.filter(r => r.statut === 'en_attente').length;
-  const badge = document.getElementById('bn-badge-mestrajets');
-  badge.textContent = pendingCount;
-  badge.classList.toggle('show', pendingCount > 0);
+  // Badge dans la nav (via buildNav)
 
   render();
 }
