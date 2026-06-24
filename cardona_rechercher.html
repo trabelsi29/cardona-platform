@@ -754,16 +754,21 @@ async function handlePayment() {
   const commission = 2.00;
   const details = document.getElementById('envoi-details').value.trim();
 
-  const { error } = await sb.from('reservations').insert({
+  // Générer le code de réservation via la séquence BDD
+  const { data: codeData } = await sb.rpc('generate_reservation_code');
+  const reservationCode = codeData || ('C-' + String(Math.floor(Math.random()*900)+100));
+
+  const { data: resaData, error } = await sb.from('reservations').insert({
     trajet_id: t.id,
     expediteur_id: session.user.id,
+    ncc: reservationCode,
     poids_kg: weight,
     categorie: selectedCategories[0] || 'autre',
     categories: selectedCategories,
     description: details,
     prix_transporteur: prixT,
     frais_service: commission
-  });
+  }).select('ncc').single();
   // Aucune ligne "paiements" n'est créée ici : la commission n'est prélevée
   // que lorsque le transporteur accepte la demande (voir cardona_publier_trajet.html).
 
