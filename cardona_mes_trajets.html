@@ -351,6 +351,18 @@ async function loadAll() {
 
   render();
 }
+function toggleAccordion(trajetId) {
+  var resa = document.getElementById('resa-' + trajetId);
+  var arrow = document.getElementById('arrow-' + trajetId);
+  if (!resa) return;
+  resa.classList.toggle('open');
+  if (arrow) arrow.classList.toggle('open');
+}
+
+function modifierTrajet(trajetId) {
+  alert('Modification du trajet bientot disponible.');
+}
+
 
 function renderReservationCard(r, person, personLabel, showActions) {
   const t = r._trajet;
