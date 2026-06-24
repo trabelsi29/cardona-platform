@@ -375,7 +375,7 @@ async function checkAccess() {
     document.getElementById('gate-action-link').href = 'cardona_app.html';
     document.getElementById('step-gate').classList.add('active');
     document.getElementById('form-wrapper').style.display = 'none';
-    checkAndBuildNav();
+    buildNav('rechercher');
     return;
   }
 
@@ -393,7 +393,7 @@ async function checkAccess() {
     document.getElementById('gate-action-link').href = 'cardona_app.html';
     document.getElementById('step-gate').classList.add('active');
     document.getElementById('form-wrapper').style.display = 'none';
-    checkAndBuildNav();
+    buildNav('rechercher');
     return;
   }
 
@@ -401,8 +401,7 @@ async function checkAccess() {
   document.getElementById('step-gate').classList.remove('active');
   document.getElementById('form-wrapper').style.display = 'block';
   // nav buildNav
-  injectNavIcons();
-  updateNavBadge();
+  buildNav('rechercher');
   goStep(1);
 }
 
@@ -730,21 +729,8 @@ async function handlePayment() {
 // ============================================================
 // ICÔNES DE NAVIGATION + BADGE DE NOTIFICATION
 // ============================================================
-function injectNavIcons() {
-  document.getElementById('icon-rechercher').src = 'data:image/png;base64,' + NAV_ICONS.rechercher;
-  document.getElementById('icon-publier').src = 'data:image/png;base64,' + NAV_ICONS.publier;
-  document.getElementById('icon-mestrajets').src = 'data:image/png;base64,' + NAV_ICONS.mestrajets;
-  document.getElementById('icon-profil').src = 'data:image/png;base64,' + NAV_ICONS.profil;
-}
-async function updateNavBadge() {
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) return;
-  const { data: trajets } = await sb.from('trajets').select('id').eq('transporteur_id', session.user.id);
-  if (!trajets || trajets.length === 0) return;
-  const { count } = await sb.from('reservations').select('id', { count: 'exact', head: true }).in('trajet_id', trajets.map(t => t.id)).eq('statut', 'en_attente');
-  const badge = document.getElementById('bn-badge-mestrajets');
-  if (badge) { badge.textContent = count || 0; badge.classList.toggle('show', (count || 0) > 0); }
-}
+// injectNavIcons remplacé par buildNav
+// updateNavBadge remplacé par buildNav
 injectNavIcons();
 updateNavBadge();
 
@@ -822,7 +808,7 @@ async function checkAndBuildNav() {
   }
   buildNav('rechercher');
 }
-checkAndBuildNav();
+// nav gérée par checkAccess
 </script>
 </body>
 </html>
