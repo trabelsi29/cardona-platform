@@ -171,11 +171,9 @@ const ICONS = {
 };
 
 function injectIcons() {
-  document.getElementById('icon-rechercher').src = 'data:image/png;base64,' + ICONS.rechercher;
-  document.getElementById('icon-publier').src = 'data:image/png;base64,' + ICONS.publier;
-  document.getElementById('icon-mestrajets').src = 'data:image/png;base64,' + ICONS.mestrajets;
-  document.getElementById('icon-profil').src = 'data:image/png;base64,' + ICONS.profil;
-  document.getElementById('menu-trigger').src = 'data:image/png;base64,' + ICONS.logo;
+  // Menu trigger (logo)
+  var mt = document.getElementById('menu-trigger');
+  if (mt && typeof ICONS !== 'undefined') mt.src = 'data:image/png;base64,' + ICONS.logo;
 }
 
 let userRole = null;
