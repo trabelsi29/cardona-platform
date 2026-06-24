@@ -182,6 +182,15 @@
     .detail-row, .trip-detail, .home-row { font-size: 14px; }
     .t-name, .trip-person { font-size: 14px; }
   }
+
+  .prix-cat-block { background:white; border-radius:12px; padding:14px 16px; margin-bottom:10px; border:1px solid var(--border); }
+  .prix-cat-title { font-size:14px; font-weight:600; color:var(--dark); margin-bottom:10px; }
+  .prix-cat-row { display:flex; align-items:center; gap:10px; }
+  .prix-cat-row label { font-size:12px; color:var(--text-secondary); flex-shrink:0; }
+  .prix-cat-row input { flex:1; padding:8px 10px; border-radius:8px; border:1px solid var(--border); font-size:14px; }
+  .prix-type-toggle { display:flex; gap:8px; margin-bottom:10px; }
+  .prix-type-btn { flex:1; padding:7px; border-radius:8px; border:1.5px solid var(--border); background:transparent; font-size:12px; cursor:pointer; color:var(--text-secondary); }
+  .prix-type-btn.active { border-color:var(--gold); color:var(--gold); background:#fdf8ee; font-weight:600; }
 </style>
 </head>
 <body>
@@ -269,12 +278,12 @@
       <button class="btn-primary" onclick="validateStep4()">Suivant</button>
     </div>
 
-    <!-- STEP 5 : prix -->
+    <!-- STEP 5 : prix par categorie -->
     <div class="step" id="step-5">
       <div class="title">Votre prix</div>
-      <div class="subtitle">Tarif de base et tarif au poids</div>
-      <div class="field"><label>Prix de base (€)</label><input type="number" id="prix-base" placeholder="10" min="0" step="0.5"></div>
-      <div class="field"><label>Prix par kg (€/kg)</label><input type="number" id="prix-kg" placeholder="2.5" min="0" step="0.1"></div>
+      <div class="subtitle">Preciser votre tarif pour chaque type de colis</div>
+      <div id="prix-categories-container"></div>
+      <div class="error-box" id="prix-error" style="display:none;"></div>
       <button class="btn-primary" onclick="validateStep5()">Suivant</button>
     </div>
 
@@ -567,8 +576,55 @@ function toggleCategory(cat) {
     el.querySelector('.category-check').textContent = checked ? '✓' : '';
   });
 }
+var CAT_INFO = {
+  marchandise:  { label: "Marchandises",           defaultType: "kg" },
+  document:     { label: "Documents",              defaultType: "forfait" },
+  fragile:      { label: "Produits fragiles",      defaultType: "kg" },
+  electronique: { label: "Produits electroniques", defaultType: "kg" },
+  autre:        { label: "Autre",                  defaultType: "choix" },
+};
+var prixTypes = {};
+
+function buildPrixForm() {
+  var container = document.getElementById("prix-categories-container");
+  container.innerHTML = "";
+  prixTypes = {};
+  selectedCategories.forEach(function(cat) {
+    var info = CAT_INFO[cat] || { label: cat, defaultType: "kg" };
+    prixTypes[cat] = info.defaultType === "choix" ? "kg" : info.defaultType;
+    var block = document.createElement("div");
+    block.className = "prix-cat-block";
+    var html = "<div class='prix-cat-title'>" + info.label + "</div>";
+    if (info.defaultType === "choix") {
+      html += "<div class='prix-type-toggle'>";
+      html += "<button class='prix-type-btn active' id='btkg-" + cat + "' onclick='setPrixType(\"" + cat + "\",\"kg\")'>par kg (€/kg)</button>";
+      html += "<button class='prix-type-btn' id='btff-" + cat + "' onclick='setPrixType(\"" + cat + "\",\"forfait\")'>Forfait fixe (€)</button>";
+      html += "</div>";
+    }
+    var unitTxt = prixTypes[cat] === "forfait" ? "€" : "€/kg";
+    html += "<div class='prix-cat-row'>";
+    html += "<input type='number' id='prix-" + cat + "' placeholder='0.00' min='0' step='0.5'>";
+    html += "<label id='ulbl-" + cat + "'>" + unitTxt + "</label>";
+    html += "</div>";
+    block.innerHTML = html;
+    container.appendChild(block);
+  });
+}
+
+function setPrixType(cat, type) {
+  prixTypes[cat] = type;
+  var unitTxt = type === "forfait" ? "€" : "€/kg";
+  var lbl = document.getElementById("ulbl-" + cat);
+  if (lbl) lbl.textContent = unitTxt;
+  var btkg = document.getElementById("btkg-" + cat);
+  var btff = document.getElementById("btff-" + cat);
+  if (btkg) btkg.classList.toggle("active", type === "kg");
+  if (btff) btff.classList.toggle("active", type === "forfait");
+}
+
 function validateStep4() {
-  if (selectedCategories.length === 0) { showFormError('Sélectionnez au moins un type de colis accepté.'); return; }
+  if (selectedCategories.length === 0) { showFormError("Selectionnez au moins un type de colis accepte."); return; }
+  buildPrixForm();
   goStep(5);
 }
 
@@ -576,10 +632,19 @@ function validateStep4() {
 // STEP 5 : PRIX
 // ============================================================
 function validateStep5() {
-  const base = document.getElementById('prix-base').value;
-  const kg = document.getElementById('prix-kg').value;
-  if (!base || parseFloat(base) < 0) { showFormError('Indiquez un prix de base valide.'); return; }
-  if (!kg || parseFloat(kg) < 0) { showFormError('Indiquez un prix au kg valide.'); return; }
+  var prixCat = {};
+  var errEl = document.getElementById("prix-error");
+  for (var i = 0; i < selectedCategories.length; i++) {
+    var cat = selectedCategories[i];
+    var el = document.getElementById("prix-" + cat);
+    if (!el || el.value === "" || parseFloat(el.value) < 0) {
+      if (errEl) { errEl.textContent = "Indiquez un prix pour chaque type de colis."; errEl.style.display = "block"; }
+      return;
+    }
+    prixCat[cat] = { prix: parseFloat(el.value), type: prixTypes[cat] || "kg" };
+  }
+  if (errEl) errEl.style.display = "none";
+  window._prixCategories = prixCat;
   fillRecap();
   goStep(6);
 }
@@ -608,7 +673,15 @@ function fillRecap() {
     `<div class="recap-line">${s.adresse} — de ${formatDateTime(s.date_heure)} à ${formatDateTime(s.date_heure_fin)}</div>`).join('');
   document.getElementById('recap-categories').innerHTML = selectedCategories.map(c =>
     `<span class="recap-chip">${categoryLabel(c)}</span>`).join('');
-  document.getElementById('recap-prix-base').textContent = document.getElementById('prix-base').value + ' €';
+  var recapPrix = document.getElementById('recap-prix-base');
+  if (recapPrix && window._prixCategories) {
+    var lines = Object.keys(window._prixCategories).map(function(cat) {
+      var info = CAT_INFO[cat] || { label: cat };
+      var p = window._prixCategories[cat];
+      return info.label + ' : ' + p.prix + (p.type === 'forfait' ? ' €' : ' €/kg');
+    });
+    recapPrix.innerHTML = lines.join('<br>');
+  }
   document.getElementById('recap-prix-kg').textContent = document.getElementById('prix-kg').value + ' €/kg';
 }
 
@@ -674,8 +747,7 @@ function resetForm() {
   distributionStops = [newStop()];
   document.querySelectorAll('.radio-item').forEach(el => { el.classList.remove('selected'); el.querySelector('.radio-circle').classList.remove('checked'); });
   document.querySelectorAll('.category-pill').forEach(el => { el.classList.remove('selected'); el.querySelector('.category-check').classList.remove('checked'); el.querySelector('.category-check').textContent = ''; });
-  document.getElementById('prix-base').value = '';
-  document.getElementById('prix-kg').value = '';
+  window._prixCategories = {}; var pc = document.getElementById('prix-categories-container'); if (pc) pc.innerHTML = '';
   renderStops('ramassage');
   renderStops('distribution');
   goStep(1);
