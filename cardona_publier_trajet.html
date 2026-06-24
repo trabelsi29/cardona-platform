@@ -308,7 +308,7 @@
         <div class="recap-chips" id="recap-categories"></div>
       </div>
       <div class="recap-card">
-        <div class="recap-row"><span>Prix de base</span><span id="recap-prix-base">—</span></div>
+        <div class="recap-row"><span>Tarifs</span><span id="recap-prix-base">—</span></div>
         <div class="recap-row"><span>Prix par kg</span><span id="recap-prix-kg">—</span></div>
       </div>
       <button class="btn-primary" id="publish-btn" onclick="publishTrajet()">Publier le trajet</button>
@@ -712,8 +712,9 @@ async function publishTrajet() {
     date_ramassage: new Date(first.date_heure).toISOString(),
     lieu_distribution: last.adresse,
     date_distribution: new Date(last.date_heure).toISOString(),
-    prix: parseFloat(document.getElementById('prix-base').value),
-    prix_par_kg: parseFloat(document.getElementById('prix-kg').value),
+        prix: 0,
+        prix_par_kg: 0,
+        prix_categories: window._prixCategories || {},
     categories_acceptees: selectedCategories,
     devise: 'EUR'
   }).select('id').single();
