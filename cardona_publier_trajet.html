@@ -467,30 +467,56 @@ function selectMode(mode) {
 function getStopsArray(type) { return type === 'ramassage' ? ramassageStops : distributionStops; }
 
 function renderStops(type) {
-  const arr = getStopsArray(type);
-  const container = document.getElementById(type + '-list');
-  container.innerHTML = arr.map((stop, idx) => `
-    <div class="stop-card">
-      <div class="stop-card-head">
-        <span class="stop-card-label">${type === 'ramassage' ? 'Ramassage' : 'Distribution'} ${idx + 1}</span>
-        ${arr.length > 1 ? `<span class="remove-stop" onclick="removeStop('${type}','${stop.id}')">✕ Retirer</span>` : ''}
-      </div>
-      <div class="field">
-        <input type="text" placeholder="Adresse (ville, aéroport, port...)" value="${stop.adresse.replace(/"/g,'&quot;')}"
-          oninput="handleAddressInput('${type}','${stop.id}', this.value)"
-          onfocus="this.select()">
-        <div class="suggestions" id="sugg-${stop.id}"></div>
-      </div>
-      <div class="field">
-        <label>À partir de</label>
-        <input type="datetime-local" value="${stop.date_heure}" onchange="updateStopField('${type}','${stop.id}','date_heure', this.value)">
-      </div>
-      <div class="field" style="margin-bottom:0;">
-        <label>Jusqu'à</label>
-        <input type="datetime-local" value="${stop.date_heure_fin}" onchange="updateStopField('${type}','${stop.id}','date_heure_fin', this.value)">
-      </div>
-    </div>
-  `).join('');
+  var arr = getStopsArray(type);
+  var container = document.getElementById(type + '-list');
+  container.innerHTML = arr.map(function(stop, idx) {
+    var label = type === 'ramassage' ? 'Ramassage' : 'Distribution';
+    var removeBtn = arr.length > 1
+      ? '<span class="remove-stop" onclick="removeStop(\'' + type + '\',\'' + stop.id + '\')">✕ Retirer</span>'
+      : '';
+    // Extraire date et heures depuis date_heure (format ISO)
+    var dateVal = stop.date_heure ? stop.date_heure.slice(0,10) : '';
+    var heureDebut = stop.date_heure ? stop.date_heure.slice(11,16) : '';
+    var heureFin = stop.date_heure_fin ? stop.date_heure_fin.slice(11,16) : '';
+    return '<div class="stop-card">'
+      + '<div class="stop-card-head"><span class="stop-card-label">' + label + ' ' + (idx+1) + '</span>' + removeBtn + '</div>'
+      + '<div class="field"><input type="text" placeholder="Adresse (ville, aéroport, port...)" value="' + stop.adresse.replace(/"/g,'&quot;') + '"'
+      + ' oninput="handleAddressInput(\'' + type + '\',\'' + stop.id + '\', this.value)" onfocus="this.select()">'
+      + '<div class="suggestions" id="sugg-' + stop.id + '"></div></div>'
+      + '<div class="field"><label>Date</label>'
+      + '<input type="date" value="' + dateVal + '" min="' + new Date().toISOString().slice(0,10) + '"'
+      + ' onchange="updateStopDate(\'' + type + '\',\'' + stop.id + '\', this.value)"></div>'
+      + '<div style="display:flex;gap:10px;">'
+      + '<div class="field" style="flex:1;"><label>Heure de début</label>'
+      + '<input type="time" value="' + heureDebut + '" onchange="updateStopTime(\'' + type + '\',\'' + stop.id + '\',\'debut\', this.value)"></div>'
+      + '<div class="field" style="flex:1;"><label>Heure de fin</label>'
+      + '<input type="time" value="' + heureFin + '" onchange="updateStopTime(\'' + type + '\',\'' + stop.id + '\',\'fin\', this.value)"></div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+function updateStopDate(type, id, dateVal) {
+  var arr = getStopsArray(type);
+  var stop = arr.find(function(s) { return s.id === id; });
+  if (!stop) return;
+  // Garder les heures existantes
+  var heureDebut = stop.date_heure ? stop.date_heure.slice(11,16) : '08:00';
+  var heureFin = stop.date_heure_fin ? stop.date_heure_fin.slice(11,16) : '20:00';
+  stop.date_heure = dateVal ? dateVal + 'T' + heureDebut : '';
+  stop.date_heure_fin = dateVal ? dateVal + 'T' + heureFin : '';
+}
+
+function updateStopTime(type, id, which, timeVal) {
+  var arr = getStopsArray(type);
+  var stop = arr.find(function(s) { return s.id === id; });
+  if (!stop) return;
+  var dateStr = stop.date_heure ? stop.date_heure.slice(0,10) : new Date().toISOString().slice(0,10);
+  if (which === 'debut') {
+    stop.date_heure = dateStr + 'T' + timeVal;
+  } else {
+    stop.date_heure_fin = dateStr + 'T' + timeVal;
+  }
 }
 
 function addStop(type) {
