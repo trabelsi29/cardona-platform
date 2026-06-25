@@ -366,65 +366,12 @@ let searchEnvoi = { adresse: '', lat: null, lon: null };
 let searchReception = { adresse: '', lat: null, lon: null };
 let allMatchingTrajets = [];
 // Villes de dépôt (multi-saisie)
-let villesDepot = []; // [{nom, lat, lon}]
-let villeDepotPending = null; // ville sélectionnée via autocomplete
+var villesDepot = [];
 
-function handleVilleDepotInput(val) {
-  villeDepotPending = null;
-  var sugg = document.getElementById('sugg-ville-depot');
-  if (val.length < 2) { sugg.innerHTML = ''; return; }
-  fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(val) + '&limit=5')
-    .then(function(r) { return r.json(); })
-    .then(function(results) {
-      sugg.innerHTML = '';
-      var seen = {};
-      results.forEach(function(r) {
-        var key = r.display_name.split(',').slice(0,2).join(',').trim();
-        if (seen[key]) return; seen[key] = true;
-        var div = document.createElement('div');
-        div.className = 'suggestion-item';
-        var parts = r.display_name.split(',');
-        var short = parts[0].trim();
-        var country = parts[parts.length-1].trim();
-        div.innerHTML = '<strong>' + short + '</strong><span style="color:var(--text-secondary);font-size:11px;margin-left:6px;">' + country + '</span>';
-        div.addEventListener('mousedown', function(e) {
-          e.preventDefault();
-          villeDepotPending = { nom: short, lat: parseFloat(r.lat), lon: parseFloat(r.lon) };
-          document.getElementById('ville-depot-input').value = short;
-          sugg.innerHTML = '';
-        });
-        sugg.appendChild(div);
-      });
-    });
-}
 
-function selectVilleDepot(nom, lat, lon) {
-  villeDepotPending = { nom: nom.split(',')[0].trim(), lat: parseFloat(lat), lon: parseFloat(lon) };
-  document.getElementById('ville-depot-input').value = villeDepotPending.nom;
-  document.getElementById('sugg-ville-depot').innerHTML = '';
-}
 
-function addVilleDepot() {
-  if (!villeDepotPending) { showFormError('Choisissez une ville dans la liste de suggestions.'); return; }
-  if (villesDepot.find(v => v.nom === villeDepotPending.nom)) { document.getElementById('ville-depot-input').value = ''; villeDepotPending = null; return; }
-  villesDepot.push(villeDepotPending);
-  villeDepotPending = null;
-  document.getElementById('ville-depot-input').value = '';
-  renderVillesDepot();
-}
 
-function removeVilleDepot(nom) {
-  villesDepot = villesDepot.filter(v => v.nom !== nom);
-  renderVillesDepot();
-}
 
-function renderVillesDepot() {
-  var list = document.getElementById('villes-depot-list');
-  if (!list) return;
-  list.innerHTML = villesDepot.map(v =>
-    '<span class="ville-tag">' + v.nom + '<button onclick="removeVilleDepot(\'' + v.nom + '\')">×</button></span>'
-  ).join('');
-}
 
 // Distance à vol d'oiseau entre deux points GPS (formule de Haversine), résultat en km
 function distanceKm(lat1, lon1, lat2, lon2) {
@@ -662,12 +609,6 @@ async function searchTransporteurs() {
     // Matching géo strict : envoi ↔ ramassage ET réception ↔ distribution
     var geoMatch = distEnvoi !== null && distEnvoi <= MAX_DIST
                 && distReception !== null && distReception <= MAX_DIST;
-    // Si villes de dépôt → vérifier aussi la proximité
-    if (geoMatch && villesDepot.length > 0) {
-      geoMatch = villesDepot.some(function(v) {
-        return ramassages.some(function(e) { return distanceKm(v.lat, v.lon, e.latitude, e.longitude) <= MAX_DIST; });
-      });
-    }
     return { trajet: t, etapes: tEtapes, transporteur: transporteurMap[t.transporteur_id], distEnvoi, distReception, geoMatch: geoMatch, matchCategorie: matchCategorie };
   }).filter(function(m) { return m.matchCategorie && m.geoMatch; });
 
