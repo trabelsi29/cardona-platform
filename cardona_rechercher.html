@@ -737,9 +737,10 @@ async function handlePayment() {
   if (!session) { showFormError('Session expirée, reconnectez-vous.'); btn.disabled = false; return; }
 
   const t = selectedTrajet.trajet;
-  const prixT = calcPrix(m.trajet, selectedCategories, weight);
+  const prixT = calcPrix(t, selectedCategories, weight);
   var commission = 3.00;
-  const details = document.getElementById('envoi-details').value.trim();
+  var detailsEl = document.getElementById('envoi-details-confirm') || document.getElementById('envoi-details');
+  const details = detailsEl ? detailsEl.value.trim() : '';
 
   // Générer le code de réservation via la séquence BDD
   const { data: codeData } = await sb.rpc('generate_reservation_code');
