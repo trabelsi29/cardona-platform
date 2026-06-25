@@ -226,9 +226,9 @@
         <div class="cat-desc">Carton, meuble, valise, électroménager…</div>
         <div class="cat-stepper" id="stepper-marchandise" style="display:none;">
           <span class="cat-stepper-label">Poids (KG)</span>
-          <div class="stepper">
+          <div style="display:flex;align-items:center;gap:10px;">
             <button class="stepper-btn" onclick="changeWeight(-1)">−</button>
-            <span class="stepper-value" id="weight-value">1</span>
+            <input type="number" id="weight-value" value="1" min="0.1" step="0.5" style="width:60px;text-align:center;border:1px solid var(--border);border-radius:8px;padding:6px;font-size:15px;font-weight:600;font-family:inherit;" onchange="weight=Math.max(0.1,parseFloat(this.value)||1)">
             <button class="stepper-btn" onclick="changeWeight(1)">+</button>
           </div>
         </div>
