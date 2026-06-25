@@ -205,9 +205,9 @@
       </div>
     </div>
 
-    <div class="subtitle">Vous êtes ?</div>
+    <div class="subtitle" style="display:none;" id="subtitle-role">Vous êtes ?</div>
 
-    <div class="tabs">
+    <div class="tabs" style="display:none;" id="tabs-role">
       <div class="tab active" id="tab-expediteur" onclick="switchTab('expediteur')">Expéditeur (<span id="count-expediteur">0</span>)</div>
       <div class="tab" id="tab-transporteur" onclick="switchTab('transporteur')">Transporteur (<span id="count-transporteur">0</span>)</div>
     </div>
@@ -267,6 +267,8 @@ async function checkAccess() {
   // Mettre à jour le titre selon le rôle
   var titleEl = document.getElementById('page-title');
   if (titleEl) titleEl.textContent = userRole === 'transporteur' ? 'Mes trajets' : 'Mes envois';
+  var subtEl = document.getElementById('subtitle-role');
+  if (subtEl) subtEl.style.display = 'block';
   setupTabsForRole();
 
   await loadAll();
