@@ -348,7 +348,7 @@ async function loadAll() {
   }
 
   // --- Côté transporteur : demandes reçues sur mes trajets ---
-  const { data: trajetsData } = await sb.from('trajets').select('*').eq('transporteur_id', currentUser.id).order('date_ramassage', { ascending: false });
+  const { data: trajetsData } = await sb.from('trajets').select('*').eq('transporteur_id', currentUser.id).neq('statut', 'annule').order('date_ramassage', { ascending: false });
   myTrajets = trajetsData || [];
   if (myTrajets.length > 0) {
     const ids = myTrajets.map(t => t.id);
