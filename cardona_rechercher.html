@@ -639,6 +639,10 @@ async function searchTransporteurs() {
 
   allMatchingTrajets = inRange;
 
+  if (inRange.length === 0 && matches.length > 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><strong>Aucun trajet dans cette période</strong><br><br>' + matches.length + ' trajet(s) correspondent géographiquement mais pas aux dates. Essayez avec une autre date.</div>';
+    return;
+  }
   if (allMatchingTrajets.length === 0) {
     list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div>Aucun transporteur disponible dans cette zone pour l'instant.</div>`;
     return;
