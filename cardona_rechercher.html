@@ -718,16 +718,11 @@ function fillRecapEnvoi() {
   document.getElementById('recap-vers').textContent = dist;
   document.getElementById('recap-transporteur').textContent = transp?.full_name || 'Transporteur';
 
-  const prixT = calcPrix(m.trajet, selectedCategories, weight);
-  var commission = 3.00;
+  var prixT = calcPrix(t, selectedCategories, weight);
   document.getElementById('recap-prix-t').textContent = prixT.toFixed(2) + ' €';
   document.getElementById('recap-frais').textContent = '3,00 €';
   var cashEl = document.getElementById('pay-cash-amount');
   if (cashEl) cashEl.textContent = prixT.toFixed(2) + ' €';
-  var commEl = document.getElementById('pay-commission-amount');
-  if (commEl) commEl.textContent = '3,00 €';
-  document.getElementById('pay-cash-amount').textContent = prixT.toFixed(2) + ' €';
-  document.getElementById('pay-commission-amount').textContent = commission.toFixed(2) + ' €';
 }
 
 // ============================================================
