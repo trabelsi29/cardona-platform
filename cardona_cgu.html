@@ -28,7 +28,7 @@
   .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
   .back-btn { width: 34px; height: 34px; border-radius: 9px; background: var(--dark); color: white; border: none; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .menu-wrapper { position: relative; flex-shrink: 0; margin-left: auto; display: flex; flex-direction: column; align-items: center; }
-  .mascot-mini { width: 44px; height: 44px; cursor: pointer; border-radius: 8px; }
+  .mascot-mini { width:38px; height:38px; object-fit:contain; display:block; }
   .mascot-mini:hover { opacity: 0.85; }
   .menu-caption { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.5px; margin-top: 3px; user-select: none; }
   .dropdown-menu { display: none; position: absolute; top: 64px; right: 0; background: white; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.18); min-width: 200px; overflow: hidden; z-index: 100; }
@@ -217,6 +217,7 @@
             <div class="menu-item" onclick="window.location.href='cardona_cgu.html'">Conditions générales</div>
             <div class="menu-item" onclick="window.location.href='cardona_apropos.html'">À propos</div>
             <div class="menu-item" onclick="window.location.href='cardona_contact.html'">Contactez-nous</div>
+            <div class="menu-item menu-item-logout" onclick="handleLogout()">Déconnexion</div>
           </div>
         </div>
       </div>
