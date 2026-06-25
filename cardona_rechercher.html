@@ -166,6 +166,16 @@
   .ville-tag { display:inline-flex; align-items:center; gap:6px; background:#f0edd8; border:1px solid #c4bd97; border-radius:20px; padding:4px 10px; font-size:12px; color:var(--dark); }
   .ville-tag button { background:none; border:none; cursor:pointer; color:var(--text-secondary); font-size:14px; line-height:1; padding:0; }
   .ville-tag button:hover { color:#d9534f; }
+
+  .mois-filter { margin-bottom:16px; }
+  .mois-filter-label { font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
+  .mois-list { display:flex; gap:8px; flex-wrap:wrap; }
+  .mois-chip { padding:6px 14px; border-radius:20px; border:1.5px solid var(--border); background:white; font-size:13px; font-weight:500; color:var(--dark); cursor:pointer; transition:all 0.15s; white-space:nowrap; }
+  .mois-chip:hover { border-color:var(--gold); color:var(--gold); }
+  .mois-chip.active { background:var(--gold); color:white; border-color:var(--gold); font-weight:600; }
+  .mois-chip.all-chip { background:#f0edd8; border-color:#c4bd97; }
+  .mois-chip.all-chip.active { background:var(--dark); border-color:var(--dark); color:white; }
+  .results-count { font-size:12px; color:var(--text-secondary); margin-bottom:12px; }
 </style>
 </head>
 <body>
@@ -273,7 +283,11 @@
     <!-- STEP 3 : transporteurs disponibles -->
     <div class="step" id="step-3">
       <div class="title">Transporteurs disponibles</div>
-      <div class="filter-link">⚙ Filtrer</div>
+      <div class="mois-filter" id="mois-filter" style="display:none;">
+        <div class="mois-filter-label">Filtrer par mois</div>
+        <div class="mois-list" id="mois-list"></div>
+      </div>
+      <div class="results-count" id="results-count"></div>
       <div id="transporteurs-list"><div class="empty-state">Chargement…</div></div>
     </div>
 
@@ -638,6 +652,8 @@ async function searchTransporteurs() {
   }
 
   allMatchingTrajets = inRange;
+  buildMoisFilter(inRange);
+  updateCount(inRange.length);
 
   if (inRange.length === 0 && matches.length > 0) {
     list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><strong>Aucun trajet dans cette période</strong><br><br>' + matches.length + ' trajet(s) correspondent géographiquement mais pas aux dates. Essayez avec une autre date.</div>';
@@ -898,6 +914,59 @@ function calcPrix(trajet, categories, poids) {
     total += unit === 'forfait' ? val : val * (poids || 1);
   });
   return total > 0 ? total : parseFloat(trajet.prix_par_kg || 0) * (poids || 1);
+}
+
+var selectedMois = 'all';
+var MOIS_FR = ['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre'];
+
+function buildMoisFilter(trajets) {
+  var filterEl = document.getElementById('mois-filter');
+  var listEl = document.getElementById('mois-list');
+  if (!filterEl || !listEl) return;
+  var moisSet = {};
+  trajets.forEach(function(m) {
+    var d = m.trajet.date_ramassage;
+    if (!d) return;
+    var date = new Date(d);
+    var key = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0');
+    var label = MOIS_FR[date.getMonth()] + ' ' + date.getFullYear();
+    moisSet[key] = label;
+  });
+  var keys = Object.keys(moisSet).sort();
+  if (keys.length <= 1) { filterEl.style.display = 'none'; return; }
+  filterEl.style.display = 'block';
+  selectedMois = 'all';
+  var html = '<div class="mois-chip all-chip active" onclick="filterByMois(this,null)">Tous</div>';
+  keys.forEach(function(key) {
+    html += '<div class="mois-chip" data-mois="' + key + '" onclick="filterByMois(this,&quot;' + key + '&quot;)">' + moisSet[key] + '</div>';
+  });
+  listEl.innerHTML = html;
+  updateCount(trajets.length);
+}
+
+function filterByMois(el, mois) {
+  selectedMois = mois || 'all';
+  document.querySelectorAll('.mois-chip').forEach(function(c) { c.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  var filtered = selectedMois === 'all' ? allMatchingTrajets : allMatchingTrajets.filter(function(m) {
+    var d = m.trajet.date_ramassage;
+    if (!d) return false;
+    var date = new Date(d);
+    var key = date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0');
+    return key === selectedMois;
+  });
+  updateCount(filtered.length);
+  var list = document.getElementById('transporteurs-list');
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div>Aucun trajet ce mois-ci.</div>';
+    return;
+  }
+  displayResults(filtered);
+}
+
+function updateCount(n) {
+  var el = document.getElementById('results-count');
+  if (el) el.textContent = n + ' trajet' + (n > 1 ? 's' : '') + ' disponible' + (n > 1 ? 's' : '');
 }
 </script>
 </body>
