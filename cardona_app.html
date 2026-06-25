@@ -580,7 +580,13 @@ async function handleSwitchRole() {
   if (!confirm('Passer en mode ' + newLabel + ' ?')) return;
   const { error } = await sb.from('profiles').update({ role: newRole }).eq('id', user.id);
   if (error) { alert('Erreur : ' + error.message); return; }
-  window.location.reload();
+  // Afficher splash 2s avant reload
+  var splashEl = document.createElement('div');
+  splashEl.id = 'splash-switch';
+  splashEl.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+  splashEl.innerHTML = '<img src="assets/cardona-logo.gif" style="width:90px;margin-bottom:16px;"><div style="font-size:20px;font-weight:700;color:var(--dark);">CARDONA</div><div style="font-size:13px;color:var(--text-secondary);margin-top:8px;">Changement de mode…</div>';
+  document.body.appendChild(splashEl);
+  setTimeout(function() { window.location.reload(); }, 2000);
 }
 
 async function handleLogout() {
@@ -867,14 +873,21 @@ sb.auth.getSession().then(({ data: { session } }) => {
 
 document.getElementById('login-password').addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
 
-// Cacher le splash : immédiatement si session active, sinon après 2500ms
-sb.auth.getSession().then(function(res) {
-  var delay = (res.data && res.data.session) ? 0 : 2500;
-  setTimeout(function() {
-    var splash = document.getElementById('splash-screen');
-    if (splash) { splash.classList.add('fade-out'); setTimeout(function() { if(splash.parentNode) splash.remove(); }, 500); }
-  }, delay);
-});
+// Cacher le splash : immédiatement si session active ou skip demandé
+var skipSplash = sessionStorage.getItem('skipSplash');
+if (skipSplash) {
+  sessionStorage.removeItem('skipSplash');
+  var splashEl = document.getElementById('splash-screen');
+  if (splashEl) splashEl.remove();
+} else {
+  sb.auth.getSession().then(function(res) {
+    var delay = (res.data && res.data.session) ? 0 : 2500;
+    setTimeout(function() {
+      var splash = document.getElementById('splash-screen');
+      if (splash) { splash.classList.add('fade-out'); setTimeout(function() { if(splash.parentNode) splash.remove(); }, 500); }
+    }, delay);
+  });
+}
 </script>
 </body>
 </html>
