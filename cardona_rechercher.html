@@ -270,11 +270,13 @@
       <div class="field">
         <label>Villes où vous pouvez déposer votre envoi <span style="font-size:11px;color:var(--text-secondary);">(facultatif)</span></label>
         <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Ajoutez les villes proches de vous où vous pouvez vous déplacer pour remettre votre envoi à un transporteur.</div>
-        <div style="display:flex;gap:8px;margin-bottom:8px;">
-          <input type="text" id="ville-depot-input" placeholder="Saisissez une ville…" style="flex:1;" oninput="handleVilleDepotInput(this.value)">
-          <button onclick="addVilleDepot()" style="white-space:nowrap;padding:0 16px;height:100%;border-radius:10px;border:1.5px solid var(--gold);background:transparent;color:var(--gold);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='var(--gold)';this.style.color='white';" onmouseout="this.style.background='transparent';this.style.color='var(--gold)';">+ Ajouter</button>
+        <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:8px;">
+          <div style="flex:1;position:relative;">
+            <input type="text" id="ville-depot-input" placeholder="Saisissez une ville…" style="width:100%;box-sizing:border-box;" oninput="handleVilleDepotInput(this.value)" autocomplete="off">
+            <div class="suggestions" id="sugg-ville-depot"></div>
+          </div>
+          <button onclick="addVilleDepot()" style="white-space:nowrap;padding:0 16px;border-radius:10px;border:1.5px solid var(--gold);background:transparent;color:var(--gold);font-size:13px;font-weight:600;cursor:pointer;align-self:flex-start;height:44px;">+ Ajouter</button>
         </div>
-        <div class="suggestions" id="sugg-ville-depot"></div>
         <div id="villes-depot-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;"></div>
       </div>
       <button class="btn-primary" onclick="searchTransporteurs()">Rechercher</button>
@@ -384,11 +386,30 @@ let villeDepotPending = null; // ville sélectionnée via autocomplete
 
 function handleVilleDepotInput(val) {
   villeDepotPending = null;
-  if (val.length < 2) { document.getElementById('sugg-ville-depot').innerHTML = ''; return; }
-  fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(val) + '&limit=4')
-    .then(r => r.json()).then(results => {
-      var sugg = document.getElementById('sugg-ville-depot');
-      sugg.innerHTML = results.map(r => '<div class="suggestion-item" onclick="selectVilleDepot(' + JSON.stringify(r.display_name) + ',' + r.lat + ',' + r.lon + ')">' + r.display_name + '</div>').join('');
+  var sugg = document.getElementById('sugg-ville-depot');
+  if (val.length < 2) { sugg.innerHTML = ''; return; }
+  fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(val) + '&limit=5')
+    .then(function(r) { return r.json(); })
+    .then(function(results) {
+      sugg.innerHTML = '';
+      var seen = {};
+      results.forEach(function(r) {
+        var key = r.display_name.split(',').slice(0,2).join(',').trim();
+        if (seen[key]) return; seen[key] = true;
+        var div = document.createElement('div');
+        div.className = 'suggestion-item';
+        var parts = r.display_name.split(',');
+        var short = parts[0].trim();
+        var country = parts[parts.length-1].trim();
+        div.innerHTML = '<strong>' + short + '</strong><span style="color:var(--text-secondary);font-size:11px;margin-left:6px;">' + country + '</span>';
+        div.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          villeDepotPending = { nom: short, lat: parseFloat(r.lat), lon: parseFloat(r.lon) };
+          document.getElementById('ville-depot-input').value = short;
+          sugg.innerHTML = '';
+        });
+        sugg.appendChild(div);
+      });
     });
 }
 
@@ -496,7 +517,7 @@ function resetForm() {
   selectedTrajet = null;
   document.querySelectorAll('.cat-row').forEach(el => { el.classList.remove('selected'); el.querySelector('.cat-check').classList.remove('checked'); el.querySelector('.cat-check').textContent = ''; });
   document.getElementById('stepper-marchandise').style.display = 'none';
-  document.getElementById('weight-value').textContent = '1';
+  var el = document.getElementById('weight-value'); if (el) el.value = 1;
   document.getElementById('adresse-envoi').value = '';
   document.getElementById('adresse-reception').value = '';
   goStep(1);
@@ -534,7 +555,7 @@ function toggleCat(cat) {
 }
 function changeWeight(delta) {
   weight = Math.max(1, weight + delta);
-  document.getElementById('weight-value').textContent = weight;
+  var el = document.getElementById('weight-value'); if (el) el.value = weight;
 }
 function validateStep1() {
   if (selectedCategories.length === 0) { showFormError('Sélectionnez au moins un type de colis.'); return; }
@@ -651,31 +672,23 @@ async function searchTransporteurs() {
       ? Math.min(...distributions.map(e => distanceKm(searchReception.lat, searchReception.lon, e.latitude, e.longitude)))
       : null;
 
-    const matchCategorie = selectedCategories.length === 0 || (t.categories_acceptees || []).some(c => selectedCategories.includes(c));
-    // Filtre : si l'expéditeur a saisi des villes de dépôt,
-  // on vérifie que l'adresse de ramassage du transporteur est proche d'une d'elles (<30km)
-  let withinRange = distEnvoi !== null && distReception !== null;
-  if (withinRange && villesDepot.length > 0) {
-    const closeToDepot = villesDepot.some(v =>
-      ramassages.some(e => distanceKm(v.lat, v.lon, e.latitude, e.longitude) <= 30)
-    );
-    withinRange = closeToDepot;
-  }
+    var matchCategorie = selectedCategories.length === 0 || (t.categories_acceptees || []).some(function(cat) { return selectedCategories.includes(cat); });
+    var MAX_DIST = 60; // km
+    // Matching géo strict : envoi ↔ ramassage ET réception ↔ distribution
+    var geoMatch = distEnvoi !== null && distEnvoi <= MAX_DIST
+                && distReception !== null && distReception <= MAX_DIST;
+    // Si villes de dépôt → vérifier aussi la proximité
+    if (geoMatch && villesDepot.length > 0) {
+      geoMatch = villesDepot.some(function(v) {
+        return ramassages.some(function(e) { return distanceKm(v.lat, v.lon, e.latitude, e.longitude) <= MAX_DIST; });
+      });
+    }
+    return { trajet: t, etapes: tEtapes, transporteur: transporteurMap[t.transporteur_id], distEnvoi, distReception, geoMatch: geoMatch, matchCategorie: matchCategorie };
+  }).filter(function(m) { return m.matchCategorie && m.geoMatch; });
 
-
-    return { trajet: t, etapes: tEtapes, transporteur: transporteurMap[t.transporteur_id], distEnvoi, distReception, withinRange, matchCategorie };
-  }).filter(m => m.matchCategorie);
-
-  // On privilégie les trajets dans le rayon choisi ; sinon on retombe sur les plus proches (mieux qu'une liste vide)
-  let inRange = matches.filter(m => m.withinRange);
-  if (inRange.length === 0) {
-    inRange = matches
-      .filter(m => m.distEnvoi !== null && m.distReception !== null)
-      .sort((a, b) => (a.distEnvoi + a.distReception) - (b.distEnvoi + b.distReception))
-      .slice(0, 5);
-  } else {
-    inRange.sort((a, b) => (a.distEnvoi + a.distReception) - (b.distEnvoi + b.distReception));
-  }
+  // Trier par distance totale
+  matches.sort(function(a, b) { return (a.distEnvoi + a.distReception) - (b.distEnvoi + b.distReception); });
+  var inRange = matches;
 
   allMatchingTrajets = inRange;
   buildMoisFilter(inRange);
