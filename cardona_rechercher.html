@@ -267,18 +267,6 @@
         <input type="text" id="adresse-reception" placeholder="Ville, adresse, aéroport…" oninput="handleSearchAddressInput('reception', this.value)">
         <div class="suggestions" id="sugg-reception"></div>
       </div>
-      <div class="field">
-        <label>Villes où vous pouvez déposer votre envoi <span style="font-size:11px;color:var(--text-secondary);">(facultatif)</span></label>
-        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:6px;">Ajoutez les villes proches de vous où vous pouvez vous déplacer pour remettre votre envoi à un transporteur.</div>
-        <div style="display:flex;gap:8px;align-items:stretch;margin-bottom:8px;">
-          <div style="flex:1;position:relative;">
-            <input type="text" id="ville-depot-input" placeholder="Saisissez une ville…" style="width:100%;box-sizing:border-box;" oninput="handleVilleDepotInput(this.value)" autocomplete="off">
-            <div class="suggestions" id="sugg-ville-depot"></div>
-          </div>
-          <button onclick="addVilleDepot()" style="white-space:nowrap;padding:0 16px;border-radius:10px;border:1.5px solid var(--gold);background:transparent;color:var(--gold);font-size:13px;font-weight:600;cursor:pointer;align-self:flex-start;height:44px;">+ Ajouter</button>
-        </div>
-        <div id="villes-depot-list" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;"></div>
-      </div>
       <button class="btn-primary" onclick="searchTransporteurs()">Rechercher</button>
     </div>
 
@@ -313,8 +301,10 @@
         <div class="detail-row"><span>Transporteur</span><span id="recap-transporteur">—</span></div>
       </div>
       <div class="detail-card">
-        <div class="detail-row"><span>À payer en espèces au transporteur</span><span id="recap-prix-t">—</span></div>
-        <div class="detail-row"><span>Commission CARDONA (carte)</span><span id="recap-frais">—</span></div>
+        <div class="detail-row"><span>💰 À payer au transporteur</span><span id="recap-prix-t" style="font-weight:700;color:var(--gold);">—</span></div>
+        <div style="font-size:11px;color:var(--text-secondary);margin:2px 0 8px;padding:0 2px;">Paiement en espèces (ou tout moyen convenu) lors de la remise du colis.</div>
+        <div class="detail-row"><span>🔒 Frais de réservation CARDONA</span><span id="recap-frais" style="color:var(--gold);">3,00 €</span></div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;padding:0 2px;">Réservés maintenant. Remboursés si le transporteur refuse ou annule.</div>
       </div>
       <div class="field">
         <label>Détails supplémentaires sur votre colis</label>
@@ -323,27 +313,22 @@
       <button class="btn-primary" onclick="goStep(6)">Continuer</button>
     </div>
 
-    <!-- STEP 6 : mode de paiement -->
+    <!-- STEP 6 : confirmation -->
     <div class="step" id="step-6">
-      <div class="title">Mode de paiement</div>
-      <div class="detail-card" style="background:#EAF3DE;">
-        <div style="font-size:13px;color:#3B6D11;line-height:1.6;">
-          💵 Vous payez <strong id="pay-cash-amount">—</strong> en espèces directement au transporteur, à la livraison.
+      <div class="title">Confirmer la réservation</div>
+      <div class="detail-card" style="background:#EAF3DE;margin-bottom:14px;">
+        <div style="font-size:13px;color:#3B6D11;line-height:1.7;">
+          💰 <strong>Paiement direct au transporteur</strong><br>
+          Vous réglez <strong id="pay-cash-amount">—</strong> en espèces (ou tout moyen convenu) directement lors de la remise du colis.
         </div>
       </div>
-      <div class="subtitle" style="margin-top:16px;">Commission CARDONA (carte)</div>
-      <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;line-height:1.5;">
-        Une commission de <strong id="pay-commission-amount">—</strong> est prélevée sur votre carte <strong>uniquement si le transporteur accepte</strong> votre demande. Rien ne vous est débité maintenant.
+      <div class="detail-card" style="margin-bottom:14px;">
+        <div style="font-size:13px;color:var(--dark);line-height:1.7;">
+          🔒 <strong>Frais de réservation CARDONA : 3,00 €</strong><br>
+          <span style="font-size:12px;color:var(--text-secondary);">Réservés maintenant. Prélevés uniquement si le transporteur accepte.<br>Remboursés intégralement en cas de refus ou d'annulation.</span>
+        </div>
       </div>
-      <div class="card-icons"><span class="card-icon">💳</span></div>
-      <div class="field"><label>Nom sur la carte</label><input type="text" id="card-name" placeholder="Amine Trabelsi"></div>
-      <div class="field"><label>Numéro</label><input type="text" id="card-number" placeholder="•••• •••• •••• ••••" maxlength="19"></div>
-      <div class="card-card-input">
-        <div class="field"><label>Date Exp</label><input type="text" id="card-exp" placeholder="MM/AA" maxlength="5"></div>
-        <div class="field"><label>Cryptogramme</label><input type="text" id="card-cvc" placeholder="•••" maxlength="3"></div>
-      </div>
-      <button class="btn-pay" id="pay-btn" onclick="handlePayment()">Confirmer la réservation</button>
-      <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text-secondary);">Démonstration — aucune carte n'est réellement débitée.</div>
+      <button class="btn-pay" id="pay-btn" onclick="handlePayment()">✓ Confirmer la réservation</button>
     </div>
 
     <!-- STEP 7 : succès -->
@@ -793,9 +778,13 @@ function fillRecapEnvoi() {
   document.getElementById('recap-transporteur').textContent = transp?.full_name || 'Transporteur';
 
   const prixT = calcPrix(m.trajet, selectedCategories, weight);
-  const commission = 2.00;
+  var commission = 3.00;
   document.getElementById('recap-prix-t').textContent = prixT.toFixed(2) + ' €';
-  document.getElementById('recap-frais').textContent = commission.toFixed(2) + ' €';
+  document.getElementById('recap-frais').textContent = '3,00 €';
+  var cashEl = document.getElementById('pay-cash-amount');
+  if (cashEl) cashEl.textContent = prixT.toFixed(2) + ' €';
+  var commEl = document.getElementById('pay-commission-amount');
+  if (commEl) commEl.textContent = '3,00 €';
   document.getElementById('pay-cash-amount').textContent = prixT.toFixed(2) + ' €';
   document.getElementById('pay-commission-amount').textContent = commission.toFixed(2) + ' €';
 }
@@ -805,23 +794,15 @@ function fillRecapEnvoi() {
 // commission CARDONA prélevée uniquement si le transporteur accepte (démonstration)
 // ============================================================
 async function handlePayment() {
-  const name = document.getElementById('card-name').value.trim();
-  const number = document.getElementById('card-number').value.trim();
-  const exp = document.getElementById('card-exp').value.trim();
-  const cvc = document.getElementById('card-cvc').value.trim();
-
-  if (!name || !number || !exp || !cvc) { showFormError('Veuillez remplir tous les champs de carte (pour la commission, prélevée seulement si accepté).'); return; }
-
   const btn = document.getElementById('pay-btn');
-  btn.disabled = true;
-  btn.textContent = 'Envoi en cours…';
+  if (btn) { btn.disabled = true; btn.textContent = 'Envoi en cours…'; }
 
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { showFormError('Session expirée, reconnectez-vous.'); btn.disabled = false; return; }
 
   const t = selectedTrajet.trajet;
   const prixT = calcPrix(m.trajet, selectedCategories, weight);
-  const commission = 2.00;
+  var commission = 3.00;
   const details = document.getElementById('envoi-details').value.trim();
 
   // Générer le code de réservation via la séquence BDD
@@ -837,7 +818,7 @@ async function handlePayment() {
     categories: selectedCategories,
     description: details,
     prix_transporteur: prixT,
-    frais_service: commission
+    frais_service: 3.00
   }).select('ncc').single();
   // Aucune ligne "paiements" n'est créée ici : la commission n'est prélevée
   // que lorsque le transporteur accepte la demande (voir cardona_publier_trajet.html).
