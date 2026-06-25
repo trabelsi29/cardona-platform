@@ -546,31 +546,57 @@ function validateStep1() {
 // ============================================================
 let debounceTimers = {};
 function handleSearchAddressInput(which, value) {
-  const target = which === 'envoi' ? searchEnvoi : searchReception;
+  var target = which === 'envoi' ? searchEnvoi : searchReception;
   target.adresse = value; target.lat = null; target.lon = null;
 
   clearTimeout(debounceTimers[which]);
-  const suggBox = document.getElementById('sugg-' + which);
-  if (value.trim().length < 3) { suggBox.style.display = 'none'; return; }
+  var suggBox = document.getElementById('sugg-' + which);
+  if (value.trim().length < 2) { suggBox.style.display = 'none'; return; }
 
-  debounceTimers[which] = setTimeout(async () => {
+  debounceTimers[which] = setTimeout(function() {
     suggBox.innerHTML = '<div class="suggestion-loading">Recherche…</div>';
     suggBox.style.display = 'block';
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(value)}&limit=5`);
-      const results = await res.json();
-      if (!results.length) { suggBox.innerHTML = '<div class="suggestion-loading">Aucun résultat</div>'; return; }
-      suggBox.innerHTML = results.map(r =>
-        `<div class="suggestion-item" onclick='selectSearchSuggestion("${which}", ${JSON.stringify(r.display_name)}, ${r.lat}, ${r.lon})'>${r.display_name}</div>`
-      ).join('');
-    } catch (e) {
-      suggBox.innerHTML = '<div class="suggestion-loading">Erreur de recherche</div>';
-    }
-  }, 450);
+    fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(value) + '&limit=6&addressdetails=1')
+      .then(function(r) { return r.json(); })
+      .then(function(results) {
+        if (!results || !results.length) { suggBox.innerHTML = '<div class="suggestion-loading">Aucun résultat</div>'; return; }
+        // Dédupliquer par nom court (ville)
+        var seen = {};
+        var unique = results.filter(function(r) {
+          var key = r.display_name.split(',').slice(0,2).join(',').trim();
+          if (seen[key]) return false;
+          seen[key] = true;
+          return true;
+        });
+        suggBox.innerHTML = '';
+        unique.forEach(function(r) {
+          var div = document.createElement('div');
+          div.className = 'suggestion-item';
+          // Afficher nom court + pays
+          var parts = r.display_name.split(',');
+          var shortName = parts[0].trim();
+          var country = parts[parts.length-1].trim();
+          var region = parts.length > 2 ? parts[parts.length-2].trim() : '';
+          div.innerHTML = '<strong>' + shortName + '</strong><span style="color:var(--text-secondary);font-size:11px;margin-left:6px;">' + (region ? region + ', ' : '') + country + '</span>';
+          div.dataset.lat = r.lat;
+          div.dataset.lon = r.lon;
+          div.dataset.name = r.display_name;
+          // mousedown au lieu de click — évite le conflit avec onblur
+          div.addEventListener('mousedown', function(e) {
+            e.preventDefault();
+            selectSearchSuggestion(which, r.display_name, r.lat, r.lon);
+          });
+          suggBox.appendChild(div);
+        });
+        suggBox.style.display = 'block';
+      })
+      .catch(function() { suggBox.innerHTML = '<div class="suggestion-loading">Erreur</div>'; });
+  }, 400);
 }
+
 function selectSearchSuggestion(which, display_name, lat, lon) {
-  const target = which === 'envoi' ? searchEnvoi : searchReception;
-  target.adresse = display_name; target.lat = lat; target.lon = lon;
+  var target = which === 'envoi' ? searchEnvoi : searchReception;
+  target.adresse = display_name; target.lat = parseFloat(lat); target.lon = parseFloat(lon);
   document.getElementById('adresse-' + which).value = display_name;
   document.getElementById('sugg-' + which).style.display = 'none';
 }
