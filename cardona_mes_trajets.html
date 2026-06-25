@@ -441,7 +441,7 @@ function render() {
   var html = myTrajets.map(function(t) {
     var resas = transporteurReservations.filter(function(r) { return r.trajet_id === t.id; });
     var nbAttente = resas.filter(function(r) { return r.statut === "en_attente"; }).length;
-    var isExpire = t.date_ramassage && new Date(t.date_ramassage) < new Date();
+    var isExpire = t.date_ramassage && new Date(t.date_ramassage) < new Date(Date.now() - 86400000);
     var dateStr = t.date_ramassage ? new Date(t.date_ramassage).toLocaleDateString("fr-FR", {day:"numeric",month:"long",year:"numeric"}) : "—";
     var modeIcon = modeIcons[t.mode_transport] || "🚗";
     var statusBadge = isExpire
