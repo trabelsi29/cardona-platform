@@ -6,6 +6,7 @@
 <title>CARDONA — Contact</title>
 <!-- v3 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -201,6 +202,7 @@
   .contact-field input:focus, .contact-field textarea:focus, .contact-field select:focus { border-color: var(--gold); outline: none; }
   .btn-send { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--gold); color: white; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
   .btn-send:hover { opacity: .88; }
+  .btn-send:disabled { opacity:.6; cursor:not-allowed; }
   .send-success { background: #e8f5ef; color: #2e7d5e; border-radius: 10px; padding: 14px; font-size: 13px; font-weight: 600; text-align: center; display: none; margin-bottom: 14px; }
 
   .dropdown-menu { display:none; position:absolute; top:58px; right:0; background:white; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); min-width:190px; max-width:220px; overflow:hidden; z-index:500; }
@@ -250,6 +252,10 @@
           </select></div>
         <div class="contact-field"><label>Message</label>
           <textarea id="c-message" placeholder="Décrivez votre demande…"></textarea></div>
+        <!-- Honeypot anti-bot : visible uniquement par les bots -->
+        <div style="position:absolute;left:-9999px;top:-9999px;opacity:0;pointer-events:none;" aria-hidden="true">
+          <input type="text" id="hp-field" name="website" tabindex="-1" autocomplete="off">
+        </div>
         <button class="btn-send" onclick="envoyerMessage()">Envoyer le message</button>
       </div>
     </div>
@@ -263,18 +269,66 @@ const SUPABASE_URL='https://daptohjruyxafskpmqeb.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_plDYJLGRhTIPT-kwPW2ljA_-48Mv7S3';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 
+// EmailJS init — remplacer par vos clés sur emailjs.com
+// Service ID, Template ID et Public Key à configurer
+var EMAILJS_SERVICE  = "service_cardona";
+var EMAILJS_TEMPLATE = "template_contact";
+var EMAILJS_PUBKEY   = "VOTRE_PUBLIC_KEY";
+var _formLoadTime = Date.now();
+
 function envoyerMessage() {
-  var name=document.getElementById("c-name").value.trim();
-  var email=document.getElementById("c-email").value.trim();
-  var sujet=document.getElementById("c-sujet").value;
-  var msg=document.getElementById("c-message").value.trim();
-  if(!name||!email||!sujet||!msg){alert("Veuillez remplir tous les champs.");return;}
-  document.getElementById("send-success").style.display="block";
-  document.getElementById("c-name").value="";
-  document.getElementById("c-email").value="";
-  document.getElementById("c-sujet").value="";
-  document.getElementById("c-message").value="";
-  window.scrollTo(0,0);
+  var name  = document.getElementById("c-name").value.trim();
+  var email = document.getElementById("c-email").value.trim();
+  var sujet = document.getElementById("c-sujet").value;
+  var msg   = document.getElementById("c-message").value.trim();
+  var hp    = document.getElementById("hp-field").value;
+
+  // Anti-bot : champ honeypot rempli = bot
+  if (hp) { console.warn("Bot détecté"); return; }
+
+  // Anti-bot : soumission trop rapide (< 3s) = bot
+  if (Date.now() - _formLoadTime < 3000) {
+    alert("Veuillez patienter quelques secondes avant d'envoyer.");
+    return;
+  }
+
+  if (!name || !email || !sujet || !msg) {
+    alert("Veuillez remplir tous les champs.");
+    return;
+  }
+
+  // Validation email basique
+  if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
+    alert("Adresse email invalide.");
+    return;
+  }
+
+  var btn = document.querySelector(".btn-send");
+  btn.disabled = true;
+  btn.textContent = "Envoi en cours…";
+
+  emailjs.init({ publicKey: EMAILJS_PUBKEY });
+  emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+    from_name:  name,
+    from_email: email,
+    subject:    sujet,
+    message:    msg,
+    to_email:   "trabelsi-amine@outlook.com"
+  }).then(function() {
+    document.getElementById("send-success").style.display = "block";
+    document.getElementById("c-name").value    = "";
+    document.getElementById("c-email").value   = "";
+    document.getElementById("c-sujet").value   = "";
+    document.getElementById("c-message").value = "";
+    btn.textContent = "Message envoyé ✓";
+    window.scrollTo(0, 0);
+    _formLoadTime = Date.now(); // reset timer
+  }, function(error) {
+    btn.disabled = false;
+    btn.textContent = "Envoyer le message";
+    alert("Erreur lors de l'envoi : " + (error.text || "Veuillez réessayer."));
+    console.error("EmailJS error:", error);
+  });
 }
 const NAV_ICONS = {
   rechercher: 'iVBORw0KGgoAAAANSUhEUgAAADgAAAAoCAYAAACrUDmFAAADfUlEQVR4nO2ZwW3bMBSGf9JGguRSdQNtUHeCqhPEnSDJBFVPjHSJc4lE5FBngroTNJmg7gbqBFU30ClBEImvBz81quvElEUVLpAfMEwL4nv8QEqP/C3gQGEYevv7+4cARkQUAPD4AwA5gFwIcVVV1bXWOneR01aiS2ellC+l/Ahg3KLbHMAsSZLPXXLbamPAKIo+AggblwoiupJSZkT00xhTAMBgMHhljHkthHgDwP+dWIhZVVVnfc9oa0CetS8ARnwpBzC5vb29nk6nxZq+gRDiVAgR1H3Lsnx3cXGRtR2HrVoBMtxX8EwQ0WWapmHbpCcnJ0dCiFOOU5Rl+bYvSNnq5sXM+Vgsx+NN4AAgTdOZMeYtFrPvDYfDr0opf5NY62QNGMfxKXhZEtGHNE1nXRJrrfMmpJTyU5d4j8lqifLS/AEAxpgzrfXE1QCUUgEvewD4kCTJ1FVswHIGpZQTbuYu4QBAaz0norpknLqMDVgA8rNxyD8nrgcAAERUx/WUUoHL2GsBG6/0oq/izLVwzvkOn7y5pWwADwCAiL65TLxC15xv7DKozTPoc+K5y8TLasT3XJYMG8ARABhjMldJV2lnZyev28YYz1XcVoW+T00mk6JuSyk9V3GtAYfD4QtXSf+lbABzAKiq6mWfA4njeLSc04VsADP+Hj1xT2cRkc/NwuURygbwG+C+Pq3QGACIKHMZdC2gMeaKm853GbW4LBwAi4Owy9hrAZu7DCml870iAAwGg0MsPJzCGON0Q2H1FjXGnHEziKJo7HIASimfiELOc+nawrAC1FrPwbMI4JOrnUYYhh4flTws3pwzF3Gbsq6DxphjPBxOO5/AwzD09vb2ftsfALI+DChrQK11LoR4B6AA4DNksElSpZTPcKPG5XEcx85P9a1dtTiOR0RUezOt7D82iN/zM+etHJAQs/Pz8+O243pMG/miy+4aaw5gVpbl9/v7+7y2EJVSvhAikFK+IaIx/nS8M6wwjV1CdnK2l+w/WxXGmMu7u7vpdDotoiia4cExeBiYI8hOgLUY9ABAgNVLryCiTEp5dXNz83nZIO4T0glgU2EYeru7u6PGpdzm+ewL0jlgF/UBuTUHXgBIkuQIwF/GFhEdbVpCtgoQeBqS/9Fqpa0DBB6HBHDUNtZWAgKPQhZt42wtILCAJKJL/pnxVvFZz3rWf6Rf3Ht7exofYFYAAAAASUVORK5CYII=',
