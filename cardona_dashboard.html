@@ -120,6 +120,37 @@
 
   .loading-row { text-align: center; padding: 30px; color: var(--text-secondary); font-size: 13px; }
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--dark); color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: none; z-index: 999; }
+
+  /* ── RESPONSIVE MOBILE ─────────────────────────────────── */
+  @media (max-width: 768px) {
+    .app-layout { flex-direction: column; height: auto; min-height: 100vh; }
+    .sidebar { width: 100%; flex-direction: row; align-items: center; padding: 10px 14px; flex-wrap: wrap; gap: 6px; flex-shrink: 0; overflow-x: auto; }
+    .sidebar-logo { display: none; }
+    .sidebar-section-label { display: none; }
+    .sidebar-user { order: -1; margin-top: 0; padding: 0; border: none; margin-right: auto; }
+    .sidebar-user .user-name { font-size: 12px; }
+    .sidebar-user .user-role { font-size: 10px; }
+    .nav-group { display: flex; flex-direction: row; gap: 4px; flex-wrap: wrap; }
+    .nav-item { padding: 6px 10px; font-size: 11px; border-radius: 8px; white-space: nowrap; }
+    .nav-item.active { background: rgba(200,144,42,0.2); }
+    .main-content { padding: 14px; overflow-y: auto; }
+    .page-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 14px; }
+    .page-header h1 { font-size: 18px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+    .data-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .data-table thead { display: none; }
+    .data-table tr { display: block; padding: 12px; border-bottom: 1px solid var(--border); }
+    .data-table td { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 12px; border: none; }
+    .data-table td::before { content: attr(data-label); color: var(--color-text-secondary); font-weight: 600; font-size: 11px; margin-right: 8px; }
+    .user-modal-box { width: 95vw; padding: 18px; }
+    .search-bar { flex-direction: column; gap: 8px; padding: 12px; }
+    .search-bar input, .search-bar select { width: 100%; box-sizing: border-box; }
+  }
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr 1fr !important; }
+    .sidebar { padding: 8px 10px; }
+    .nav-item { font-size: 10px; padding: 5px 8px; }
+  }
 </style>
 </head>
 <body>
