@@ -528,12 +528,12 @@ function renderVerif() {
     </div>`).join('');
 }
 
-async function viewVerifDoc(path) {
-  const { data, error } = await sb.storage.from('verification-docs').createSignedUrl(path, 300);
-  if (error) { showToast('Impossible d\u2019ouvrir le document : ' + error.message); return; }
-  window.open(data.signedUrl, '_blank');
-}
-
+async function viewVerifDoc(rawPath) {
+  var path = (typeof rawPath === "string") ? rawPath : (rawPath && (rawPath.path||rawPath.name||rawPath.url)||"");
+  if (!path) { showToast("Chemin de document invalide"); return; }
+  const { data, error } = await sb.storage.from("verification-docs").createSignedUrl(path, 300);
+  if (error) { showToast("Impossible d'ouvrir le document : " + error.message); return; }
+  window.open(data.signedUrl, "_blank");
 async function setVerification(userId, status) {
   const { error } = await sb.from('profiles').update({ verification_status: status }).eq('id', userId);
   if (error) { showToast('Erreur : ' + error.message); return; }
