@@ -121,35 +121,25 @@
   .loading-row { text-align: center; padding: 30px; color: var(--text-secondary); font-size: 13px; }
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--dark); color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: none; z-index: 999; }
 
-  /* ── RESPONSIVE MOBILE ─────────────────────────────────── */
+  /* ── MOBILE HAMBURGER ────────────────────────────── */
+  .hamburger { display: none; position: fixed; top: 12px; left: 12px; z-index: 300; background: var(--dark); border: none; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; flex-direction: column; align-items: center; justify-content: center; gap: 5px; }
+  .hamburger span { display: block; width: 20px; height: 2px; background: white; border-radius: 2px; }
+  .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199; }
+
   @media (max-width: 768px) {
-    .app-layout { flex-direction: column; height: auto; min-height: 100vh; }
-    .sidebar { width: 100%; flex-direction: row; align-items: center; padding: 10px 14px; flex-wrap: wrap; gap: 6px; flex-shrink: 0; overflow-x: auto; }
-    .sidebar-logo { display: none; }
-    .sidebar-section-label { display: none; }
-    .sidebar-user { order: -1; margin-top: 0; padding: 0; border: none; margin-right: auto; }
-    .sidebar-user .user-name { font-size: 12px; }
-    .sidebar-user .user-role { font-size: 10px; }
-    .nav-group { display: flex; flex-direction: row; gap: 4px; flex-wrap: wrap; }
-    .nav-item { padding: 6px 10px; font-size: 11px; border-radius: 8px; white-space: nowrap; }
-    .nav-item.active { background: rgba(200,144,42,0.2); }
-    .main-content { padding: 14px; overflow-y: auto; }
-    .page-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 14px; }
+    .hamburger { display: flex; }
+    .sidebar { position: fixed; left: -260px; top: 0; bottom: 0; z-index: 200; width: 240px; transition: left 0.25s ease; box-shadow: none; }
+    .sidebar.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
+    .sidebar-overlay.open { display: block; }
+    .main-content { padding: 60px 14px 14px; width: 100%; box-sizing: border-box; overflow-y: auto; }
+    .page-header { flex-direction: column; align-items: flex-start; gap: 8px; }
     .page-header h1 { font-size: 18px; }
-    .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
-    .data-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    .data-table thead { display: none; }
-    .data-table tr { display: block; padding: 12px; border-bottom: 1px solid var(--border); }
-    .data-table td { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 12px; border: none; }
-    .data-table td::before { content: attr(data-label); color: var(--color-text-secondary); font-weight: 600; font-size: 11px; margin-right: 8px; }
-    .user-modal-box { width: 95vw; padding: 18px; }
+    .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+    .data-table { display: block; overflow-x: auto; font-size: 12px; }
+    .card { padding: 12px; }
+    .user-modal-box { width: 94vw; max-height: 80vh; padding: 18px; }
     .search-bar { flex-direction: column; gap: 8px; padding: 12px; }
     .search-bar input, .search-bar select { width: 100%; box-sizing: border-box; }
-  }
-  @media (max-width: 480px) {
-    .stats-grid { grid-template-columns: 1fr 1fr !important; }
-    .sidebar { padding: 8px 10px; }
-    .nav-item { font-size: 10px; padding: 5px 8px; }
   }
 </style>
 </head>
@@ -606,6 +596,21 @@ sb.auth.getSession().then(({ data: { session } }) => {
       }
     });
   }
+});
+
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+// Fermer sidebar quand on clique sur un item
+document.querySelectorAll('.nav-item').forEach(function(el) {
+  el.addEventListener('click', function() {
+    if (window.innerWidth <= 768) closeSidebar();
+  });
 });
 </script>
 </body>
