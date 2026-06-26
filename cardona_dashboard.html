@@ -529,7 +529,7 @@ function renderVerif() {
 }
 
 async function viewVerifDoc(rawPath) {
-  var path = (typeof rawPath === "string") ? rawPath : (rawPath && (rawPath.path||rawPath.name||rawPath.url)||"");
+  var path = (typeof rawPath === "string") ? rawPath : (rawPath && rawPath.path) || "";
   if (!path) { showToast("Chemin de document invalide"); return; }
   const { data, error } = await sb.storage.from("verification-docs").createSignedUrl(path, 300);
   if (error) { showToast("Impossible d'ouvrir le document : " + error.message); return; }
@@ -632,7 +632,7 @@ function filterUsers() {
   if (!tbody) return;
   if (!filtered.length) { tbody.innerHTML = "<tr><td colspan=6 style='text-align:center;padding:30px;color:#999'>Aucun résultat</td></tr>"; return; }
   tbody.innerHTML = filtered.map(function(p) {
-    var docBtn = (p.verification_docs&&p.verification_docs.length) ? "<button class=btn-manage onclick=\"viewVerifDoc('"+p.verification_docs[0]+"')\">📄 Doc</button>" : "";
+    var docBtn = (p.verification_docs&&p.verification_docs.length) ? '<button class=btn-manage onclick="viewVerifDoc(\''+(p.verification_docs[0].path||p.verification_docs[0])+'\')">📄 Doc</button>' : "";
     var appBtn = p.verification_status==="en_attente" ? "<button class=btn-approve onclick=\"setVerification('"+p.id+"','verifie')\">✓</button><button class=btn-reject2 onclick=\"setVerification('"+p.id+"','incomplet')\">✕</button>" : "";
     var susBtn = p.is_suspended ? "<button class='action-btn success' onclick=\"toggleSuspend('"+p.id+"',false)\">Réactiver</button>" : "<button class='action-btn danger' onclick=\"toggleSuspend('"+p.id+"',true)\">Suspendre</button>";
     return "<tr><td><div class=user-cell><div class=avatar>"+initials(p.full_name)+"</div><div class=user-cell-name>"+(p.full_name||"Sans nom")+"</div></div></td>"+"<td style='text-align:center;font-weight:700;'>"+allTrajets.filter(function(t){return t.transporteur_id===p.id&&t.statut!=="annule";}).length+"</td><td style='text-align:center;font-weight:700;'>"+allReservations.filter(function(r){return r.expediteur_id===p.id;}).length+"</td><td>"+(p.is_suspended?"<span class='badge badge-danger'>Suspendu</span>":verifBadge(p.verification_status))+"</td><td>"+(p.rating?"&#11088; "+p.rating:"&#8212;")+"</td>"+"<td style='color:var(--text-secondary);font-size:12px'>"+formatDate(p.created_at)+"</td>"+"<td><button class=btn-manage onclick=\'openUserModal(&quot;"+p.id+"&quot;)\'>👁 Gérer</button>"+docBtn+appBtn+susBtn+"</td></tr>";
@@ -648,7 +648,7 @@ function openUserModal(uid) {
   var rows = [["Email",p.email||"—"],["Trajets publiés",nbTrajets],["Envois effectués",nbEnvois],["Statut vérification",p.verification_status||"—"],["Note",p.rating?"⭐ "+p.rating:"—"],["Inscrit le",formatDate(p.created_at)],["Suspendu",p.is_suspended?"Oui":"Non"]];
   document.getElementById("umod-content").innerHTML = rows.map(function(r){return "<div class=user-modal-row><span class=user-modal-lbl>"+r[0]+"</span><span class=user-modal-val>"+r[1]+"</span></div>";}).join("");
   var a = "";
-  if (p.verification_docs&&p.verification_docs.length) p.verification_docs.forEach(function(d){a+="<button class=btn-manage onclick=\"viewVerifDoc('"+d+"')\">📄 Voir document</button>";});
+  if (p.verification_docs&&p.verification_docs.length) p.verification_docs.forEach(function(d){a+='<button class=btn-manage onclick="viewVerifDoc(\''+(d.path||d)+'\')">📄 Voir document ('+( d.filename||"doc")+')</button>';});
   if (p.verification_status==="en_attente"){a+="<button class=btn-approve onclick=\"setVerification('"+p.id+"','verifie');closeModal()\">✓ Approuver</button><button class=btn-reject2 onclick=\"setVerification('"+p.id+"','incomplet');closeModal()\">✕ Rejeter</button>";}
   else if (p.verification_status!=="verifie"){a+="<button class=btn-approve onclick=\"setVerification('"+p.id+"','verifie');closeModal()\">✓ Marquer vérifié</button>";}
   if (p.is_suspended){a+="<button class='action-btn success' onclick=\"toggleSuspend('"+p.id+"',false);closeModal()\">Réactiver</button>";}
