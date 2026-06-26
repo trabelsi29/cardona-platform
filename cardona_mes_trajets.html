@@ -24,8 +24,7 @@
   .mascot-mini { width:38px; height:38px; object-fit:contain; display:block; }
   .menu-caption { font-size:10px; color:var(--text-secondary); letter-spacing:0.5px; margin-top:3px; user-select:none; }
   .menu-caption { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.5px; margin-top: 3px; user-select: none; }
-  .dropdown-menu { display: none; position: absolute; top: 64px; right: 0; background: white; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.18); min-width: 200px; overflow: hidden; z-index: 100; }
-  .dropdown-menu.open { display: block; }
+  
   .menu-item { padding: 12px 18px; font-size: 13px; color: var(--dark); cursor: pointer; border-bottom: 1px solid #f0f0f0; }
   .menu-item:last-child { border-bottom: none; }
   .menu-item:hover { background: #FDF8EE; }
@@ -173,6 +172,14 @@
   .prix-cat-ligne { display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px solid #e8e4de; }
   .prix-cat-ligne:last-child { border-bottom:none; }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  .dropdown-menu { display:none; position:absolute; top:58px; right:0; background:white; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); min-width:190px; max-width:220px; overflow:hidden; z-index:500; }
+  .dropdown-menu.open { display:block; }
+  .menu-item { padding:13px 18px; font-size:13px; color:var(--dark); cursor:pointer; border-bottom:1px solid #f0ede8; white-space:nowrap; }
+  .menu-item:hover { background:#faf9f4; }
+  .menu-item:last-child { border-bottom:none; }
+  .menu-item-logout { color:#c0392b; font-weight:600; padding:13px 18px; font-size:13px; cursor:pointer; }
+  .menu-item-logout:hover { background:#fde8e8; }
 </style>
 </head>
 <body>
@@ -200,7 +207,7 @@
           <div class="menu-item" onclick="window.location.href='cardona_cgu.html'">Conditions générales</div>
           <div class="menu-item" onclick="window.location.href='cardona_apropos.html'">À propos</div>
           <div class="menu-item" onclick="window.location.href='cardona_contact.html'">Contactez-nous</div>
-          <div class="menu-item-logout" onclick="handleMenuLogout()">Déconnexion</div>
+          <div class="menu-item-logout" onclick="handleLogout()">Déconnexion</div>
         </div>
       </div>
     </div>
