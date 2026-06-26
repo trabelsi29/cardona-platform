@@ -645,7 +645,7 @@ async function loadHome() {
   statusLine.innerHTML = `<span class="verif-status-badge vs-${status}">${statusLabel(status)}</span>` +
     (status === 'non_soumis' ? `<div class="verif-helper">Envoyez une pièce d'identité pour pouvoir publier des trajets.</div>` :
      status === 'en_attente' ? `<div class="verif-helper">Votre profil est en cours de vérification par notre équipe.</div>` :
-     status === 'verifie' ? `<div class="verif-helper">Vous pouvez publier des trajets.</div>` :
+     status === 'verifie' ? `<div class="verif-helper">${currentProfile && currentProfile.role === 'transporteur' ? 'Vous pouvez publier des trajets.' : 'Votre profil est vérifié.'}</div>` :
      `<div class="verif-helper">Veuillez renvoyer une pièce d'identité lisible.</div>`);
 
   // On cache la zone d'upload une fois vérifié ou en attente de revue
