@@ -227,8 +227,18 @@
         <!-- USERS -->
         <div class="page" id="page-users">
           <div class="card" style="padding:0;overflow:hidden;">
+            <div style="display:flex;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+              <input type="text" id="user-search" placeholder="🔍 Rechercher..." oninput="filterUsers()" style="flex:1;min-width:140px;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;">
+              <select id="user-filter-status" onchange="filterUsers()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;outline:none;background:white;">
+                <option value="">Tous les statuts</option>
+                <option value="non_soumis">Non soumis</option>
+                <option value="en_attente">En attente</option>
+                <option value="verifie">Vérifié</option>
+                <option value="incomplet">Incomplet</option>
+              </select>
+            </div>
             <table class="data-table">
-              <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Statut</th><th>Note</th><th>Inscrit le</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Utilisateur</th><th>Trajets</th><th>Envois</th><th>Statut</th><th>Note</th><th>Inscrit le</th><th>Actions</th></tr></thead>
               <tbody id="users-tbody"><tr><td colspan="6" class="loading-row">Chargement…</td></tr></tbody>
             </table>
           </div>
@@ -362,11 +372,16 @@ async function handleLogout() {
 // ============================================================
 // CHARGEMENT DES DONNÉES
 // ============================================================
+var allReservations = [];
 async function loadAllData() {
-  const { data: profiles } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-  const { data: trajets } = await sb.from('trajets').select('*').order('created_at', { ascending: false });
-  allProfiles = profiles || [];
-  allTrajets = trajets || [];
+  const [pr, tr, rr] = await Promise.all([
+    sb.from('profiles').select('*').order('created_at', {ascending:false}),
+    sb.from('trajets').select('*').order('created_at', {ascending:false}),
+    sb.from('reservations').select('expediteur_id,statut')
+  ]);
+  allProfiles = pr.data || [];
+  allTrajets = tr.data || [];
+  allReservations = rr.data || [];
   renderDashboard();
   renderUsers();
   renderVerif();
@@ -442,176 +457,40 @@ function renderDashboard() {
 // ============================================================
 // UTILISATEURS
 // ============================================================
-function renderUsers() {
-  const tbody = document.getElementById('users-tbody');
-  if (allProfiles.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
-      <div class="empty-state-icon">👥</div>
-      <div class="empty-state-title">Aucun utilisateur pour l'instant</div>
-      <div class="empty-state-desc">Les comptes créés sur votre app CARDONA apparaîtront ici.</div>
-    </div></td></tr>`;
-    return;
-  }
-  tbody.innerHTML = allProfiles.map(p => `
-    <tr>
-      <td><div class="user-cell"><div class="avatar">${initials(p.full_name)}</div><div class="user-cell-name">${p.full_name || 'Sans nom'}</div></div></td>
-      <td>${roleLabel(p.role)}</td>
-      <td>${p.is_suspended ? '<span class="badge badge-danger">Suspendu</span>' : verifBadge(p.verification_status)}</td>
-      <td>${p.rating ? '⭐ ' + p.rating : '—'}</td>
-      <td style="color:var(--text-secondary);font-size:12px;">${formatDate(p.created_at)}</td>
-      <td>
-        ${p.is_suspended
-          ? `<button class="action-btn success" onclick="toggleSuspend('${p.id}', false)">Réactiver</button>`
-          : `<button class="action-btn danger" onclick="toggleSuspend('${p.id}', true)">Suspendre</button>`
-        }
-      </td>
-    </tr>`).join('');
-}
+function renderUsers() { filterUsers(); }
 
-async function toggleSuspend(userId, suspend) {
-  const { error } = await sb.from('profiles').update({ is_suspended: suspend }).eq('id', userId);
-  if (error) { showToast('Erreur : ' + error.message); return; }
-  showToast(suspend ? 'Compte suspendu' : 'Compte réactivé');
-  await loadAllData();
-}
-
-// ============================================================
-// VÉRIFICATION
-// ============================================================
-function renderVerif() {
-  const box = document.getElementById('verif-list');
-  const pending = allProfiles.filter(p => p.verification_status === 'en_attente' || p.verification_status === 'incomplet');
-  if (pending.length === 0) {
-    box.innerHTML = `<div class="empty-state">
-      <div class="empty-state-icon">✓</div>
-      <div class="empty-state-title">Aucun compte en attente</div>
-      <div class="empty-state-desc">Quand un transporteur soumettra ses documents d'identité, ils apparaîtront ici pour validation.</div>
-    </div>`;
-    return;
-  }
-  box.innerHTML = pending.map(p => `
-    <div class="card" style="display:flex;align-items:center;gap:16px;margin-bottom:10px;">
-      <div class="avatar" style="width:44px;height:44px;font-size:15px;">${initials(p.full_name)}</div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:14px;font-weight:500;">${p.full_name || 'Sans nom'}</div>
-        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">${p.role === 'transporteur' ? 'Transporteur' : 'Expéditeur'} · ${p.phone || 'téléphone non renseigné'}</div>
-        <div style="font-size:11px;color:var(--color-text-tertiary,#999);margin-top:2px;">${(p.verification_docs && p.verification_docs.length) ? p.verification_docs.length + ' document(s) soumis' : 'Aucun document joint'}</div>
-      </div>
-      <div style="text-align:right;margin-right:8px;">${verifBadge(p.verification_status)}</div>
-      <div>
-        ${(p.verification_docs && p.verification_docs.length) ? `<button class="btn-view" onclick='viewVerifDoc(${JSON.stringify(p.verification_docs[p.verification_docs.length-1].path)})'>📄 Voir docs</button>` : ''}
-        <button class="action-btn success" onclick="setVerification('${p.id}', 'verifie')">✓ Valider</button>
-        <button class="action-btn danger" onclick="setVerification('${p.id}', 'refuse')">✕ Refuser</button>
-      </div>
-    </div>`).join('');
-}
-
-async function viewVerifDoc(path) {
-  const { data, error } = await sb.storage.from('verification-docs').createSignedUrl(path, 300);
-  if (error) { showToast('Impossible d\u2019ouvrir le document : ' + error.message); return; }
-  window.open(data.signedUrl, '_blank');
-}
-
-async function setVerification(userId, status) {
-  const { error } = await sb.from('profiles').update({ verification_status: status }).eq('id', userId);
-  if (error) { showToast('Erreur : ' + error.message); return; }
-  showToast(status === 'verifie' ? 'Compte validé' : 'Compte refusé');
-  await loadAllData();
-}
-
-// ============================================================
-// TRAJETS
-// ============================================================
-function trajetStatutBadge(s) {
-  const map = {
-    'publie': '<span class="badge badge-info">Publié</span>',
-    'complet': '<span class="badge badge-warning">Complet</span>',
-    'termine': '<span class="badge badge-gray">Terminé</span>',
-    'annule': '<span class="badge badge-danger">Annulé</span>',
-  };
-  return map[s] || s;
-}
-
-function modeLabel(m) {
-  const map = { avion: '✈ Avion', camion_fourgon: '🚛 Camion/fourgon', voiture: '🚗 Voiture', train_bus: '🚆 Train/bus', autre: '❓ Autre' };
-  return map[m] || m;
-}
-
-function renderTrajets() {
-  const tbody = document.getElementById('trajets-tbody');
-  if (allTrajets.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">
-      <div class="empty-state-icon">🗺</div>
-      <div class="empty-state-title">Aucun trajet publié pour l'instant</div>
-      <div class="empty-state-desc">Dès qu'un transporteur publiera un trajet depuis l'app, il apparaîtra ici.</div>
-    </div></td></tr>`;
-    return;
-  }
-  const profileMap = {};
-  allProfiles.forEach(p => profileMap[p.id] = p.full_name);
-
-  tbody.innerHTML = allTrajets.map(t => `
-    <tr>
-      <td style="font-size:12px;font-family:monospace;color:var(--text-secondary);">${t.id.slice(0,8)}</td>
-      <td>${profileMap[t.transporteur_id] || 'Inconnu'}</td>
-      <td>${t.lieu_ramassage} → ${t.lieu_distribution}</td>
-      <td>${modeLabel(t.mode_transport)}</td>
-      <td style="font-size:12px;color:var(--text-secondary);">${formatDate(t.date_ramassage)}</td>
-      <td>${t.prix} ${t.devise || 'EUR'}</td>
-      <td>${trajetStatutBadge(t.statut)}</td>
-    </tr>`).join('');
-}
-
-// ============================================================
-// NAVIGATION
-// ============================================================
-const titles = {
-  dashboard: "Vue d'ensemble", users: 'Gestion des comptes', verif: 'Vérification des comptes',
-  trajets: 'Trajets', settings: 'Paramètres'
-};
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  document.getElementById('page-title').textContent = titles[id];
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.page === id));
-}
-
-// Connexion au clavier (touche Entrée)
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('login-password').addEventListener('keypress', e => {
-    if (e.key === 'Enter') handleLogin();
+function filterUsers() {
+  var s = (document.getElementById("user-search")||{value:""}).value.toLowerCase();
+  var sf = (document.getElementById("user-filter-status")||{value:""}).value;
+  var filtered = allProfiles.filter(function(p) {
+    var nm = ((p.full_name||"")+(p.email||"")).toLowerCase();
+    return (!s||nm.includes(s)) && (!sf||p.verification_status===sf);
   });
-});
-
-// Reprise de session si déjà connecté
-sb.auth.getSession().then(({ data: { session } }) => {
-  if (session) {
-    sb.from('profiles').select('is_admin, full_name').eq('id', session.user.id).single().then(({ data: profile }) => {
-      if (profile && profile.is_admin) {
-        document.getElementById('admin-name').textContent = profile.full_name || session.user.email;
-        document.getElementById('admin-avatar').textContent = (profile.full_name || session.user.email).slice(0,2).toUpperCase();
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app-screen').style.display = 'block';
-        loadAllData();
-      }
-    });
-  }
-});
-
-function toggleSidebar() {
-  document.querySelector('.sidebar').classList.toggle('open');
-  document.getElementById('sidebar-overlay').classList.toggle('open');
+  var tbody = document.getElementById("users-tbody");
+  if (!tbody) return;
+  if (!filtered.length) { tbody.innerHTML = "<tr><td colspan=6 style='text-align:center;padding:24px;color:#999'>Aucun résultat</td></tr>"; return; }
+  tbody.innerHTML = filtered.map(function(p) {
+    var nbt = allTrajets.filter(function(t){return t.transporteur_id===p.id&&t.statut!=="annule";}).length;
+    var nbe = allReservations.filter(function(r){return r.expediteur_id===p.id;}).length;
+    var hasDoc = p.verification_docs&&p.verification_docs.length&&p.verification_docs[0].path;
+    var docBtn = hasDoc ? '<button class="action-btn" style="background:#f0edd8;color:#b97a20;border:1px solid #c4bd97;" onclick="viewVerifDoc(\'' + p.verification_docs[0].path + '\')">📄 Doc</button>' : "";
+    var appBtn = p.verification_status==="en_attente"
+      ? '<button class="action-btn success" onclick="setVerification(\'' + p.id + '\',\'verifie\')">✓</button><button class="action-btn danger" onclick="setVerification(\'' + p.id + '\',\'incomplet\')">✕</button>'
+      : "";
+    var susBtn = p.is_suspended
+      ? '<button class="action-btn success" onclick="toggleSuspend(\'' + p.id + '\',false)">Réactiver</button>'
+      : '<button class="action-btn danger" onclick="toggleSuspend(\'' + p.id + '\',true)">Suspendre</button>';
+    return "<tr>"
+      + "<td><div class='user-cell'><div class='avatar'>"+initials(p.full_name)+"</div>"
+      + "<div class='user-cell-name'>"+(p.full_name||"Sans nom")+"</div></div></td>"
+      + "<td style='text-align:center;font-weight:700;'>"+nbt+"</td>"
+      + "<td style='text-align:center;font-weight:700;'>"+nbe+"</td>"
+      + "<td>"+(p.is_suspended?"<span class='badge badge-danger'>Suspendu</span>":verifBadge(p.verification_status))+"</td>"
+      + "<td>"+(p.rating?"⭐ "+p.rating:"—")+"</td>"
+      + "<td style='color:var(--color-text-secondary);font-size:12px;'>"+formatDate(p.created_at)+"</td>"
+      + "<td>"+docBtn+appBtn+susBtn+"</td>"
+      + "</tr>";
+  }).join("");
 }
-function closeSidebar() {
-  document.querySelector('.sidebar').classList.remove('open');
-  document.getElementById('sidebar-overlay').classList.remove('open');
-}
-// Fermer sidebar quand on clique sur un item
-document.querySelectorAll('.nav-item').forEach(function(el) {
-  el.addEventListener('click', function() {
-    if (window.innerWidth <= 768) closeSidebar();
-  });
-});
-</script>
-</body>
-</html>
+
+
