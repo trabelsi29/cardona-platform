@@ -143,8 +143,7 @@
   .mascot-mini { width: 44px; height: 44px; cursor: pointer; border-radius: 8px; }
   .mascot-mini:hover { opacity: 0.85; }
   .menu-caption { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.5px; margin-top: 3px; user-select: none; }
-  .dropdown-menu { display: none; position: absolute; top: 64px; right: 0; background: white; border-radius: 12px; box-shadow: 0 12px 30px rgba(0,0,0,0.18); min-width: 200px; overflow: hidden; z-index: 100; }
-  .dropdown-menu.open { display: block; }
+  
   .menu-item { padding: 12px 18px; font-size: 13px; color: var(--dark); cursor: pointer; border-bottom: 1px solid #f0f0f0; }
   .menu-item:last-child { border-bottom: none; }
   .menu-item:hover { background: #FDF8EE; }
@@ -207,6 +206,14 @@
   .btn-annuler-trajet { width:100%; padding:12px; border-radius:12px; border:1.5px solid #d9534f; background:white; color:#d9534f; font-size:14px; font-weight:600; cursor:pointer; margin-top:8px; font-family:inherit; }
   .success-msg { background:#e8f5ef; color:#2e7d5e; border-radius:10px; padding:12px 16px; font-size:13px; font-weight:600; margin-bottom:14px; display:none; }
   @keyframes spin { to { transform:rotate(360deg); } }
+
+  .dropdown-menu { display:none; position:absolute; top:58px; right:0; background:white; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); min-width:190px; max-width:220px; overflow:hidden; z-index:500; }
+  .dropdown-menu.open { display:block; }
+  .menu-item { padding:13px 18px; font-size:13px; color:var(--dark); cursor:pointer; border-bottom:1px solid #f0ede8; white-space:nowrap; }
+  .menu-item:hover { background:#faf9f4; }
+  .menu-item:last-child { border-bottom:none; }
+  .menu-item-logout { color:#c0392b; font-weight:600; padding:13px 18px; font-size:13px; cursor:pointer; }
+  .menu-item-logout:hover { background:#fde8e8; }
 </style>
 </head>
 <body>
