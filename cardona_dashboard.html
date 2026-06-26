@@ -227,11 +227,6 @@
           <div class="card" style="padding:0;overflow:hidden;">
             <div class="search-bar">
               <input type="text" id="user-search" placeholder="🔍 Rechercher par nom ou email..." oninput="filterUsers()">
-              <select id="user-filter-role" onchange="filterUsers()">
-                <option value="">Tous les rôles</option>
-                <option value="expediteur">Expéditeur</option>
-                <option value="transporteur">Transporteur</option>
-              </select>
               <select id="user-filter-status" onchange="filterUsers()">
                 <option value="">Tous les statuts</option>
                 <option value="non_soumis">Non soumis</option>
@@ -627,11 +622,11 @@ sb.auth.getSession().then(({ data: { session } }) => {
 
 function filterUsers() {
   var s = (document.getElementById("user-search") ? document.getElementById("user-search").value : "").toLowerCase();
-  var rf = document.getElementById("user-filter-role") ? document.getElementById("user-filter-role").value : "";
+  var rf = "";
   var sf = document.getElementById("user-filter-status") ? document.getElementById("user-filter-status").value : "";
   var filtered = allProfiles.filter(function(p) {
     var nm = ((p.full_name||"")+(p.email||"")).toLowerCase();
-    return (!s||nm.includes(s)) && (!rf||p.role===rf) && (!sf||p.verification_status===sf);
+    return (!s||nm.includes(s)) && (!sf||p.verification_status===sf);
   });
   var tbody = document.getElementById("users-tbody");
   if (!tbody) return;
