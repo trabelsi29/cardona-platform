@@ -269,7 +269,12 @@ async function checkAccess() {
   document.getElementById('main-content').style.display = 'block';
   // nav buildNav
 
-  const { data: profile } = await sb.from('profiles').select('role').eq('id', currentUser.id).single();
+  const { data: profile } = await sb.from('profiles').select('role, is_suspended').eq('id', currentUser.id).single();
+  if (profile && profile.is_suspended) {
+    await sb.auth.signOut();
+    window.location.href = 'cardona_app.html';
+    return;
+  }
   userRole = profile?.role || 'expediteur';
   // Mettre à jour le titre selon le rôle
   var titleEl = document.getElementById('page-title');
