@@ -309,11 +309,9 @@ function envoyerMessage() {
 
   emailjs.init({ publicKey: EMAILJS_PUBKEY });
   emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
-    from_name:  name,
-    from_email: email,
-    subject:    sujet,
-    message:    msg,
-    to_email:   "trabelsi-amine@outlook.com"
+    name:    name + " (" + email + ")",
+    message: "Sujet : " + sujet + "\n\n" + msg,
+    time:    new Date().toLocaleString("fr-FR")
   }).then(function() {
     document.getElementById("send-success").style.display = "block";
     document.getElementById("c-name").value    = "";
