@@ -241,7 +241,7 @@
               </select>
             </div>
             <table class="data-table">
-              <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Statut</th><th>Note</th><th>Inscrit le</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Utilisateur</th><th>Trajets</th><th>Envois</th><th>Statut</th><th>Note</th><th>Inscrit le</th><th>Actions</th></tr></thead>
               <tbody id="users-tbody"><tr><td colspan="6" class="loading-row">Chargement…</td></tr></tbody>
             </table>
           </div>
@@ -383,11 +383,16 @@ async function handleLogout() {
 // ============================================================
 // CHARGEMENT DES DONNÉES
 // ============================================================
+var allReservations = [];
 async function loadAllData() {
-  const { data: profiles } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-  const { data: trajets } = await sb.from('trajets').select('*').order('created_at', { ascending: false });
-  allProfiles = profiles || [];
-  allTrajets = trajets || [];
+  const [profRes, trajRes, resaRes] = await Promise.all([
+    sb.from('profiles').select('*').order('created_at', { ascending: false }),
+    sb.from('trajets').select('*').order('created_at', { ascending: false }),
+    sb.from('reservations').select('expediteur_id, trajet_id, statut')
+  ]);
+  allProfiles = profRes.data || [];
+  allTrajets = trajRes.data || [];
+  allReservations = resaRes.data || [];
   renderDashboard();
   renderUsers();
   renderVerif();
@@ -635,7 +640,7 @@ function filterUsers() {
     var docBtn = (p.verification_docs&&p.verification_docs.length) ? "<button class=btn-manage onclick=\"viewVerifDoc('"+p.verification_docs[0]+"')\">📄 Doc</button>" : "";
     var appBtn = p.verification_status==="en_attente" ? "<button class=btn-approve onclick=\"setVerification('"+p.id+"','verifie')\">✓</button><button class=btn-reject2 onclick=\"setVerification('"+p.id+"','incomplet')\">✕</button>" : "";
     var susBtn = p.is_suspended ? "<button class='action-btn success' onclick=\"toggleSuspend('"+p.id+"',false)\">Réactiver</button>" : "<button class='action-btn danger' onclick=\"toggleSuspend('"+p.id+"',true)\">Suspendre</button>";
-    return "<tr><td><div class=user-cell><div class=avatar>"+initials(p.full_name)+"</div><div class=user-cell-name>"+(p.full_name||"Sans nom")+"</div></div></td><td>"+roleLabel(p.role)+"</td><td>"+(p.is_suspended?"<span class='badge badge-danger'>Suspendu</span>":verifBadge(p.verification_status))+"</td><td>"+(p.rating?"⭐ "+p.rating:"—")+"</td><td style='color:var(--text-secondary);font-size:12px'>"+formatDate(p.created_at)+"</td><td><button class=btn-manage onclick=\"openUserModal('"+p.id+"')\">👁 Gérer</button>"+docBtn+appBtn+susBtn+"</td></tr>";
+    return "<tr><td><div class=user-cell><div class=avatar>"+initials(p.full_name)+"</div><div class=user-cell-name>"+(p.full_name||"Sans nom")+"</div></div></td>+"<td style='text-align:center;font-weight:600;'>"+allTrajets.filter(function(t){return t.transporteur_id===p.id&&t.statut!=='annule';}).length+"</td>+"<td style='text-align:center;font-weight:600;'>"+allReservations.filter(function(r){return r.expediteur_id===p.id;}).length+"</td>+"<td>"+(p.is_suspended?"<span class='badge badge-danger'>Suspendu</span>":verifBadge(p.verification_status))+"</td><td>"+(p.rating?"⭐ "+p.rating:"—")+"</td><td style='color:var(--text-secondary);font-size:12px'>"+formatDate(p.created_at)+"</td><td><button class=btn-manage onclick=\"openUserModal('"+p.id+"')\">👁 Gérer</button>"+docBtn+appBtn+susBtn+"</td></tr>";
   }).join("");
 }
 
@@ -643,7 +648,9 @@ function openUserModal(uid) {
   var p = allProfiles.find(function(x){return x.id===uid;});
   if (!p) return;
   document.getElementById("umod-name").textContent = p.full_name || "Sans nom";
-  var rows = [["Email",p.email||"—"],["Rôle",p.role==="expediteur"?"Expéditeur":"Transporteur"],["Statut",p.verification_status||"—"],["Note",p.rating?"⭐ "+p.rating:"—"],["Inscrit le",formatDate(p.created_at)],["Suspendu",p.is_suspended?"Oui":"Non"]];
+  var nbTrajets = allTrajets.filter(function(t){return t.transporteur_id===p.id&&t.statut!=="annule";}).length;
+  var nbEnvois = allReservations.filter(function(r){return r.expediteur_id===p.id;}).length;
+  var rows = [["Email",p.email||"—"],["Trajets publiés",nbTrajets],["Envois effectués",nbEnvois],["Statut vérification",p.verification_status||"—"],["Note",p.rating?"⭐ "+p.rating:"—"],["Inscrit le",formatDate(p.created_at)],["Suspendu",p.is_suspended?"Oui":"Non"]];
   document.getElementById("umod-content").innerHTML = rows.map(function(r){return "<div class=user-modal-row><span class=user-modal-lbl>"+r[0]+"</span><span class=user-modal-val>"+r[1]+"</span></div>";}).join("");
   var a = "";
   if (p.verification_docs&&p.verification_docs.length) p.verification_docs.forEach(function(d){a+="<button class=btn-manage onclick=\"viewVerifDoc('"+d+"')\">📄 Voir document</button>";});
