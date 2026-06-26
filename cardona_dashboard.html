@@ -4,7 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CARDONA — Administration</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+async function viewVerifDoc(raw) {
+  var fp = typeof raw === 'string' ? raw : (raw && raw.path ? raw.path : '');
+  if (!fp) { showToast('Chemin de document invalide'); return; }
+  const { data, error } = await sb.storage.from('verification-docs').createSignedUrl(fp, 300);
+  if (error) { showToast('Erreur ouverture : ' + error.message); return; }
+  window.open(data.signedUrl, '_blank');
+}
+</script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
