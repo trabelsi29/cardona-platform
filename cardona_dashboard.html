@@ -169,7 +169,6 @@
         <div class="nav-item" data-page="verif" onclick="showPage('verif')">✓ Vérification <span class="nav-badge" id="verif-badge">0</span></div>
         <div class="nav-section">Marketplace</div>
         <div class="nav-item" data-page="trajets" onclick="showPage('trajets')">🗺 Trajets</div>
-        <div class="nav-item" data-page="messages" onclick="showPage('messages')">💬 Messagerie</div>
         <div class="nav-section">Plateforme</div>
         <div class="nav-item" data-page="settings" onclick="showPage('settings')">⚙ Paramètres</div>
       </div>
@@ -472,7 +471,7 @@ function renderVerif() {
     </div>`).join('');
 }
 
-async function viewVerifDoc(path) {
+async async function viewVerifDoc(path) {
   const { data, error } = await sb.storage.from('verification-docs').createSignedUrl(path, 300);
   if (error) { showToast('Impossible d\u2019ouvrir le document : ' + error.message); return; }
   window.open(data.signedUrl, '_blank');
@@ -533,7 +532,7 @@ function renderTrajets() {
 // ============================================================
 const titles = {
   dashboard: "Vue d'ensemble", users: 'Gestion des comptes', verif: 'Vérification des comptes',
-  trajets: 'Trajets', messages: 'Messagerie', settings: 'Paramètres'
+  trajets: 'Trajets', settings: 'Paramètres'
 };
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
