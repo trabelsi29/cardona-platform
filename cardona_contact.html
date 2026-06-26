@@ -240,16 +240,6 @@
           <input type="text" id="c-name" placeholder="Votre nom"></div>
         <div class="contact-field"><label>Email</label>
           <input type="email" id="c-email" placeholder="votre@email.com"></div>
-        <div class="contact-field"><label>Sujet</label>
-          <select id="c-sujet">
-            <option value="">Choisissez un sujet</option>
-            <option>Problème avec une réservation</option>
-            <option>Signaler un utilisateur</option>
-            <option>Question sur les frais</option>
-            <option>Suggestion d'amélioration</option>
-            <option>Demande de suppression de compte</option>
-            <option>Autre</option>
-          </select></div>
         <div class="contact-field"><label>Message</label>
           <textarea id="c-message" placeholder="Décrivez votre demande…"></textarea></div>
         <!-- Honeypot anti-bot : visible uniquement par les bots -->
@@ -279,7 +269,6 @@ var _formLoadTime = Date.now();
 function envoyerMessage() {
   var name  = document.getElementById("c-name").value.trim();
   var email = document.getElementById("c-email").value.trim();
-  var sujet = document.getElementById("c-sujet").value;
   var msg   = document.getElementById("c-message").value.trim();
   var hp    = document.getElementById("hp-field").value;
 
@@ -292,7 +281,7 @@ function envoyerMessage() {
     return;
   }
 
-  if (!name || !email || !sujet || !msg) {
+  if (!name || !email || !msg) {
     alert("Veuillez remplir tous les champs.");
     return;
   }
@@ -310,13 +299,12 @@ function envoyerMessage() {
   emailjs.init({ publicKey: EMAILJS_PUBKEY });
   emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
     name:    name + " (" + email + ")",
-    message: "Sujet : " + sujet + "\n\n" + msg,
+    message: msg,
     time:    new Date().toLocaleString("fr-FR")
   }).then(function() {
     document.getElementById("send-success").style.display = "block";
     document.getElementById("c-name").value    = "";
     document.getElementById("c-email").value   = "";
-    document.getElementById("c-sujet").value   = "";
     document.getElementById("c-message").value = "";
     btn.textContent = "Message envoyé ✓";
     window.scrollTo(0, 0);
