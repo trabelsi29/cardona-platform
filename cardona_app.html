@@ -593,6 +593,16 @@ async function loadHome() {
   const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
   currentProfile = profile;
 
+  // Vérifier si le compte est suspendu
+  if (profile && profile.is_suspended) {
+    await sb.auth.signOut();
+    switchView('login');
+    document.getElementById('login-error').textContent = 'Votre compte a été suspendu. Contactez le support : trabelsi-amine@outlook.com';
+    document.getElementById('login-error').style.display = 'block';
+    return;
+  }
+
+
   document.getElementById('home-name').textContent = profile?.full_name || user.email;
   document.getElementById('home-role').textContent = roleLabel(profile?.role);
   buildNav('profil');
