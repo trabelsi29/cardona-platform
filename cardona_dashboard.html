@@ -120,6 +120,25 @@
 
   .loading-row { text-align: center; padding: 30px; color: var(--text-secondary); font-size: 13px; }
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--dark); color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: none; z-index: 999; }
+
+  .search-bar { display:flex; gap:10px; padding:16px 20px; border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .search-bar input { flex:1; min-width:160px; padding:9px 14px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; outline:none; }
+  .search-bar input:focus { border-color:var(--gold); }
+  .search-bar select { padding:9px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; outline:none; cursor:pointer; background:white; }
+  .btn-manage { background:#f0edd8; color:#b97a20; border:1px solid #c4bd97; border-radius:6px; padding:5px 10px; font-size:11px; cursor:pointer; font-weight:600; }
+  .btn-manage:hover { background:#e8e3c8; }
+  .btn-approve { background:#e8f5ef; color:#2e7d5e; border:1px solid #b2d9c6; border-radius:6px; padding:5px 10px; font-size:11px; cursor:pointer; font-weight:600; }
+  .btn-reject2 { background:#fde8e8; color:#c0392b; border:1px solid #f0b8b8; border-radius:6px; padding:5px 10px; font-size:11px; cursor:pointer; font-weight:600; }
+  .user-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:1000; align-items:center; justify-content:center; }
+  .user-modal.open { display:flex; }
+  .user-modal-box { background:white; border-radius:16px; padding:28px 28px 20px; width:460px; max-width:95vw; max-height:88vh; overflow-y:auto; position:relative; }
+  .user-modal-title { font-size:17px; font-weight:700; margin-bottom:16px; color:#1a1410; padding-right:30px; }
+  .user-modal-row { display:flex; justify-content:space-between; align-items:center; padding:9px 0; border-bottom:1px solid #f5f2ee; font-size:13px; }
+  .user-modal-row:last-of-type { border-bottom:none; }
+  .user-modal-lbl { color:#999; }
+  .user-modal-val { font-weight:600; color:#1a1410; text-align:right; }
+  .user-modal-actions { display:flex; gap:8px; margin-top:18px; flex-wrap:wrap; }
+  .modal-close-btn { position:absolute; top:14px; right:16px; background:none; border:none; font-size:22px; cursor:pointer; color:#aaa; line-height:1; }
 </style>
 </head>
 <body>
@@ -206,6 +225,21 @@
         <!-- USERS -->
         <div class="page" id="page-users">
           <div class="card" style="padding:0;overflow:hidden;">
+            <div class="search-bar">
+              <input type="text" id="user-search" placeholder="🔍 Rechercher par nom ou email..." oninput="filterUsers()">
+              <select id="user-filter-role" onchange="filterUsers()">
+                <option value="">Tous les rôles</option>
+                <option value="expediteur">Expéditeur</option>
+                <option value="transporteur">Transporteur</option>
+              </select>
+              <select id="user-filter-status" onchange="filterUsers()">
+                <option value="">Tous les statuts</option>
+                <option value="non_soumis">Non soumis</option>
+                <option value="en_attente">En attente</option>
+                <option value="verifie">Vérifié</option>
+                <option value="incomplet">Incomplet</option>
+              </select>
+            </div>
             <table class="data-table">
               <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Statut</th><th>Note</th><th>Inscrit le</th><th>Actions</th></tr></thead>
               <tbody id="users-tbody"><tr><td colspan="6" class="loading-row">Chargement…</td></tr></tbody>
@@ -265,6 +299,14 @@
   </div>
 </div>
 
+<div class="user-modal" id="user-modal" onclick="if(event.target===this)closeModal()">
+  <div class="user-modal-box">
+    <button class="modal-close-btn" onclick="closeModal()">×</button>
+    <div class="user-modal-title" id="umod-name">Utilisateur</div>
+    <div id="umod-content"></div>
+    <div class="user-modal-actions" id="umod-actions"></div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -421,7 +463,8 @@ function renderDashboard() {
 // ============================================================
 // UTILISATEURS
 // ============================================================
-function renderUsers() {
+function renderUsers() { filterUsers(); }
+function _renderUsersFull() {
   const tbody = document.getElementById('users-tbody');
   if (allProfiles.length === 0) {
     tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">
@@ -576,6 +619,43 @@ sb.auth.getSession().then(({ data: { session } }) => {
     });
   }
 });
+
+function filterUsers() {
+  var s = (document.getElementById("user-search") ? document.getElementById("user-search").value : "").toLowerCase();
+  var rf = document.getElementById("user-filter-role") ? document.getElementById("user-filter-role").value : "";
+  var sf = document.getElementById("user-filter-status") ? document.getElementById("user-filter-status").value : "";
+  var filtered = allProfiles.filter(function(p) {
+    var nm = ((p.full_name||"")+(p.email||"")).toLowerCase();
+    return (!s||nm.includes(s)) && (!rf||p.role===rf) && (!sf||p.verification_status===sf);
+  });
+  var tbody = document.getElementById("users-tbody");
+  if (!tbody) return;
+  if (!filtered.length) { tbody.innerHTML = "<tr><td colspan=6 style='text-align:center;padding:30px;color:#999'>Aucun résultat</td></tr>"; return; }
+  tbody.innerHTML = filtered.map(function(p) {
+    var docBtn = (p.verification_docs&&p.verification_docs.length) ? "<button class=btn-manage onclick=\"viewVerifDoc('"+p.verification_docs[0]+"')\">📄 Doc</button>" : "";
+    var appBtn = p.verification_status==="en_attente" ? "<button class=btn-approve onclick=\"setVerification('"+p.id+"','verifie')\">✓</button><button class=btn-reject2 onclick=\"setVerification('"+p.id+"','incomplet')\">✕</button>" : "";
+    var susBtn = p.is_suspended ? "<button class='action-btn success' onclick=\"toggleSuspend('"+p.id+"',false)\">Réactiver</button>" : "<button class='action-btn danger' onclick=\"toggleSuspend('"+p.id+"',true)\">Suspendre</button>";
+    return "<tr><td><div class=user-cell><div class=avatar>"+initials(p.full_name)+"</div><div class=user-cell-name>"+(p.full_name||"Sans nom")+"</div></div></td><td>"+roleLabel(p.role)+"</td><td>"+(p.is_suspended?"<span class='badge badge-danger'>Suspendu</span>":verifBadge(p.verification_status))+"</td><td>"+(p.rating?"⭐ "+p.rating:"—")+"</td><td style='color:var(--text-secondary);font-size:12px'>"+formatDate(p.created_at)+"</td><td><button class=btn-manage onclick=\"openUserModal('"+p.id+"')\">👁 Gérer</button>"+docBtn+appBtn+susBtn+"</td></tr>";
+  }).join("");
+}
+
+function openUserModal(uid) {
+  var p = allProfiles.find(function(x){return x.id===uid;});
+  if (!p) return;
+  document.getElementById("umod-name").textContent = p.full_name || "Sans nom";
+  var rows = [["Email",p.email||"—"],["Rôle",p.role==="expediteur"?"Expéditeur":"Transporteur"],["Statut",p.verification_status||"—"],["Note",p.rating?"⭐ "+p.rating:"—"],["Inscrit le",formatDate(p.created_at)],["Suspendu",p.is_suspended?"Oui":"Non"]];
+  document.getElementById("umod-content").innerHTML = rows.map(function(r){return "<div class=user-modal-row><span class=user-modal-lbl>"+r[0]+"</span><span class=user-modal-val>"+r[1]+"</span></div>";}).join("");
+  var a = "";
+  if (p.verification_docs&&p.verification_docs.length) p.verification_docs.forEach(function(d){a+="<button class=btn-manage onclick=\"viewVerifDoc('"+d+"')\">📄 Voir document</button>";});
+  if (p.verification_status==="en_attente"){a+="<button class=btn-approve onclick=\"setVerification('"+p.id+"','verifie');closeModal()\">✓ Approuver</button><button class=btn-reject2 onclick=\"setVerification('"+p.id+"','incomplet');closeModal()\">✕ Rejeter</button>";}
+  else if (p.verification_status!=="verifie"){a+="<button class=btn-approve onclick=\"setVerification('"+p.id+"','verifie');closeModal()\">✓ Marquer vérifié</button>";}
+  if (p.is_suspended){a+="<button class='action-btn success' onclick=\"toggleSuspend('"+p.id+"',false);closeModal()\">Réactiver</button>";}
+  else{a+="<button class='action-btn danger' onclick=\"toggleSuspend('"+p.id+"',true);closeModal()\">Suspendre</button>";}
+  document.getElementById("umod-actions").innerHTML = a;
+  document.getElementById("user-modal").classList.add("open");
+}
+
+function closeModal() { document.getElementById("user-modal").classList.remove("open"); }
 </script>
 </body>
 </html>
