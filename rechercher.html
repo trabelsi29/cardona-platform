@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CARDONA — Rechercher un transporteur</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.stripe.com/v3/"></script>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -373,6 +374,12 @@
         <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">
           💰 Le reste (~<strong id="pay-cash-amount">—</strong>) se règle <strong>directement avec le transporteur</strong> lors de la remise du colis, en espèces ou tout autre moyen convenu.
         </div>
+      </div>
+      <!-- Formulaire Stripe -->
+      <div id="stripe-payment-form" style="display:none;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">💳 Paiement sécurisé</div>
+        <div id="payment-element" style="padding:4px 0;"></div>
+        <div id="stripe-error" style="color:#c0392b;font-size:12px;margin-top:8px;display:none;"></div>
       </div>
       <button class="btn-pay" id="pay-btn" onclick="handlePayment()">✓ Confirmer la réservation</button>
     </div>
@@ -777,20 +784,134 @@ function fillRecapEnvoi() {
 // STEP 6 : RÉSERVATION — paiement cash au transporteur,
 // commission CARDONA prélevée uniquement si le transporteur accepte (démonstration)
 // ============================================================
+var stripeInstance = Stripe('pk_test_51TmxzQI2HjkZXqejOLgKQZ4JgmaK766dqES4E2ElpPAcBdis1EHKiECsQEjjm4LL5a823K6V64qRkxqJlm8H79Jw00238oi4g2');
+var stripeElements = null;
+var paymentElement = null;
+var pendingReservationData = null;
+
 async function handlePayment() {
   const btn = document.getElementById('pay-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'Envoi en cours…'; }
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { showFormError('Session expirée, reconnectez-vous.'); return; }
 
+  const t = selectedTrajet.trajet;
+  const prixT = calcPrix(t, selectedCategories, weight);
+  var detailsEl = document.getElementById('envoi-details-confirm') || document.getElementById('envoi-details');
+  const details = detailsEl ? detailsEl.value.trim() : '';
+  const reservationCode = Array.from({length:4}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
+
+  // Stocker les données de réservation pour après le paiement
+  pendingReservationData = { t, prixT, details, reservationCode, session };
+
+  // Si Stripe déjà initialisé → confirmer le paiement
+  if (stripeElements) {
+    await confirmerPaiementStripe();
+    return;
+  }
+
+  // Créer le PaymentIntent via Edge Function
+  btn.disabled = true;
+  btn.textContent = 'Préparation du paiement…';
+  try {
+    const resp = await fetch('https://daptohjruyxafskpmqeb.supabase.co/functions/v1/create-payment-intent', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + session.access_token
+      },
+      body: JSON.stringify({
+        amount: 3.00,
+        currency: 'eur',
+        reservation_id: 'pending',
+        expediteur_id: session.user.id
+      })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+
+    // Initialiser Stripe Elements
+    stripeElements = stripeInstance.elements({ clientSecret: data.client_secret });
+    paymentElement = stripeElements.create('payment');
+    paymentElement.mount('#payment-element');
+    document.getElementById('stripe-payment-form').style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '💳 Payer 3,00 € et réserver';
+  } catch (err) {
+    showFormError('Erreur paiement : ' + err.message);
+    btn.disabled = false;
+    btn.textContent = '✓ Confirmer la réservation';
+  }
+}
+
+async function confirmerPaiementStripe() {
+  const btn = document.getElementById('pay-btn');
+  btn.disabled = true;
+  btn.textContent = 'Paiement en cours…';
+  const errEl = document.getElementById('stripe-error');
+
+  const { error: stripeError } = await stripeInstance.confirmPayment({
+    elements: stripeElements,
+    redirect: 'if_required'
+  });
+
+  if (stripeError) {
+    errEl.textContent = stripeError.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '💳 Payer 3,00 € et réserver';
+    return;
+  }
+
+  // Paiement OK → créer la réservation
+  const { t, prixT, details, reservationCode, session } = pendingReservationData;
+  const { data: resaData, error } = await sb.from('reservations').insert({
+    trajet_id: t.id,
+    expediteur_id: session.user.id,
+    ncc: reservationCode,
+    poids_kg: weight,
+    categorie: selectedCategories[0] || 'autre',
+    categories: selectedCategories,
+    description: details,
+    prix_transporteur: prixT,
+    frais_service: 3.00
+  }).select('ncc').single();
+
+  btn.disabled = false;
+  btn.textContent = '✓ Confirmer la réservation';
+
+  if (error) { showFormError('Erreur lors de la réservation : ' + error.message); return; }
+
+  var codeEl = document.getElementById('reservation-code-display');
+  if (codeEl && resaData) codeEl.textContent = resaData.ncc || reservationCode;
+  else if (codeEl) codeEl.textContent = reservationCode;
+
+  // Notification transporteur
+  await sb.from('notifications').insert({
+    user_id: t.transporteur_id,
+    trajet_id: t.id,
+    type: 'nouvelle_reservation',
+    message: 'Nouvelle demande de réservation'
+  });
+
+  nextStep();
+  // réinitialiser Stripe
+  stripeElements = null; paymentElement = null; pendingReservationData = null;
+  document.getElementById('stripe-payment-form').style.display = 'none';
+  var spf = document.getElementById('stripe-payment-form');
+  if (spf) spf.innerHTML = '<div style="font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:8px;">💳 Paiement sécurisé</div><div id="payment-element"></div><div id="stripe-error" style="color:#c0392b;font-size:12px;margin-top:8px;display:none;"></div>';
+}
+
+// Ancienne logique gardée pour référence — remplacée par confirmerPaiementStripe
+async function _oldHandlePayment() {
+  const btn = document.getElementById('pay-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Envoi en cours…'; }
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { showFormError('Session expirée, reconnectez-vous.'); btn.disabled = false; return; }
-
   const t = selectedTrajet.trajet;
   const prixT = calcPrix(t, selectedCategories, weight);
   var commission = 3.00;
   var detailsEl = document.getElementById('envoi-details-confirm') || document.getElementById('envoi-details');
   const details = detailsEl ? detailsEl.value.trim() : '';
-
-  // Générer un code secret de 4 caractères alphanumériques
   const reservationCode = Array.from({length:4}, () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
 
   const { data: resaData, error } = await sb.from('reservations').insert({
