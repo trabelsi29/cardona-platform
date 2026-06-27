@@ -429,7 +429,10 @@
       <div id="info-edit" style="display:none;">
         <div class="field"><label>Nom & Prénom</label><input type="text" id="edit-fullname"></div>
         <div class="field"><label>Téléphone</label><input type="tel" id="edit-phone"></div>
-
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button class="btn-secondary" onclick="toggleEditInfo()" style="flex:1;">Annuler</button>
+          <button class="btn-primary" onclick="handleUpdateInfo()" style="flex:2;">💾 Sauvegarder</button>
+        </div>
   </div>
   </div>
 
@@ -723,7 +726,7 @@ async function loadHome() {
   const docs = profile?.verification_docs || [];
   const docList = document.getElementById('verif-doc-list');
   docList.innerHTML = docs.length === 0 ? '' : docs.map((d, i) =>
-    `<div class="doc-row"><span>📄 ${d.filename || 'Document ' + (i+1)}</span><span class="doc-view-link" onclick="viewMyDoc('${d.path}')">Consulter</span></div>`
+    `<div class="doc-row"><span>📄 ${d.filename || 'Document ' + (i+1)}</span><div style="display:flex;gap:8px;"><span class="doc-view-link" onclick="viewMyDoc('${d.path}')">Consulter</span><span class="doc-view-link" style="color:#b97a20;" onclick="modifierDocument()">Modifier</span></div></div>`
   ).join('');
 
   switchView('home');
@@ -811,6 +814,7 @@ async function handleUploadDoc() {
 
   const { error: updateError } = await sb.from('profiles').update({
     verification_docs: newDocs,
+      verification_status: 'en_attente',
     verification_status: 'en_attente'
   }).eq('id', user.id);
 
@@ -954,6 +958,23 @@ sb.auth.getSession().then(function(res) {
     if (splash) { splash.classList.add('fade-out'); setTimeout(function() { if(splash.parentNode) splash.remove(); }, 500); }
   }, delay);
 });
+
+function modifierDocument() {
+  // Afficher la zone d'upload avec message d'info
+  var zone = document.getElementById('verif-upload-zone');
+  if (zone) {
+    zone.style.display = 'block';
+    var info = document.getElementById('verif-modif-info');
+    if (!info) {
+      var div = document.createElement('div');
+      div.id = 'verif-modif-info';
+      div.style.cssText = 'background:#fff3cd;border-radius:8px;padding:10px 12px;font-size:12px;color:#856404;margin-bottom:10px;';
+      div.innerHTML = '⚠️ En remplaçant votre document, votre profil repassera en statut <strong>En attente de validation</strong>. Nos équipes vérifieront le nouveau document.';
+      zone.insertBefore(div, zone.firstChild);
+    }
+    zone.scrollIntoView({ behavior: 'smooth' });
+  }
+}
 </script>
 </body>
 </html>
