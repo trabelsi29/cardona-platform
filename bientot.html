@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CARDONA — Transport collaboratif</title>
-  <meta name="description" content="Envoyez ou transportez des colis, documents, médicaments et plus encore. Gagnez de l'argent en faisant votre trajet habituel.">
+  <title>CARDONA — Bientôt disponible</title>
+  <meta name="description" content="CARDONA — Le transport collaboratif. Envoyez ou transportez des colis, documents, médicaments et plus encore.">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -14,374 +14,131 @@
       --card: #F3F1EC;
       --text-secondary: #574f43;
       --border: #d4cfc8;
-      --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
-    html { scroll-behavior: smooth; }
     body {
-      font-family: var(--font);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--dark);
       min-height: 100vh;
-    }
-
-    /* ── HEADER ── */
-    header {
-      background: var(--dark);
-      padding: 0 24px;
-      height: 58px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    .header-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .header-logo img { width: 34px; height: 34px; object-fit: contain; }
-    .header-logo span {
-      font-size: 18px;
-      font-weight: 900;
-      color: white;
-      letter-spacing: 2px;
-    }
-    .header-cta {
-      background: var(--gold);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 8px 18px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: var(--font);
-      text-decoration: none;
-    }
-
-    /* ── HERO ── */
-    .hero {
-      max-width: 680px;
-      margin: 0 auto;
-      padding: 56px 24px 40px;
-      text-align: center;
-    }
-    .hero-mascot {
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-      margin-bottom: 20px;
-    }
-    .hero-eyebrow {
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--gold);
-      margin-bottom: 14px;
-    }
-    .hero-title {
-      font-size: clamp(26px, 5vw, 40px);
-      font-weight: 900;
-      line-height: 1.2;
-      color: var(--dark);
-      margin-bottom: 18px;
-    }
-    .hero-title em {
-      font-style: normal;
-      color: var(--gold);
-    }
-    .hero-sub {
-      font-size: 16px;
-      color: var(--text-secondary);
-      line-height: 1.7;
-      max-width: 500px;
-      margin: 0 auto 32px;
-    }
-    .hero-actions {
-      display: flex;
-      gap: 12px;
       justify-content: center;
-      flex-wrap: wrap;
+      padding: 32px 16px;
     }
-    .btn-primary {
-      background: var(--gold);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 14px 28px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: var(--font);
-      text-decoration: none;
-      display: inline-block;
-    }
-    .btn-outline {
-      background: transparent;
-      color: var(--dark);
-      border: 2px solid var(--dark);
-      border-radius: 12px;
-      padding: 12px 28px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: var(--font);
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    /* ── SECTION ── */
-    .section {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 40px 24px;
-    }
-    .section-title {
-      font-size: 22px;
-      font-weight: 800;
-      margin-bottom: 6px;
-      color: var(--dark);
-    }
-    .section-sub {
-      font-size: 14px;
-      color: var(--text-secondary);
-      margin-bottom: 24px;
-    }
-
-    /* ── CARDS MODES ── */
-    .modes {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-    .mode-card {
+    .card {
       background: var(--card);
-      border: 2px solid var(--border);
-      border-radius: 18px;
-      padding: 24px 20px;
+      border-radius: 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+      padding: 48px 36px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
     }
-    .mode-card.gold { border-color: var(--gold); background: #fdf8f0; }
-    .mode-icon {
-      width: 48px; height: 48px;
-      background: var(--gold);
+
+    /* Logo */
+    .logo { width: 88px; height: 88px; object-fit: contain; margin-bottom: 6px; }
+    .brand { font-size: 30px; font-weight: 900; letter-spacing: 3px; color: var(--dark); }
+    .tagline { font-size: 13px; color: var(--text-secondary); margin-top: 4px; letter-spacing: 0.4px; }
+
+    /* Séparateur */
+    .sep { width: 36px; height: 3px; background: var(--gold); border-radius: 2px; margin: 20px auto; }
+
+    /* Titre */
+    .headline { font-size: 22px; font-weight: 800; line-height: 1.35; margin-bottom: 12px; }
+    .headline em { font-style: normal; color: var(--gold); }
+    .desc { font-size: 14px; color: var(--text-secondary); line-height: 1.75; margin-bottom: 28px; }
+
+    /* Badges rôles */
+    .roles { display: flex; justify-content: center; gap: 10px; margin-bottom: 28px; flex-wrap: wrap; }
+    .role {
+      display: flex; align-items: center; gap: 8px;
+      border: 2px solid var(--gold);
       border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px;
-      margin-bottom: 14px;
-    }
-    .mode-title { font-size: 17px; font-weight: 800; margin-bottom: 6px; }
-    .mode-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
-
-    /* ── OBJETS TRANSPORTABLES ── */
-    .items-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-      gap: 10px;
-    }
-    .item-chip {
-      background: var(--card);
-      border: 1.5px solid var(--border);
-      border-radius: 12px;
-      padding: 12px 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--dark);
-    }
-    .item-chip span:first-child { font-size: 18px; }
-
-    /* ── HOW IT WORKS ── */
-    .steps { display: grid; gap: 12px; }
-    .step-row {
-      background: var(--card);
-      border-radius: 14px;
-      padding: 18px 20px;
-      display: flex;
-      align-items: flex-start;
-      gap: 16px;
-      border: 1.5px solid var(--border);
-    }
-    .step-num {
-      width: 36px; height: 36px; flex-shrink: 0;
-      background: var(--dark);
-      color: white;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px;
-      font-weight: 900;
-    }
-    .step-content-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
-    .step-content-desc { font-size: 13px; color: var(--text-secondary); }
-
-    /* ── GAIN ── */
-    .gain-card {
-      background: var(--dark);
-      border-radius: 18px;
-      padding: 28px 24px;
-      color: white;
-      text-align: center;
-    }
-    .gain-card h3 { font-size: 20px; font-weight: 800; margin-bottom: 10px; }
-    .gain-card p { font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.7; margin-bottom: 20px; }
-    .gain-amount {
-      font-size: 42px;
-      font-weight: 900;
-      color: var(--gold);
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-    .gain-label { font-size: 13px; color: rgba(255,255,255,0.5); }
-
-    /* ── DIVIDER ── */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 0 24px;
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      text-align: center;
-      padding: 32px 24px;
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-    footer strong { color: var(--gold); }
-
-    /* ── COMING SOON BANNER ── */
-    .coming-banner {
-      background: var(--gold);
-      color: white;
-      text-align: center;
       padding: 10px 16px;
       font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.3px;
+      font-weight: 700;
+      color: var(--dark);
+      background: white;
+    }
+    .role-icon {
+      width: 30px; height: 30px;
+      background: var(--gold);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      filter: none;
     }
 
-    @media (max-width: 500px) {
-      .modes { grid-template-columns: 1fr; }
-      .hero { padding: 40px 18px 32px; }
-      .section { padding: 32px 18px; }
+    /* Ce qu'on transporte */
+    .items {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 7px;
+      margin-bottom: 28px;
+    }
+    .item {
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex; align-items: center; gap: 5px;
+    }
+
+    /* Coming soon */
+    .coming {
+      background: var(--dark);
+      color: white;
+      border-radius: 16px;
+      padding: 18px 20px;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .coming strong { color: var(--gold); }
+
+    @media (max-width: 420px) {
+      .card { padding: 36px 20px; }
+      .headline { font-size: 19px; }
+      .roles { flex-direction: column; align-items: center; }
     }
   </style>
 </head>
 <body>
+  <div class="card">
 
-  <!-- Bandeau -->
-  <div class="coming-banner">🚀 Plateforme en cours de lancement — Inscription bientôt ouverte</div>
+    <img class="logo" src="assets/cardona-logo.gif" alt="CARDONA">
+    <div class="brand">CARDONA</div>
+    <div class="tagline">Le transport collaboratif, simple et local</div>
 
-  <!-- Header -->
-  <header>
-    <div class="header-logo">
-      <img src="assets/cardona-logo.gif" alt="CARDONA">
-      <span>CARDONA</span>
+    <div class="sep"></div>
+
+    <h1 class="headline">Envoyez vos colis.<br>Ou transportez — et <em>gagnez.</em></h1>
+    <p class="desc">Particulier ou professionnel, si vous faites la route, profitez-en. Transportez des colis, documents ou médicaments et rentabilisez chaque trajet.</p>
+
+    <div class="roles">
+      <div class="role"><div class="role-icon">📦</div>Expéditeurs</div>
+      <div class="role"><div class="role-icon">🚗</div>Particuliers</div>
+      <div class="role"><div class="role-icon">🚚</div>Professionnels</div>
     </div>
-    <a href="index.html" class="header-cta">Accéder →</a>
-  </header>
 
-  <!-- Hero -->
-  <div class="hero">
-    <img class="hero-mascot" src="assets/cardona-logo.gif" alt="">
-    <div class="hero-eyebrow">Transport collaboratif</div>
-    <h1 class="hero-title">Envoyez vos colis.<br><em>Gagnez de l'argent.</em><br>En faisant votre route.</h1>
-    <p class="hero-sub">CARDONA connecte les personnes qui ont besoin d'envoyer quelque chose avec celles qui font déjà la route. Simple, local, et humain.</p>
-    <div class="hero-actions">
-      <a href="index.html" class="btn-primary">📦 Envoyer un colis</a>
-      <a href="index.html" class="btn-outline">🚗 Devenir transporteur</a>
+    <div class="items">
+      <div class="item">💊 Médicaments</div>
+      <div class="item">📄 Documents</div>
+      <div class="item">📦 Colis</div>
+      <div class="item">🎁 Cadeaux</div>
+      <div class="item">💻 Électronique</div>
+      <div class="item">👜 Vêtements</div>
+      <div class="item">🥗 Produits locaux</div>
     </div>
+
+    <div class="coming">
+      🚀 La plateforme arrive <strong>bientôt</strong>.<br>
+      Préparez-vous à envoyer et transporter autrement.
+    </div>
+
   </div>
-
-  <div class="divider"></div>
-
-  <!-- Modes -->
-  <div class="section">
-    <div class="section-title">Deux façons d'utiliser CARDONA</div>
-    <div class="section-sub">Expéditeur ou transporteur — choisissez votre rôle, changez-le à tout moment.</div>
-    <div class="modes">
-      <div class="mode-card gold">
-        <div class="mode-icon">📦</div>
-        <div class="mode-title">Expéditeur</div>
-        <div class="mode-desc">Trouvez un transporteur qui fait déjà votre trajet et confiez-lui votre colis en toute sécurité.</div>
-      </div>
-      <div class="mode-card">
-        <div class="mode-icon">🚗</div>
-        <div class="mode-title">Transporteur</div>
-        <div class="mode-desc">Publiez votre trajet et transportez des colis sur votre chemin. Particulier ou professionnel.</div>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- Ce qu'on peut transporter -->
-  <div class="section">
-    <div class="section-title">Que peut-on envoyer ?</div>
-    <div class="section-sub">Tout ce qui rentre dans un coffre ou un sac — ou presque.</div>
-    <div class="items-grid">
-      <div class="item-chip"><span>💊</span> Médicaments</div>
-      <div class="item-chip"><span>📄</span> Documents</div>
-      <div class="item-chip"><span>📦</span> Colis</div>
-      <div class="item-chip"><span>🎁</span> Cadeaux</div>
-      <div class="item-chip"><span>👜</span> Vêtements</div>
-      <div class="item-chip"><span>💻</span> Électronique</div>
-      <div class="item-chip"><span>🥗</span> Produits locaux</div>
-      <div class="item-chip"><span>🛋️</span> Petits meubles</div>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- Comment ça marche -->
-  <div class="section">
-    <div class="section-title">Comment ça marche ?</div>
-    <div class="section-sub">3 étapes, pas plus.</div>
-    <div class="steps">
-      <div class="step-row">
-        <div class="step-num">1</div>
-        <div class="step-content">
-          <div class="step-content-title">Publiez ou recherchez</div>
-          <div class="step-content-desc">Le transporteur publie son trajet. L'expéditeur recherche un transporteur proche de son itinéraire.</div>
-        </div>
-      </div>
-      <div class="step-row">
-        <div class="step-num">2</div>
-        <div class="step-content">
-          <div class="step-content-title">Réservez et payez</div>
-          <div class="step-content-desc">L'expéditeur réserve et règle les frais de service. Le transporteur accepte la demande.</div>
-        </div>
-      </div>
-      <div class="step-row">
-        <div class="step-num">3</div>
-        <div class="step-content">
-          <div class="step-content-title">Remise et confirmation</div>
-          <div class="step-content-desc">Un code secret unique valide la livraison. Simple, traçable, sécurisé.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="divider"></div>
-
-  <!-- Gain transporteur -->
-  <div class="section">
-    <div class="gain-card">
-      <h3>Vous faites déjà la route ?<br>Autant en profiter.</h3>
-      <p>Que vous soyez chauffeur, livreur, professionnel de la route ou simplement quelqu'un qui fait des allers-retours réguliers — CARDONA vous permet de rentabiliser chaque trajet.</p>
-      <div class="gain-amount">+ Revenus</div>
-      <div class="gain-label">sur vos trajets du quotidien</div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer>
-    © 2026 <strong>CARDONA</strong> — Le transport autrement.
-  </footer>
-
 </body>
 </html>
