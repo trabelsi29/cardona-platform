@@ -551,6 +551,11 @@ async function handleSignup() {
   btn.disabled = false;
   btn.textContent = 'Créer';
 
+  // Supabase renvoie data.user sans session si email déjà utilisé
+  if (data && data.user && !data.user.identities?.length) {
+    showError('signup-error', 'Un compte existe déjà avec cet email.');
+    return;
+  }
   if (error) {
     showError('signup-error', error.message.includes('already registered')
       ? 'Un compte existe déjà avec cet email.'
