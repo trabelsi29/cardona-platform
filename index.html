@@ -373,7 +373,7 @@
         <div class="dropdown-menu" id="dropdown-menu">
           <div class="menu-item" onclick="window.location.href='cgu.html'">Conditions générales</div>          <div class="menu-item" onclick="window.location.href='apropos.html'">À propos</div>
           <div class="menu-item" onclick="window.location.href='contact.html'">Contactez-nous</div>
-          <div class="menu-item menu-item-logout" onclick="handleLogout()">Déconnexion</div>
+          <div class="menu-item" id="switch-mode-item" onclick="handleSwitchRole()" style="color:var(--gold);font-weight:600;">🔄 Passer en mode…</div><div class="menu-item menu-item-logout" onclick="handleLogout()">Déconnexion</div>
         </div>
       </div>
     </div>
@@ -682,6 +682,12 @@ async function loadHome() {
 
 
   document.getElementById('home-name').textContent = profile?.full_name || user.email;
+  // Mettre à jour le libellé switch dans le menu
+  var switchItem = document.getElementById('switch-mode-item');
+  if (switchItem) {
+    var otherMode = profile?.role === 'expediteur' ? 'Transporteur' : 'Expéditeur';
+    switchItem.textContent = '🔄 Passer en mode ' + otherMode;
+  }
   document.getElementById('home-role').textContent = roleLabel(profile?.role);
   buildNav('profil');
   document.getElementById('home-fullname').textContent = profile?.full_name || '—';
