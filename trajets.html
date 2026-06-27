@@ -533,7 +533,7 @@ function render() {
 
     return "<div class='trajet-card-main'>"
       + "<div class='trajet-card-header'>"
-      + "<div class='trajet-info'><div class='trajet-mode-route'>" + modeIcon + " " + shorten(t.lieu_ramassage) + " → " + shorten(t.lieu_distribution) + "</div><div class='trajet-meta'>📅 " + dateStr + "</div></div>"
+      + "<div class='trajet-info'><div class='trajet-mode-route'>" + modeIcon + " " + (t.stops_ramassage&&t.stops_ramassage.length?t.stops_ramassage.map(function(s){return shorten(s.adresse,15);}).join(' · '):shorten(t.lieu_ramassage)) + " → " + (t.stops_distribution&&t.stops_distribution.length?t.stops_distribution.map(function(s){return shorten(s.adresse,15);}).join(' · '):shorten(t.lieu_distribution) + "</div><div class='trajet-meta'>📅 " + dateStr + "</div></div>"
       + "<div class='trajet-right'>" + statusBadge
       + "<button class='trajet-modify-btn' onclick='voirDetail(event,&quot;" + t.id + "&quot;)'>🔍 Détail</button>"
       + (!isExpire ? "<button class='trajet-modify-btn' onclick='modifierTrajet(&quot;" + t.id + "&quot;)'>✏ Modifier</button>" : "")
@@ -675,8 +675,8 @@ function voirDetail(event, trajetId) {
     + '<div class="modal-section"><div class="modal-label">Statut</div><div class="modal-value">' + (t.statut || '—') + '</div></div>'
     + '</div>'
     + '<div class="modal-row">'
-    + '<div class="modal-section"><div class="modal-label">🟢 Ramassage</div><div class="modal-value">' + (t.lieu_ramassage || '—') + '</div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">📅 ' + dateRam + '</div></div>'
-    + '<div class="modal-section"><div class="modal-label">🔴 Distribution</div><div class="modal-value">' + (t.lieu_distribution || '—') + '</div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">📅 ' + dateDist + '</div></div>'
+    + '<div class="modal-section"><div class="modal-label">🟢 Ramassage</div><div class="modal-value">' + (t.stops_ramassage && t.stops_ramassage.length ? t.stops_ramassage.map(function(s){return s.adresse;}).join('<br>') : t.lieu_ramassage || '—') + '</div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">📅 ' + dateRam + '</div></div>'
+    + '<div class="modal-section"><div class="modal-label">🔴 Distribution</div><div class="modal-value">' + (t.stops_distribution && t.stops_distribution.length ? t.stops_distribution.map(function(s){return s.adresse;}).join('<br>') : t.lieu_distribution || '—') + '</div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">📅 ' + dateDist + '</div></div>'
     + '</div>'
     + prixHtml;
 
