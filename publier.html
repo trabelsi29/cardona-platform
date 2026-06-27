@@ -273,6 +273,9 @@
       <div class="radio-item" data-value="voiture" onclick="selectMode('voiture')"><span>🚗 Voiture</span><div class="radio-circle"></div></div>
       <div class="radio-item" data-value="train_bus" onclick="selectMode('train_bus')"><span>🚆 Train/bus</span><div class="radio-circle"></div></div>
       <div class="radio-item" data-value="autre" onclick="selectMode('autre')"><span>❓ Autre</span><div class="radio-circle"></div></div>
+      <div id="autre-mode-field" style="display:none;margin-top:8px;">
+        <input type="text" id="autre-mode-input" placeholder="Précisez votre moyen de transport..." style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+      </div>
       <button class="btn-primary" onclick="goStep(2)">Suivant</button>
     </div>
 
@@ -487,6 +490,8 @@ function selectMode(mode) {
     el.classList.toggle('selected', checked);
     el.querySelector('.radio-circle').classList.toggle('checked', checked);
   });
+  var af = document.getElementById('autre-mode-field');
+  if (af) af.style.display = mode === 'autre' ? 'block' : 'none';
 }
 
 // ============================================================
@@ -602,6 +607,11 @@ function selectSuggestion(type, id, display_name, lat, lon) {
 
 function validateStep2() {
   if (!selectedMode) { goStep(1); showFormError('Choisissez un moyen de transport.'); return; }
+  if (selectedMode === 'autre') {
+    var autreModeVal = (document.getElementById('autre-mode-input') ? document.getElementById('autre-mode-input').value : '').trim();
+    if (!autreModeVal) { showFormError('Précisez votre moyen de transport.'); return; }
+    window._autreModeLabel = autreModeVal;
+  }
   var today = new Date(); today.setHours(0,0,0,0);
   for (const s of ramassageStops) {
     if (!s.adresse.trim() || !s.date_heure || !s.date_heure_fin) { showFormError('Renseignez l\u2019adresse, l\u2019heure de début et l\u2019heure de fin pour chaque point de ramassage.'); return; }
