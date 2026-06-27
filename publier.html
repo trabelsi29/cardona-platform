@@ -645,11 +645,19 @@ function validateStep3() {
 function toggleCategory(cat) {
   if (cat === "autre") {
     var zone = document.getElementById("autre-cat-zone");
-    var idx2 = selectedCategories.indexOf("autre");
-    if (idx2 > -1) { selectedCategories.splice(idx2, 1); if(zone) zone.style.display="none"; }
-    else { selectedCategories.push("autre"); if(zone) zone.style.display="block"; }
     var pill = document.querySelector('.category-pill[data-cat="autre"]');
-    if (pill) pill.classList.toggle("active", selectedCategories.includes("autre"));
+    var isActive = pill && pill.classList.contains("active");
+    if (isActive) {
+      if (pill) pill.classList.remove("active");
+      if (zone) zone.style.display = "none";
+      selectedCategories = selectedCategories.filter(function(c){return c !== "autre" && !c.startsWith("custom_");});
+      _autreCats = [];
+      var tags = document.getElementById("autre-cat-tags");
+      if (tags) tags.innerHTML = "";
+    } else {
+      if (pill) pill.classList.add("active");
+      if (zone) zone.style.display = "block";
+    }
     return;
   }
   const idx = selectedCategories.indexOf(cat);
