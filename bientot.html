@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CARDONA — Bientôt disponible</title>
+  <meta name="description" content="CARDONA — La plateforme de transport collaboratif. Connectez expéditeurs et transporteurs simplement.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #C8902A;
+      --dark: #221b16;
+      --bg: #f5f2ed;
+      --card: #ffffff;
+    }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    .container {
+      max-width: 540px;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* Logo */
+    .logo-wrap { margin-bottom: 24px; }
+    .logo-wrap img { width: 90px; height: 90px; object-fit: contain; }
+    .brand { font-size: 36px; font-weight: 900; letter-spacing: 3px; color: var(--dark); margin-top: 8px; }
+    .tagline { font-size: 14px; color: #888; margin-top: 4px; letter-spacing: 0.5px; }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      background: var(--gold);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin: 20px 0 28px;
+    }
+
+    /* Titre */
+    .headline { font-size: 28px; font-weight: 800; line-height: 1.3; margin-bottom: 14px; }
+    .headline span { color: var(--gold); }
+    .desc { font-size: 15px; color: #666; line-height: 1.7; margin-bottom: 32px; }
+
+    /* Features */
+    .features { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-bottom: 36px; }
+    .feature {
+      background: white;
+      border: 1.5px solid #e8e3da;
+      border-radius: 14px;
+      padding: 14px 16px;
+      width: 150px;
+      text-align: center;
+    }
+    .feature-icon { font-size: 26px; margin-bottom: 6px; }
+    .feature-title { font-size: 12px; font-weight: 700; color: var(--dark); }
+    .feature-desc { font-size: 11px; color: #999; margin-top: 3px; }
+
+    /* Compte à rebours */
+    .countdown { display: flex; justify-content: center; gap: 16px; margin-bottom: 36px; }
+    .countdown-item { text-align: center; }
+    .countdown-num {
+      background: var(--dark);
+      color: white;
+      font-size: 28px;
+      font-weight: 900;
+      width: 64px; height: 64px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .countdown-label { font-size: 10px; color: #999; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Formulaire */
+    .form-title { font-size: 14px; font-weight: 600; color: var(--dark); margin-bottom: 12px; }
+    .form-row { display: flex; gap: 8px; max-width: 400px; margin: 0 auto 10px; }
+    .form-row input {
+      flex: 1;
+      padding: 13px 16px;
+      border: 1.5px solid #e0dbd4;
+      border-radius: 12px;
+      font-size: 14px;
+      outline: none;
+      background: white;
+      color: var(--dark);
+      font-family: inherit;
+    }
+    .form-row input:focus { border-color: var(--gold); }
+    .form-row button {
+      padding: 13px 20px;
+      background: var(--gold);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: inherit;
+      transition: opacity .15s;
+    }
+    .form-row button:hover { opacity: .88; }
+    .form-hint { font-size: 11px; color: #bbb; }
+    .form-success {
+      background: #e8f5ef;
+      color: #2e7d5e;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+      max-width: 400px;
+      margin: 0 auto 10px;
+    }
+
+    /* Séparateur */
+    .sep { border: none; border-top: 1px solid #e8e3da; margin: 32px 0; }
+
+    /* Footer */
+    .footer { font-size: 12px; color: #bbb; }
+    .footer a { color: var(--gold); text-decoration: none; }
+
+    @media (max-width: 480px) {
+      .headline { font-size: 22px; }
+      .feature { width: 130px; }
+      .countdown-num { width: 54px; height: 54px; font-size: 22px; }
+      .form-row { flex-direction: column; }
+      .form-row button { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Logo -->
+    <div class="logo-wrap">
+      <img src="assets/cardona-logo.gif" alt="CARDONA">
+      <div class="brand">CARDONA</div>
+      <div class="tagline">Le transport collaboratif, simple et local</div>
+    </div>
+
+    <!-- Badge -->
+    <div class="badge">🚀 Bientôt disponible</div>
+
+    <!-- Titre -->
+    <h1 class="headline">Envoyez vos colis avec des <span>transporteurs de confiance</span></h1>
+    <p class="desc">CARDONA connecte les expéditeurs avec des transporteurs particuliers qui font déjà la route. Simple, rapide et économique.</p>
+
+    <!-- Features -->
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">📦</div>
+        <div class="feature-title">Envoyez</div>
+        <div class="feature-desc">Trouvez un transporteur sur votre trajet</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🚗</div>
+        <div class="feature-title">Transportez</div>
+        <div class="feature-desc">Rentabilisez vos trajets du quotidien</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <div class="feature-title">Sécurisé</div>
+        <div class="feature-desc">Code secret unique pour chaque livraison</div>
+      </div>
+    </div>
+
+    <!-- Compte à rebours -->
+    <div class="countdown">
+      <div class="countdown-item"><div class="countdown-num" id="cd-j">00</div><div class="countdown-label">Jours</div></div>
+      <div class="countdown-item"><div class="countdown-num" id="cd-h">00</div><div class="countdown-label">Heures</div></div>
+      <div class="countdown-item"><div class="countdown-num" id="cd-m">00</div><div class="countdown-label">Minutes</div></div>
+      <div class="countdown-item"><div class="countdown-num" id="cd-s">00</div><div class="countdown-label">Secondes</div></div>
+    </div>
+
+    <!-- Formulaire inscription -->
+    <div class="form-title">✉️ Soyez parmi les premiers informés du lancement</div>
+    <div class="form-success" id="form-success">✅ Merci ! Vous serez parmi les premiers informés.</div>
+    <div class="form-row">
+      <input type="email" id="email-input" placeholder="votre@email.com">
+      <button onclick="inscrire()">Me prévenir</button>
+    </div>
+    <div class="form-hint">Pas de spam. Juste un email au lancement. 🎉</div>
+
+    <hr class="sep">
+
+    <!-- Footer -->
+    <div class="footer">
+      © 2026 CARDONA — <a href="cgu.html">Conditions générales</a> · <a href="apropos.html">À propos</a> · <a href="contact.html">Contact</a>
+    </div>
+
+  </div>
+
+  <script>
+    // Compte à rebours — date de lancement (modifiable)
+    var launchDate = new Date('2026-09-01T00:00:00');
+
+    function updateCountdown() {
+      var now = new Date();
+      var diff = launchDate - now;
+      if (diff <= 0) {
+        document.querySelector('.countdown').innerHTML = '<div style="font-size:18px;font-weight:700;color:var(--gold);">🎉 C'est lancé !</div>';
+        return;
+      }
+      var j = Math.floor(diff / 86400000);
+      var h = Math.floor((diff % 86400000) / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      document.getElementById('cd-j').textContent = String(j).padStart(2, '0');
+      document.getElementById('cd-h').textContent = String(h).padStart(2, '0');
+      document.getElementById('cd-m').textContent = String(m).padStart(2, '0');
+      document.getElementById('cd-s').textContent = String(s).padStart(2, '0');
+    }
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+
+    // Inscription email (simple — stockage local pour démo)
+    function inscrire() {
+      var email = document.getElementById('email-input').value.trim();
+      if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
+        alert('Veuillez entrer une adresse email valide.');
+        return;
+      }
+      // Envoyer via EmailJS
+      emailjs.init('dWk-YgDI36JADXSGN');
+      emailjs.send('service_f9sp7vz', 'template_jeegk4w', {
+        name: 'Inscription landing page',
+        message: 'Nouvelle inscription : ' + email,
+        time: new Date().toLocaleString('fr-FR')
+      });
+      document.getElementById('form-success').style.display = 'block';
+      document.getElementById('email-input').value = '';
+      document.querySelector('.form-row').style.display = 'none';
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</body>
+</html>
