@@ -417,6 +417,10 @@ async function loadAll() {
   render();
 }
 
+function catLabel(cat){
+  var m={marchandise:"Marchandise",document:"Document",fragile:"Fragile",electronique:"Électronique",autre:"Autre"};
+  return m[cat]||cat;
+}
 function shorten(addr) {
   if (!addr) return '—';
   return addr.split(',')[0].trim();
@@ -443,14 +447,17 @@ function renderReservationCard(r, person, personLabel, showActions) {
   return `
     <div class="trip-card">
       <div class="trip-head">
-        <div><div class="trip-ncc">NCC : ${r.ncc}</div></div>
+        <div>
+          <div class="trip-ncc">🔐 Code : ${r.ncc}</div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">${ram} → ${dist}</div>
+        </div>
         ${person?.avatar_url ? `<img class="trip-avatar" src="${person.avatar_url}">` : `<div class="trip-avatar">${initials(person?.full_name)}</div>`}
       </div>
       <div class="trip-person">${person?.full_name || personLabel}</div>
       <div class="trip-status ${st.cls}">${st.label}</div>
       <div class="trip-divider"></div>
-      <div class="trip-detail"><span class="trip-detail-label">Colis</span>${categoryLabel(r.categorie)} (${r.poids_kg || '—'}Kg)</div>
-      <div class="trip-divider"></div>
+      <div class="trip-detail"><span class="trip-detail-label">Colis</span>${(r.categories&&r.categories.length?r.categories.map(categoryLabel).join(', '):categoryLabel(r.categorie))} (${r.poids_kg || '—'}Kg)</div>
+      ${r.description ? `<div class="trip-detail"><span class="trip-detail-label">Note</span>${r.description}</div><div class="trip-divider"></div>` : ''}
       <div class="trip-price-row">
         <span class="trip-price-label">Cash à la livraison</span>
         <span class="trip-price-value">${r.prix_transporteur} €</span>
@@ -514,9 +521,11 @@ function render() {
           ? "<div class='resa-actions'>" + "<button class='btn-livrer' id='btn-livrer-" + r.id + "' onclick='afficherFormCode(&quot;" + r.id + "&quot;)'>📦 Valider livraison</button>" + "<div class='livraison-form' id='form-" + r.id + "'>" + "<div class='livraison-hint'>Saisissez le code secret communiqué par l'expéditeur</div>" + "<input type='text' id='input-" + r.id + "' maxlength='4' placeholder='- - - -' oninput='this.value=this.value.toUpperCase()'>" + "<div class='livraison-btns'>" + "<button class='btn-annuler-code' onclick='masquerFormCode(&quot;" + r.id + "&quot;)'>Annuler</button>" + "<button class='btn-confirmer-code' onclick='validerCodeLivraison(&quot;" + r.id + "&quot;,&quot;" + r.ncc + "&quot;)'>✓ Confirmer</button>" + "</div></div></div>"
           : "";
       return "<div class='resa-card'>"
-        + "<div class='resa-head'><div><div class='resa-name'>" + (exp.full_name || "Expéditeur") + "</div></div>" + avatarHtml + "</div>"
+        + "<div class='resa-head'><div><div class='resa-name'>" + (exp.full_name || "Expéditeur") + "</div>"
+        + "<div style='font-size:11px;color:var(--text-secondary);'>" + (t ? shorten(t.lieu_ramassage,20)+" → "+shorten(t.lieu_distribution,20) : "") + "</div></div>" + avatarHtml + "</div>"
         + "<div class='resa-status " + r.statut + "'>" + statusLabel + "</div>"
-        + "<div class='resa-details'>Colis : " + cats + (r.poids_kg ? " (" + r.poids_kg + " kg)" : "") + "</div>"
+        + "<div class='resa-details'>Colis : " + (r.categories&&r.categories.length?r.categories.map(catLabel).join(', '):catLabel(r.categorie)) + (r.poids_kg ? " (" + r.poids_kg + " kg)" : "") + "</div>"
+        + (r.description ? "<div class='resa-details' style='color:var(--text-secondary);font-style:italic;font-size:12px;'>" + r.description + "</div>" : "")
         + "<div class='resa-price'>" + (r.prix_transporteur || "—") + " €</div>"
         + actions
         + "</div>";
