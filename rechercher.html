@@ -883,10 +883,10 @@ async function confirmerPaiementStripe() {
     user_id: t.transporteur_id,
     trajet_id: t.id,
     type: 'nouvelle_reservation',
-    message: 'Nouvelle demande de réservation'
-  });
+    message: 'Nouvelle demande de reservation'
+  }).then(function(){}).catch(function(){});
 
-  nextStep();
+  goStep(7);
   // réinitialiser Stripe
   stripeElements = null; paymentElement = null; pendingReservationData = null;
   document.getElementById('stripe-payment-form').style.display = 'none';
