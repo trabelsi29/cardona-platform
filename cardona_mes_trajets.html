@@ -180,6 +180,25 @@
   .menu-item:last-child { border-bottom:none; }
   .menu-item-logout { color:#c0392b; font-weight:600; padding:13px 18px; font-size:13px; cursor:pointer; }
   .menu-item-logout:hover { background:#fde8e8; }
+
+  /* ── NAV BAS FIXE SUR MOBILE ─────────────────────────── */
+  @media (max-width: 900px) {
+    body { margin: 0; padding: 0; background: #F3F1EC; }
+    .phone-frame {
+      width: 100% !important;
+      height: 100dvh !important;
+      max-height: 100dvh !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .bottom-nav {
+      position: sticky;
+      bottom: 0;
+      flex-shrink: 0 !important;
+      padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    }
+  }
 </style>
 </head>
 <body>
