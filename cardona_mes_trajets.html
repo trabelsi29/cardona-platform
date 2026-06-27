@@ -717,11 +717,12 @@ async function validerCodeLivraison(resaId, codeAttendu) {
   input.disabled = true;
   const { error } = await sb.from("reservations").update({ statut: "livre" }).eq("id", resaId);
   if (error) { alert("Erreur : " + error.message); input.disabled = false; return; }
+  // Notifier l'expéditeur
   var { data: resa } = await sb.from("reservations").select("expediteur_id, trajet_id").eq("id", resaId).single();
   if (resa) {
-    await sb.from("notifications").insert({ user_id: resa.expediteur_id, trajet_id: resa.trajet_id, reservation_ncc: resaId, type: "livre", message: "Votre colis a été livré avec succès !" });
+    await sb.from("notifications").insert({ user_id: resa.expediteur_id, trajet_id: resa.trajet_id, type: "livre", message: "Votre colis a été livré avec succès !" });
   }
-  loadTrajets();
+  loadAll();
 }
 </script>
 
