@@ -895,9 +895,13 @@ async function buildNav(activePage) {
   var sessRes = await sb.auth.getSession();
   if (!sessRes.data.session) { nav.style.display = 'none'; return; }
   var uid = sessRes.data.session.user.id;
-  var profRes = await sb.from('profiles').select('role').eq('id', uid).single();
+  var profRes = await sb.from('profiles').select('role, is_suspended').eq('id', uid).single();
+  if (profRes.data && profRes.data.is_suspended) {
+    await sb.auth.signOut();
+    window.location.href = 'index.html';
+    return;
+  }
   var role = (profRes.data && profRes.data.role) || 'expediteur';
-
   var items;
   if (role === 'expediteur') {
     items = [
@@ -912,10 +916,9 @@ async function buildNav(activePage) {
       { id: 'profil',     label: 'Profil',      icon: 'profil',     href: 'index.html' },
     ];
   }
-
   nav.style.display = 'flex';
   nav.innerHTML = items.map(function(it) {
-    var isActive = it.id === activePage || (activePage === 'mesenvois' && it.id === 'mesenvois') || (activePage === 'mestrajets' && it.id === 'mestrajets');
+    var isActive = it.id === activePage;
     var activeClass = isActive ? ' active' : '';
     var tag = it.href === '#' ? 'div' : 'a';
     var hrefAttr = it.href !== '#' ? ' href="' + it.href + '"' : '';
@@ -926,13 +929,10 @@ async function buildNav(activePage) {
       + '<span class="bn-underline"></span>'
       + '</' + tag + '>';
   }).join('');
-
   items.forEach(function(it) {
     var el = document.getElementById('ni-' + it.id);
     if (el && NAV_ICONS[it.icon]) el.src = 'data:image/png;base64,' + NAV_ICONS[it.icon];
   });
-
-  // Badge réservations en attente (transporteur)
   if (role === 'transporteur') {
     sb.from('trajets').select('id').eq('transporteur_id', uid).then(function(r1) {
       if (!r1.data || !r1.data.length) return;
