@@ -813,15 +813,17 @@ async function handlePayment() {
   btn.disabled = true;
   btn.textContent = 'Préparation du paiement…';
   try {
-    const { data, error: fnError } = await sb.functions.invoke('create-payment-intent', {
-      body: {
-        amount: 3.00,
-        currency: 'eur',
-        reservation_id: 'pending',
-        expediteur_id: session.user.id
-      }
+    const resp = await fetch('https://daptohjruyxafskpmqeb.supabase.co/functions/v1/create-payment-intent', {
+      method: 'POST',
+      headers: {
+        'apikey': 'sb_publishable_plDYJLGRhTIPT-kwPW2ljA_-48Mv7S3',
+        'Authorization': 'Bearer ' + session.access_token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ amount: 3.00, currency: 'eur', expediteur_id: session.user.id })
     });
-    if (fnError) throw new Error(fnError.message);
+    if (!resp.ok) { const e = await resp.text(); throw new Error('Erreur serveur: ' + e); }
+    const data = await resp.json();
     if (data.error) throw new Error(data.error);
 
     // Initialiser Stripe Elements
