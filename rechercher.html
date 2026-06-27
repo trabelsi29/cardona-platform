@@ -881,9 +881,8 @@ async function confirmerPaiementStripe() {
   // Notification transporteur
   await sb.from('notifications').insert({
     user_id: t.transporteur_id,
-    trajet_id: t.id,
     type: 'nouvelle_reservation',
-    message: 'Nouvelle demande de reservation'
+    content: 'Nouvelle demande de reservation'
   }).then(function(){}).catch(function(){});
 
   goStep(7);
