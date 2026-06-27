@@ -276,7 +276,7 @@
       <div id="autre-mode-field" style="display:none;margin-top:8px;">
         <input type="text" id="autre-mode-input" placeholder="Précisez votre moyen de transport..." style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
       </div>
-      <button class="btn-primary" onclick="goStep(2)">Suivant</button>
+      <button class="btn-primary" onclick="validateStep1()">Suivant</button>
     </div>
 
     <!-- STEP 2 : ramassage (multi) -->
@@ -605,13 +605,17 @@ function selectSuggestion(type, id, display_name, lat, lon) {
   renderStops(type);
 }
 
-function validateStep2() {
-  if (!selectedMode) { goStep(1); showFormError('Choisissez un moyen de transport.'); return; }
+function validateStep1() {
+  if (!selectedMode) { showFormError('Choisissez un moyen de transport.'); return; }
   if (selectedMode === 'autre') {
-    var autreModeVal = (document.getElementById('autre-mode-input') ? document.getElementById('autre-mode-input').value : '').trim();
-    if (!autreModeVal) { showFormError('Précisez votre moyen de transport.'); return; }
-    window._autreModeLabel = autreModeVal;
+    var v = document.getElementById('autre-mode-input');
+    if (!v || !v.value.trim()) { showFormError('Précisez votre moyen de transport.'); return; }
+    window._autreModeLabel = v.value.trim();
   }
+  goStep(2);
+}
+
+function validateStep2() {
   var today = new Date(); today.setHours(0,0,0,0);
   for (const s of ramassageStops) {
     if (!s.adresse.trim() || !s.date_heure || !s.date_heure_fin) { showFormError('Renseignez l\u2019adresse, l\u2019heure de début et l\u2019heure de fin pour chaque point de ramassage.'); return; }
