@@ -815,10 +815,7 @@ async function handlePayment() {
   try {
     const resp = await fetch('https://daptohjruyxafskpmqeb.supabase.co/functions/v1/create-payment-intent', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + session.access_token
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         amount: 3.00,
         currency: 'eur',
