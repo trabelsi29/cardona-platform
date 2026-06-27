@@ -306,6 +306,11 @@
       <div class="category-pill" data-cat="fragile" onclick="toggleCategory('fragile')"><div class="category-check"></div>🔔 Produits fragiles</div>
       <div class="category-pill" data-cat="electronique" onclick="toggleCategory('electronique')"><div class="category-check"></div>💻 Produits électroniques</div>
       <div class="category-pill" data-cat="autre" onclick="toggleCategory('autre')"><div class="category-check"></div>❓ Autre</div>
+      <div id="autre-cat-zone" style="display:none;margin-top:8px;">
+        <input type="text" id="autre-cat-input" placeholder="Nommez ce type de colis (ex: Animaux, Plantes...)" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:6px;">
+        <div id="autre-cat-tags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        <button onclick="addAutreCat()" style="margin-top:8px;padding:8px 14px;background:var(--gold);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">+ Ajouter</button>
+      </div>
       <button class="btn-primary" onclick="validateStep4()">Suivant</button>
     </div>
 
@@ -638,6 +643,15 @@ function validateStep3() {
 // STEP 4 : CATÉGORIES
 // ============================================================
 function toggleCategory(cat) {
+  if (cat === "autre") {
+    var zone = document.getElementById("autre-cat-zone");
+    var idx2 = selectedCategories.indexOf("autre");
+    if (idx2 > -1) { selectedCategories.splice(idx2, 1); if(zone) zone.style.display="none"; }
+    else { selectedCategories.push("autre"); if(zone) zone.style.display="block"; }
+    var pill = document.querySelector('.category-pill[data-cat="autre"]');
+    if (pill) pill.classList.toggle("active", selectedCategories.includes("autre"));
+    return;
+  }
   const idx = selectedCategories.indexOf(cat);
   if (idx > -1) selectedCategories.splice(idx, 1); else selectedCategories.push(cat);
   document.querySelectorAll('.category-pill').forEach(el => {
@@ -918,6 +932,30 @@ checkAndBuildNav();
 async function handleLogout() {
   await sb.auth.signOut();
   window.location.href = "index.html";
+}
+
+var _autreCats = [];
+function addAutreCat() {
+  var input = document.getElementById("autre-cat-input");
+  var val = (input.value || "").trim();
+  if (!val) return;
+  if (_autreCats.includes(val)) { input.value = ""; return; }
+  _autreCats.push(val);
+  var catId = "custom_" + _autreCats.length;
+  selectedCategories.push(catId);
+  CAT_INFO[catId] = { label: val, defaultType: "choix" };
+  var tags = document.getElementById("autre-cat-tags");
+  var tag = document.createElement("span");
+  tag.style.cssText = "background:var(--gold);color:white;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:6px;";
+  tag.innerHTML = val + ' <span style="cursor:pointer;opacity:.7;" onclick="removeAutreCat(this,\"' + catId + '\",\"' + val + '\')">✕</span>';
+  tags.appendChild(tag);
+  input.value = "";
+}
+function removeAutreCat(el, catId, val) {
+  _autreCats = _autreCats.filter(function(v){return v!==val;});
+  selectedCategories = selectedCategories.filter(function(c){return c!==catId;});
+  delete CAT_INFO[catId];
+  el.parentElement.remove();
 }
 </script>
 </body>
