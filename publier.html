@@ -785,6 +785,8 @@ async function publishTrajet() {
     date_ramassage: new Date(first.date_heure).toISOString(),
     lieu_distribution: last.adresse,
     date_distribution: new Date(last.date_heure).toISOString(),
+    stops_ramassage: ramassageStops.map(function(s){return{adresse:s.adresse,date_heure:s.date_heure};}),
+    stops_distribution: distributionStops.map(function(s){return{adresse:s.adresse,date_heure:s.date_heure};}),
         prix: 0,
         prix_par_kg: 0,
         prix_categories: window._prixCategories || {},
