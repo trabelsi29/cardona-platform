@@ -925,6 +925,8 @@ async function buildNav(activePage) {
     ];
   }
   nav.style.display = 'flex';
+  var fc = document.getElementById('footer-copyright');
+  if (fc) fc.style.display = 'none';
   nav.innerHTML = items.map(function(it) {
     var isActive = it.id === activePage;
     var activeClass = isActive ? ' active' : '';
