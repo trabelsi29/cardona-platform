@@ -14,17 +14,17 @@
       --text-secondary: #574f43;
       --border: #d4cfc8;
     }
-    html, body {
-      height: 100%;
-      overflow: hidden;
-    }
+    html, body { height: 100%; }
     body {
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--dark);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
     }
     .phone-frame {
       width: 860px;
@@ -38,37 +38,36 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 60px;
+      padding: 40px 70px;
       text-align: center;
       overflow: hidden;
+      position: relative;
     }
 
-    .logo { width: 80px; height: 80px; object-fit: contain; margin-bottom: 4px; }
-    .brand { font-size: 28px; font-weight: 900; letter-spacing: 3px; }
-    .tagline { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
-
-    .sep { width: 32px; height: 3px; background: var(--gold); border-radius: 2px; margin: 18px auto; }
-
-    .headline { font-size: 20px; font-weight: 800; line-height: 1.35; margin-bottom: 10px; }
+    .logo { width: 72px; height: 72px; object-fit: contain; margin-bottom: 4px; }
+    .brand { font-size: 26px; font-weight: 900; letter-spacing: 3px; }
+    .sep { width: 32px; height: 3px; background: var(--gold); border-radius: 2px; margin: 14px auto; }
+    .headline { font-size: 19px; font-weight: 800; line-height: 1.35; margin-bottom: 10px; }
     .headline em { font-style: normal; color: var(--gold); }
-    .desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 24px; max-width: 420px; }
+    .desc { font-size: 13px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 20px; max-width: 460px; font-weight: 400; }
 
-    .roles { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+    .roles { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
     .role {
-      display: flex; align-items: center; gap: 8px;
-      border: 2px solid var(--gold);
-      border-radius: 12px;
-      padding: 9px 14px;
-      font-size: 13px;
-      font-weight: 700;
+      display: flex; align-items: center; gap: 7px;
+      border: 1.5px solid var(--gold);
+      border-radius: 10px;
+      padding: 7px 13px;
+      font-size: 12px;
+      font-weight: 600;
       background: white;
+      color: var(--dark);
     }
     .role-icon {
-      width: 28px; height: 28px;
+      width: 24px; height: 24px;
       background: var(--gold);
-      border-radius: 7px;
+      border-radius: 6px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
+      font-size: 12px;
     }
 
     .items {
@@ -76,41 +75,69 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 6px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .item {
       background: white;
       border: 1.5px solid var(--border);
       border-radius: 20px;
-      padding: 5px 14px;
+      padding: 5px 13px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 500;
       color: var(--text-secondary);
+    }
+
+    .transports {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .transport-chip {
+      background: var(--dark);
+      color: rgba(255,255,255,0.85);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 11px;
     }
 
     .coming {
       background: var(--dark);
       color: white;
-      border-radius: 14px;
-      padding: 14px 20px;
+      border-radius: 12px;
+      padding: 12px 20px;
       font-size: 13px;
       line-height: 1.6;
       max-width: 420px;
+      font-weight: 400;
     }
-    .coming strong { color: var(--gold); }
+    .coming strong { color: var(--gold); font-weight: 700; }
 
-    @media (max-width: 900px) {
-      body { overflow: auto; }
-      html { overflow: auto; }
+    .footer {
+      margin-top: 16px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      body { padding: 0; justify-content: flex-start; background: var(--card); }
       .phone-frame {
         width: 100%;
         height: auto;
-        min-height: 100vh;
+        min-height: 100dvh;
         border-radius: 0;
         box-shadow: none;
-        padding: 40px 24px;
+        padding: 40px 24px 32px;
         justify-content: center;
       }
+      .headline { font-size: 18px; }
+      .desc { font-size: 13px; }
+      .roles { gap: 6px; }
     }
   </style>
 </head>
@@ -119,12 +146,11 @@
 
     <img class="logo" src="assets/cardona-logo.gif" alt="CARDONA">
     <div class="brand">CARDONA</div>
-    <div class="tagline">Gratuit pour les transporteurs. Pratique pour les expéditeurs.</div>
-
     <div class="sep"></div>
 
-    <h1 class="headline">Envoyez vos colis.<br>Transportez — et <em>gagnez de l'argent.</em></h1>
-    <p class="desc">Publiez votre trajet gratuitement et transportez des envois sur votre chemin. Les expéditeurs trouvent un transporteur vérifié, partout dans le monde.</p>
+    <h1 class="headline">Gratuit pour les transporteurs.<br><em>Pratique pour les expéditeurs.</em></h1>
+
+    <p class="desc">Publiez votre trajet et transportez tout type de marchandise sur votre chemin. Les expéditeurs trouvent un transporteur vérifié, partout dans le monde.</p>
 
     <div class="roles">
       <div class="role"><div class="role-icon">📦</div>Expéditeurs</div>
@@ -133,15 +159,27 @@
     </div>
 
     <div class="items">
-      <div class="item">Médicaments</div>
-      <div class="item">Documents</div>
       <div class="item">Colis</div>
+      <div class="item">Documents</div>
+      <div class="item">Médicaments</div>
       <div class="item">Électronique</div>
+      <div class="item">Vêtements</div>
+      <div class="item">Et bien plus...</div>
+    </div>
+
+    <div class="transports">
+      <span class="transport-chip">Voiture</span>
+      <span class="transport-chip">Camion</span>
+      <span class="transport-chip">Avion</span>
+      <span class="transport-chip">Train</span>
+      <span class="transport-chip">Bus</span>
     </div>
 
     <div class="coming">
-      La plateforme arrive <strong>bientôt</strong>.<br>Des transporteurs vérifiés, partout dans le monde.
+      La plateforme arrive <strong>bientôt</strong> — des transporteurs vérifiés, partout dans le monde.
     </div>
+
+    <div class="footer">© 2026 CARDONA — Tous droits réservés</div>
 
   </div>
 </body>
