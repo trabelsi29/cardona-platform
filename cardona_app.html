@@ -224,6 +224,25 @@
   .view { display: none !important; }
   .view.active { display: block !important; }
   #app-loading { display: flex; align-items: center; justify-content: center; height: 100%; }
+
+  /* ── NAV BAS FIXE SUR MOBILE ─────────────────────────── */
+  @media (max-width: 900px) {
+    body { margin: 0; padding: 0; background: #F3F1EC; }
+    .phone-frame {
+      width: 100% !important;
+      height: 100dvh !important;
+      max-height: 100dvh !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+    }
+    .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .bottom-nav {
+      position: sticky;
+      bottom: 0;
+      flex-shrink: 0 !important;
+      padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+    }
+  }
 </style>
 </head>
 <body>
