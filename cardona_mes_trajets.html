@@ -53,6 +53,18 @@
   .btn-livrer { background:var(--gold); color:white; border:none; border-radius:8px; padding:8px 16px; font-size:13px; font-weight:600; cursor:pointer; width:100%; margin-top:8px; }
   .btn-livrer:hover { opacity:.85; }
   .resa-code { font-size:12px; color:var(--text-secondary); margin-bottom:2px; }
+  .livraison-form { display:none; margin-top:10px; padding:12px; background:#f5f3ee; border-radius:10px; }
+  .livraison-form.visible { display:block; }
+  .livraison-form input { width:100%; padding:10px 14px; border:2px solid var(--border); border-radius:8px; font-size:22px; font-weight:700; letter-spacing:8px; text-align:center; text-transform:uppercase; box-sizing:border-box; font-family:monospace; outline:none; }
+  .livraison-form input:focus { border-color:var(--gold); }
+  .livraison-form input.error { border-color:#c0392b; animation: shake .3s; }
+  .livraison-hint { font-size:12px; color:var(--text-secondary); text-align:center; margin-bottom:8px; }
+  .livraison-btns { display:flex; gap:8px; margin-top:10px; }
+  .livraison-btns button { flex:1; padding:10px; border-radius:8px; border:none; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-confirmer-code { background:var(--gold); color:white; }
+  .btn-annuler-code { background:#e8e4dd; color:var(--dark); }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
   .trip-divider { border-top: 1px solid #eee; margin: 10px 0; }
   .section-title { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.6px; margin: 18px 0 8px; }
   .section-title:first-child { margin-top: 0; }
@@ -498,10 +510,10 @@ function render() {
       var actions = r.statut === "en_attente"
         ? "<div class='resa-actions'><button class='btn-accept' onclick='updateStatut(&quot;" + r.id + "&quot;,&quot;confirme&quot;)'>✓ Accepter</button><button class='btn-refuse-sm' onclick='updateStatut(&quot;" + r.id + "&quot;,&quot;refuse&quot;)'>✕ Refuser</button></div>"
         : r.statut === "confirme"
-          ? "<div class='resa-actions'><button class='btn-livrer' onclick='demanderCodeLivraison(&quot;" + r.id + "&quot;,&quot;" + r.ncc + "&quot;)'>📦 Valider livraison</button></div>"
+          ? "<div class='resa-actions'>" + "<button class='btn-livrer' id='btn-livrer-" + r.id + "' onclick='afficherFormCode(&quot;" + r.id + "&quot;)'>📦 Valider livraison</button>" + "<div class='livraison-form' id='form-" + r.id + "'>" + "<div class='livraison-hint'>Saisissez le code secret communiqué par l'expéditeur</div>" + "<input type='text' id='input-" + r.id + "' maxlength='4' placeholder='- - - -' oninput='this.value=this.value.toUpperCase()'>" + "<div class='livraison-btns'>" + "<button class='btn-annuler-code' onclick='masquerFormCode(&quot;" + r.id + "&quot;)'>Annuler</button>" + "<button class='btn-confirmer-code' onclick='validerCodeLivraison(&quot;" + r.id + "&quot;,&quot;" + r.ncc + "&quot;)'>✓ Confirmer</button>" + "</div></div></div>"
           : "";
       return "<div class='resa-card'>"
-        + "<div class='resa-head'><div><div class='resa-code'>🔐 Code : <strong>" + r.ncc + "</strong></div><div class='resa-name'>" + (exp.full_name || "Expéditeur") + "</div></div>" + avatarHtml + "</div>"
+        + "<div class='resa-head'><div><div class='resa-name'>" + (exp.full_name || "Expéditeur") + "</div></div>" + avatarHtml + "</div>"
         + "<div class='resa-status " + r.statut + "'>" + statusLabel + "</div>"
         + "<div class='resa-details'>Colis : " + cats + (r.poids_kg ? " (" + r.poids_kg + " kg)" : "") + "</div>"
         + "<div class='resa-price'>" + (r.prix_transporteur || "—") + " €</div>"
@@ -673,24 +685,42 @@ async function handleLogout() {
   window.location.href = "cardona_app.html";
 }
 
-async function demanderCodeLivraison(resaId, codeAttendu) {
-  var saisie = prompt("Saisissez le code secret du destinataire (4 caractères) :");
-  if (!saisie) return;
-  if (saisie.trim().toUpperCase() !== codeAttendu.toUpperCase()) {
-    alert("❌ Code incorrect. Demandez le code à l'expéditeur.");
+function afficherFormCode(resaId) {
+  var form = document.getElementById("form-" + resaId);
+  var btn = document.getElementById("btn-livrer-" + resaId);
+  if (form) form.classList.add("visible");
+  if (btn) btn.style.display = "none";
+  var input = document.getElementById("input-" + resaId);
+  if (input) { input.value = ""; input.focus(); }
+}
+
+function masquerFormCode(resaId) {
+  var form = document.getElementById("form-" + resaId);
+  var btn = document.getElementById("btn-livrer-" + resaId);
+  if (form) form.classList.remove("visible");
+  if (btn) btn.style.display = "";
+}
+
+async function validerCodeLivraison(resaId, codeAttendu) {
+  var input = document.getElementById("input-" + resaId);
+  if (!input) return;
+  var saisie = input.value.trim().toUpperCase();
+  if (saisie !== codeAttendu.toUpperCase()) {
+    input.classList.add("error");
+    setTimeout(function() { input.classList.remove("error"); }, 400);
+    input.value = "";
+    input.placeholder = "Code incorrect !";
+    setTimeout(function() { input.placeholder = "- - - -"; }, 1500);
     return;
   }
-  // Code correct — valider la livraison
-  var btn = event && event.target;
-  if (btn) { btn.disabled = true; btn.textContent = "Validation…"; }
-  const { error } = await sb.from('reservations').update({ statut: 'livre' }).eq('id', resaId);
-  if (error) { alert("Erreur : " + error.message); if (btn) { btn.disabled = false; btn.textContent = "📦 Valider livraison"; } return; }
-  // Notifier l'expéditeur
-  var { data: resa } = await sb.from('reservations').select('expediteur_id, trajet_id').eq('id', resaId).single();
+  // Code correct
+  input.disabled = true;
+  const { error } = await sb.from("reservations").update({ statut: "livre" }).eq("id", resaId);
+  if (error) { alert("Erreur : " + error.message); input.disabled = false; return; }
+  var { data: resa } = await sb.from("reservations").select("expediteur_id, trajet_id").eq("id", resaId).single();
   if (resa) {
-    await sb.from('notifications').insert({ user_id: resa.expediteur_id, trajet_id: resa.trajet_id, reservation_ncc: resaId, type: 'livre', message: "Votre colis a été livré avec succès !" });
+    await sb.from("notifications").insert({ user_id: resa.expediteur_id, trajet_id: resa.trajet_id, reservation_ncc: resaId, type: "livre", message: "Votre colis a été livré avec succès !" });
   }
-  alert("✅ Livraison confirmée !");
   loadTrajets();
 }
 </script>
