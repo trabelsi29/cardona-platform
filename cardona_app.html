@@ -234,14 +234,19 @@
       max-height: 100dvh !important;
       border-radius: 0 !important;
       box-shadow: none !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
     }
-    .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .scroll-area { flex: 1 !important; overflow-y: auto !important; -webkit-overflow-scrolling: touch; min-height: 0; }
+    .view.active { flex: 1; overflow-y: auto; min-height: 0; }
     .bottom-nav {
-      position: sticky;
-      bottom: 0;
       flex-shrink: 0 !important;
       padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+      position: relative !important;
+      z-index: 50;
     }
+    .scroll-area { padding: 20px 20px; }
   }
 </style>
 </head>
