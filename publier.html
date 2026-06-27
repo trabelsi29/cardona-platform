@@ -232,12 +232,12 @@
       <div class="gate-title" id="gate-title">Connexion requise</div>
       <div class="gate-desc" id="gate-desc">Connectez-vous avec un compte transporteur via la page de connexion CARDONA pour publier un trajet.</div>
       <button class="btn-primary" id="gate-logout-btn" style="display:none;margin-top:20px;" onclick="handleGateLogout()">Se déconnecter</button>
-      <a class="btn-primary" id="gate-login-link" href="index.html" onclick="sessionStorage.setItem('skipSplash','1')" style="display:none;margin-top:20px;text-decoration:none;text-align:center;">Aller à la page de connexion</a>
-      <a class="btn-primary" id="gate-profile-link" href="index.html" onclick="sessionStorage.setItem('skipSplash','1')" style="display:none;margin-top:20px;text-decoration:none;text-align:center;">Aller à mon profil</a>
+      <a class="btn-primary" id="gate-login-link" href="/" onclick="sessionStorage.setItem('skipSplash','1')" style="display:none;margin-top:20px;text-decoration:none;text-align:center;">Aller à la page de connexion</a>
+      <a class="btn-primary" id="gate-profile-link" href="/" onclick="sessionStorage.setItem('skipSplash','1')" style="display:none;margin-top:20px;text-decoration:none;text-align:center;">Aller à mon profil</a>
       <div id="gate-become-block" style="display:none;margin-top:20px;">
         <button class="btn-primary" style="margin-bottom:10px;" onclick="becomeTransporteur('prive')">Devenir transporteur privé</button>
         <button class="btn-outline" style="margin-bottom:10px;" onclick="becomeTransporteur('pro')">Devenir transporteur professionnel</button>
-        <a href="index.html" onclick="sessionStorage.setItem('skipSplash','1')" style="display:block;text-align:center;font-size:13px;color:var(--text-secondary);text-decoration:none;margin-top:6px;">Retour à mon profil</a>
+        <a href="/" onclick="sessionStorage.setItem('skipSplash','1')" style="display:block;text-align:center;font-size:13px;color:var(--text-secondary);text-decoration:none;margin-top:6px;">Retour à mon profil</a>
       </div>
     </div>
   </div>
