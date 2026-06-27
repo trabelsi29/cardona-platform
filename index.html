@@ -41,9 +41,10 @@
     padding: 0;
   }
   .mascot { width: 130px; height: auto; display: block; margin: 0 auto 24px; }
-  .scroll-area { flex: 1; overflow-y: auto; padding: 32px 80px; box-sizing: border-box; min-height: 0; }
+  .scroll-area { flex: 1; overflow: hidden; padding: 0; box-sizing: border-box; min-height: 0; display: flex; flex-direction: column; }
   .form-inner { max-width: 480px; margin: 0 auto; width: 100%; }
   .view { display: none; min-height: 0; }
+  #view-home { display: none; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 32px 80px; box-sizing: border-box; }
   .view.active { display: block; }
 
   .field { margin-bottom: 14px; }
@@ -234,6 +235,7 @@
   .verif-required { font-size:12px; color:#d9534f; background:#fdf2f2; border-radius:8px; padding:10px 12px; margin-top:8px; line-height:1.5; }
   .view { display: none !important; }
   .view.active { display: block !important; min-height: 0; }
+  #view-home.active { display: flex !important; flex-direction: column; }
   #app-loading { display: flex; align-items: center; justify-content: center; height: 100%; }
 
   /* ── NAV BAS FIXE SUR MOBILE ─────────────────────────── */
