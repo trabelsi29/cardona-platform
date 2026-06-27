@@ -137,15 +137,10 @@
   .menu-item:hover { background: #FDF8EE; }
   .menu-item-logout { color: #A32D2D; font-weight: 500; }
 
-  .bottom-nav { display:flex; border-top:1px solid #e3e0db; flex-shrink:0; padding:12px 8px max(10px,env(safe-area-inset-bottom)); background:#fff; z-index:50; width:100%; box-sizing:border-box; }
-  .bn-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; text-decoration:none; cursor:pointer; padding:4px 2px; }
-  .bn-icon-wrap { width:24px; height:24px; display:flex; align-items:center; justify-content:center; }
-  .bn-icon-img { width:22px; height:22px; object-fit:contain; opacity:0.4; transition:opacity .15s; }
-  .bn-label { font-size:11px; color:#aaa; transition:color .15s; white-space:nowrap; }
-  .bn-underline { width:18px; height:3px; border-radius:2px; background:transparent; margin-top:1px; transition:background .15s; }
-  .bn-item.active .bn-icon-img { opacity:1; }
-  .bn-item.active .bn-label { color:var(--dark,#221b16); font-weight:700; }
-  .bn-item.active .bn-underline { background:#C8902A; }
+  .bottom-nav { display:flex; border-top:1px solid #e3e0db; flex-shrink:0; padding:12px 8px 10px; background:#ffffff; z-index:50; width:100%; box-sizing:border-box; }
+  .bn-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; text-decoration:none; cursor:pointer; padding:4px; }
+  .bn-item.active .bn-label { color:var(--dark); font-weight:600; }
+  .bn-item.active .bn-underline { background:var(--gold); }
   .bn-item.active .bn-icon-img { opacity:1; filter:none; }
   .bn-icon-wrap { width:24px; height:24px; display:flex; align-items:center; justify-content:center; }
   .bn-icon-img { width:22px; height:22px; object-fit:contain; opacity:0.4; }
@@ -466,7 +461,7 @@
     </div>
   </div>
   <div class="footer-copyright" style="text-align:center;font-size:10.5px;color:var(--text-secondary);padding:6px 0;flex-shrink:0;background:white;">© 2026 CARDONA. Tous droits réservés.</div>
-  <div class="bottom-nav" id="bottom-nav" style="display:none;"><!-- injecté par buildNav --></div>
+  <div class="bottom-nav" id="bottom-nav" style="display:none;"><!-- nav injectée dynamiquement --></div>
 </div>
 
 <script>
