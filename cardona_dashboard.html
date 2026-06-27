@@ -120,7 +120,7 @@
 
   .loading-row { text-align: center; padding: 30px; color: var(--text-secondary); font-size: 13px; }
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--dark); color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: none; z-index: 999; }
-.hamburger{display:none;position:fixed;top:12px;left:12px;z-index:300;background:var(--dark);border:none;border-radius:8px;width:40px;height:40px;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:5px;}.hamburger span{display:block;width:20px;height:2px;background:white;border-radius:2px;}.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;}
+.hamburger{display:none;background:var(--dark);border:none;border-radius:8px;width:36px;height:36px;cursor:pointer;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex-shrink:0;margin-right:10px;}.hamburger span{display:block;width:20px;height:2px;background:white;border-radius:2px;}.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;}
 @media (max-width: 768px) {
   .hamburger { display: flex !important; }
   .sidebar {
@@ -134,7 +134,7 @@
   }
   .sidebar.open { left: 0 !important; box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
   .sb-overlay.open { display: block !important; }
-  .main-content { padding: 60px 12px 12px !important; box-sizing: border-box; }
+  .main-content { padding: 12px !important; box-sizing: border-box; }
   .stats-grid { grid-template-columns: 1fr 1fr !important; }
   .data-table { display: block; overflow-x: auto; font-size: 12px; }
   .page-header h1 { font-size: 18px; }
@@ -170,7 +170,7 @@
 
 <!-- ===================== APP SCREEN ===================== -->
 <div id="app-screen">
-  <button class="hamburger" id="hamburger-btn" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sb-ov').classList.toggle('open')"><span></span><span></span><span></span></button><div class="sb-overlay" id="sb-ov" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('open')"></div><div class="app">
+  <div class="sb-overlay" id="sb-ov" onclick="document.querySelector('.sidebar').classList.remove('open');this.classList.remove('open')"></div><div class="app">
     <div class="sidebar">
       <div class="sidebar-logo">
         <div class="logo-mark">
@@ -203,6 +203,7 @@
 
     <div class="main">
       <div class="topbar">
+        <button class="hamburger" id="hamburger-btn" onclick="document.querySelector('.sidebar').classList.toggle('open');document.getElementById('sb-ov').classList.toggle('open')"><span></span><span></span><span></span></button>
         <div class="topbar-title" id="page-title">Vue d'ensemble</div>
         <button class="refresh-btn" onclick="loadAllData()">↻ Actualiser</button>
       </div>
