@@ -887,21 +887,21 @@ async function confirmerPaiementStripe() {
 
   // Email au transporteur
   try {
-    var { data: transProfile } = await sb.from('profiles').select('email, full_name').eq('id', t.transporteur_id).single();
-    if (transProfile && transProfile.email) {
-      var emailColis = selectedCategories.join(', ') || '—';
-      var emailTrajet = (t.lieu_ramassage || '') + ' → ' + (t.lieu_distribution || '');
-      emailjs.init('dWk-YgDI36JADXSGN');
-      await emailjs.send('service_f9sp7vz', 'template_4zhpb6k', {
-        to_email: transProfile.email,
-        trajet: emailTrajet,
-        expediteur: session.user.email,
-        colis: emailColis,
-        poids: weight || '—',
-        prix: prixT || '—'
-      });
-      console.log('Email envoyé à', transProfile.email);
-    }
+    var { data: transProfile } = await sb.from('profiles').select('full_name, phone').eq('id', t.transporteur_id).single();
+    var emailColis = selectedCategories.join(', ') || '—';
+    var emailTrajet = (t.lieu_ramassage || '') + ' → ' + (t.lieu_distribution || '');
+    var transName = (transProfile && transProfile.full_name) || 'Transporteur';
+    emailjs.init('dWk-YgDI36JADXSGN');
+    await emailjs.send('service_f9sp7vz', 'template_4zhpb6k', {
+      to_email: 'contact@cardona-app.com',
+      trajet: emailTrajet,
+      expediteur: session.user.email,
+      transporteur: transName,
+      colis: emailColis,
+      poids: weight || '—',
+      prix: prixT || '—'
+    });
+    console.log('Email notification envoyé');
   } catch(e) { console.warn('Email transporteur:', e); }
 
   goStep(7);
