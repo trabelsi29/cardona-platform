@@ -575,6 +575,8 @@ async function handleSignup() {
   }
 
   if (data.session) {
+    // Sauvegarder email dans profiles
+    await sb.from('profiles').update({ email: email }).eq('id', data.user.id).catch(function(){});
     await loadHome();
   } else {
     switchView('confirm');
