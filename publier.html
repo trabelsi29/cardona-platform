@@ -222,17 +222,21 @@
   .prix-cat-row input { min-width: 80px; }
 
   /* ── INPUTS DATE/TIME MOBILE ── */
-  input[type="date"], input[type="time"] {
+  input[type="date"] {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
-    -webkit-appearance: none;
-    appearance: none;
+  }
+  input[type="time"] {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
   .field { min-width: 0; overflow: hidden; }
   .stop-block { overflow: hidden; }
-  .stop-times { display: flex; gap: 8px; flex-wrap: wrap; }
-  .stop-times .field { flex: 1; min-width: 120px; }
+  .stop-times { display: flex; gap: 8px; }
+  .stop-times .field { flex: 1; min-width: 0; }
+  .stop-times input[type="time"] { width: 100%; min-width: 0; }
 </style>
 </head>
 <body>
@@ -318,7 +322,7 @@
       <div class="category-pill" data-cat="document" onclick="toggleCategory('document')"><div class="category-check"></div>📄 Documents</div>
       <div class="category-pill" data-cat="fragile" onclick="toggleCategory('fragile')"><div class="category-check"></div>🔔 Produits fragiles</div>
       <div class="category-pill" data-cat="electronique" onclick="toggleCategory('electronique')"><div class="category-check"></div>💻 Produits électroniques</div>
-      <div class="category-pill" data-cat="autre" onclick="toggleCategory('autre')"><div class="category-check"></div>❓ Autre</div>
+      <div class="category-pill" data-cat="autre" onclick="toggleAutre()"><div class="category-check"></div>❓ Autre</div>
       <div id="autre-cat-zone" style="display:none;margin-top:8px;">
         <input type="text" id="autre-cat-input" placeholder="Nommez ce type de colis (ex: Animaux, Plantes...)" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:6px;">
         <div id="autre-cat-tags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
@@ -656,23 +660,6 @@ function validateStep3() {
 // STEP 4 : CATÉGORIES
 // ============================================================
 function toggleCategory(cat) {
-  if (cat === "autre") {
-    var zone = document.getElementById("autre-cat-zone");
-    var pill = document.querySelector('.category-pill[data-cat="autre"]');
-    var isActive = pill && pill.classList.contains("active");
-    if (isActive) {
-      if (pill) pill.classList.remove("active");
-      if (zone) zone.style.display = "none";
-      selectedCategories = selectedCategories.filter(function(c){return c !== "autre" && !c.startsWith("custom_");});
-      _autreCats = [];
-      var tags = document.getElementById("autre-cat-tags");
-      if (tags) tags.innerHTML = "";
-    } else {
-      if (pill) pill.classList.add("active");
-      if (zone) zone.style.display = "block";
-    }
-    return;
-  }
   const idx = selectedCategories.indexOf(cat);
   if (idx > -1) selectedCategories.splice(idx, 1); else selectedCategories.push(cat);
   document.querySelectorAll('.category-pill').forEach(el => {
@@ -977,6 +964,23 @@ function removeAutreCat(el, catId, val) {
   selectedCategories = selectedCategories.filter(function(c){return c!==catId;});
   delete CAT_INFO[catId];
   el.parentElement.remove();
+}
+
+function toggleAutre() {
+  var pill = document.querySelector('.category-pill[data-cat="autre"]');
+  var zone = document.getElementById("autre-cat-zone");
+  var isActive = pill && pill.classList.contains("active");
+  if (isActive) {
+    pill.classList.remove("active");
+    if (zone) zone.style.display = "none";
+    selectedCategories = selectedCategories.filter(function(c){ return c !== "autre" && !c.startsWith("custom_"); });
+    _autreCats = [];
+    var tags = document.getElementById("autre-cat-tags");
+    if (tags) tags.innerHTML = "";
+  } else {
+    pill.classList.add("active");
+    if (zone) zone.style.display = "block";
+  }
 }
 </script>
 </body>
