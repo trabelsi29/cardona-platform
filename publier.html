@@ -542,10 +542,10 @@ function renderStops(type) {
       + '<input type="date" value="' + dateVal + '" min="' + new Date().toISOString().slice(0,10) + '"'
       + ' onchange="updateStopDate(\'' + type + '\',\'' + stop.id + '\', this.value)"></div>'
       + '<div style="display:flex;gap:10px;">'
-      + '<div class="field" style="flex:1;"><label>Heure de début</label>'
-      + '<input type="time" value="' + heureDebut + '" onchange="updateStopTime(\'' + type + '\',\'' + stop.id + '\',\'debut\', this.value)"></div>'
-      + '<div class="field"><label>Heure de fin</label>'
-      + '<input type="time" value="' + heureFin + '" onchange="updateStopTime(\'' + type + '\',\'' + stop.id + '\',\'fin\', this.value)"></div>'
+      + '<div style="flex:1;min-width:0;"><label style="font-size:13px;color:var(--text-secondary);">Heure de début</label>'
+      + '<input type="time" value="' + heureDebut + '" style="width:100%;box-sizing:border-box;" onchange="updateStopTime(\'' + type + '\',\'' + stop.id + '\',\'debut\', this.value)"></div>'
+      + '<div style="flex:1;min-width:0;"><label style="font-size:13px;color:var(--text-secondary);">Heure de fin</label>'
+      + '<input type="time" value="' + heureFin + '" style="width:100%;box-sizing:border-box;" onchange="updateStopTime(\'' + type + '\',\'' + stop.id + '\',\'fin\', this.value)"></div>'
       + '</div>'
       + '</div>';
   }).join('');
