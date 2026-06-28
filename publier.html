@@ -220,6 +220,19 @@
   input[type="date"], input[type="time"] { box-sizing: border-box; width: 100%; }
   .prix-cat-row { flex-wrap: wrap; }
   .prix-cat-row input { min-width: 80px; }
+
+  /* ── INPUTS DATE/TIME MOBILE ── */
+  input[type="date"], input[type="time"] {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .field { min-width: 0; overflow: hidden; }
+  .stop-block { overflow: hidden; }
+  .stop-times { display: flex; gap: 8px; flex-wrap: wrap; }
+  .stop-times .field { flex: 1; min-width: 120px; }
 </style>
 </head>
 <body>
@@ -527,7 +540,7 @@ function renderStops(type) {
       + '<div style="display:flex;gap:10px;">'
       + '<div class="field" style="flex:1;"><label>Heure de début</label>'
       + '<input type="time" value="' + heureDebut + '" onchange="updateStopTime(\'' + type + '\',\'' + stop.id + '\',\'debut\', this.value)"></div>'
-      + '<div class="field" style="flex:1;min-width:120px;"><label>Heure de fin</label>'
+      + '<div class="field"><label>Heure de fin</label>'
       + '<input type="time" value="' + heureFin + '" onchange="updateStopTime(\'' + type + '\',\'' + stop.id + '\',\'fin\', this.value)"></div>'
       + '</div>'
       + '</div>';
