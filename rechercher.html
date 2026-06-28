@@ -885,6 +885,23 @@ async function confirmerPaiementStripe() {
     content: 'Nouvelle demande de reservation'
   }).then(function(){}).catch(function(){});
 
+  // Email au transporteur
+  try {
+    var { data: transProfile } = await sb.from('profiles').select('email, full_name').eq('id', t.transporteur_id).single();
+    if (transProfile && transProfile.email) {
+      var cats = (pendingReservationData.selectedCategories || [pendingReservationData.t.categories_acceptees]).join(', ');
+      emailjs.init('dWk-YgDI36JADXSGN');
+      emailjs.send('service_f9sp7vz', 'template_4zhpb6k', {
+        to_email: transProfile.email,
+        trajet: (t.lieu_ramassage || '') + ' → ' + (t.lieu_distribution || ''),
+        expediteur: session.user.email,
+        colis: (r.categories && r.categories.length ? r.categories.join(', ') : r.categorie) || '—',
+        poids: r.poids_kg || '—',
+        prix: r.prix_transporteur || '—'
+      });
+    }
+  } catch(e) { console.warn('Email transporteur:', e); }
+
   goStep(7);
   // réinitialiser Stripe
   stripeElements = null; paymentElement = null; pendingReservationData = null;
