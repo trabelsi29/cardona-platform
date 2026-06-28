@@ -887,13 +887,13 @@ async function confirmerPaiementStripe() {
 
   // Email au transporteur
   try {
-    var { data: transProfile } = await sb.from('profiles').select('full_name, phone').eq('id', t.transporteur_id).single();
+    var { data: transProfile } = await sb.from('profiles').select('full_name, email').eq('id', t.transporteur_id).single();
     var emailColis = selectedCategories.join(', ') || '—';
     var emailTrajet = (t.lieu_ramassage || '') + ' → ' + (t.lieu_distribution || '');
     var transName = (transProfile && transProfile.full_name) || 'Transporteur';
     emailjs.init('dWk-YgDI36JADXSGN');
     await emailjs.send('service_f9sp7vz', 'template_4zhpb6k', {
-      to_email: 'contact@cardona-app.com',
+      to_email: (transProfile && transProfile.email) ? transProfile.email : 'contact@cardona-app.com',
       trajet: emailTrajet,
       expediteur: session.user.email,
       transporteur: transName,
