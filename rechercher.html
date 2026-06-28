@@ -889,16 +889,18 @@ async function confirmerPaiementStripe() {
   try {
     var { data: transProfile } = await sb.from('profiles').select('email, full_name').eq('id', t.transporteur_id).single();
     if (transProfile && transProfile.email) {
-      var cats = (pendingReservationData.selectedCategories || [pendingReservationData.t.categories_acceptees]).join(', ');
+      var emailColis = selectedCategories.join(', ') || '—';
+      var emailTrajet = (t.lieu_ramassage || '') + ' → ' + (t.lieu_distribution || '');
       emailjs.init('dWk-YgDI36JADXSGN');
-      emailjs.send('service_f9sp7vz', 'template_4zhpb6k', {
+      await emailjs.send('service_f9sp7vz', 'template_4zhpb6k', {
         to_email: transProfile.email,
-        trajet: (t.lieu_ramassage || '') + ' → ' + (t.lieu_distribution || ''),
+        trajet: emailTrajet,
         expediteur: session.user.email,
-        colis: (r.categories && r.categories.length ? r.categories.join(', ') : r.categorie) || '—',
-        poids: r.poids_kg || '—',
-        prix: r.prix_transporteur || '—'
+        colis: emailColis,
+        poids: weight || '—',
+        prix: prixT || '—'
       });
+      console.log('Email envoyé à', transProfile.email);
     }
   } catch(e) { console.warn('Email transporteur:', e); }
 
