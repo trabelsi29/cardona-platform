@@ -60,7 +60,7 @@
   .field input { width: 100%; padding: 12px 13px; border: 1px solid #e0ddd8; border-radius: 10px; font-size: 13px; background: white; outline: none; color: var(--dark); }
   .field input:focus { border-color: var(--gold); }
 
-  .suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e0ddd8; border-radius: 10px; margin-top: 4px; max-height: 160px; overflow-y: auto; z-index: 50; box-shadow: 0 8px 20px rgba(0,0,0,0.1); display: none; }
+  .suggestions { position: fixed; background: white; border: 1px solid #e0ddd8; border-radius: 10px; max-height: 200px; overflow-y: auto; z-index: 9999; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
   .suggestion-item { padding: 10px 12px; font-size: 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; color: var(--dark); }
   .suggestion-item:last-child { border-bottom: none; }
   .suggestion-item:hover { background: #FDF8EE; }
@@ -604,6 +604,14 @@ function handleAddressInput(type, id, value) {
   debounceTimers[id] = setTimeout(async () => {
     suggBox.innerHTML = '<div class="suggestion-loading">Recherche…</div>';
     suggBox.style.display = 'block';
+    // Positionner en fixed sous le champ
+    var inputEl = document.getElementById('addr-' + id) || document.querySelector('input[oninput*="' + id + '"]');
+    if (inputEl) {
+      var rect = inputEl.getBoundingClientRect();
+      suggBox.style.top = (rect.bottom + 4) + 'px';
+      suggBox.style.left = rect.left + 'px';
+      suggBox.style.width = rect.width + 'px';
+    }
     try {
       const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&accept-language=fr&q=${encodeURIComponent(value)}`);
 
