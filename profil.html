@@ -289,12 +289,13 @@
   .bn-item .bn-underline { width: 18px; height: 3px; border-radius: 2px; background: transparent; margin-top: 2px; }
 html, body { height:100%; margin:0; padding:0; }
 body { background:var(--bg); display:flex; align-items:center; justify-content:center; }
-.phone-frame { width:860px; max-width:100%; height:780px; max-height:88vh; background:var(--card); border-radius:28px; box-shadow:0 20px 50px rgba(0,0,0,0.15); display:flex; flex-direction:column; overflow:hidden; }
+.phone-frame { width:860px; max-width:100%; height:780px; max-height:88vh; background:var(--card); border-radius:28px; box-shadow:0 20px 50px rgba(0,0,0,0.15); display:flex; flex-direction:column; overflow:hidden; position:relative; }
 .scroll-area { flex:1; overflow-y:auto; min-height:0; padding:28px; box-sizing:border-box; }
 @media(max-width:900px) {
-  body { background:var(--card); align-items:flex-start; }
-  .phone-frame { width:100%; height:100dvh; max-height:100dvh; border-radius:0; box-shadow:none; }
-  .scroll-area { padding:20px; }
+  body { background:var(--bg); align-items:flex-start; padding:0; }
+  .phone-frame { width:100%; height:100dvh; max-height:100dvh; border-radius:0; box-shadow:none; display:flex; flex-direction:column; overflow:hidden; }
+  .scroll-area { flex:1; overflow-y:auto; min-height:0; padding:20px; -webkit-overflow-scrolling:touch; }
+  .bottom-nav { flex-shrink:0; padding-bottom:max(10px,env(safe-area-inset-bottom)); }
 }
 </style>
 </head>
