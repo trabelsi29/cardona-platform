@@ -690,6 +690,9 @@ function handleAddressInput(type, id, value) {
 function selectSuggestion(type, id, display_name, lat, lon) {
   const stop = getStopsArray(type).find(s => s.id === id);
   if (stop) { stop.adresse = display_name; stop.lat = lat; stop.lon = lon; }
+  // Mettre à jour l'input immédiatement (important sur mobile)
+  var inputEl = document.getElementById('addr-' + id);
+  if (inputEl) { inputEl.value = display_name; inputEl.blur(); }
   document.getElementById('global-sugg-box').style.display = 'none';
   renderStops(type);
 }
