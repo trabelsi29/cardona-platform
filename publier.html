@@ -620,14 +620,19 @@ function handleAddressInput(type, id, value) {
         suggBox.innerHTML = '<div class="suggestion-loading">Aucun résultat</div>';
         return;
       }
-      // Dédupliquer et simplifier l'affichage
+      // Dédupliquer par ville+pays — garder seulement le premier résultat par ville
       var seen = new Set();
       var unique = results.filter(function(r) {
         var parts = r.display_name.split(',');
-        var key = (parts[0] + ',' + parts[parts.length-1]).trim();
+        var city = parts[0].trim().toLowerCase();
+        var country = parts[parts.length-1].trim().toLowerCase();
+        var key = city + '|' + country;
+        // Ignorer si c'est un sous-région (Gouvernorat, District, etc.)
+        var isRegion = /gouvernorat|district|province|region|département|county|state/i.test(parts[0]);
+        if (isRegion) return false;
         if (seen.has(key)) return false;
         seen.add(key); return true;
-      });
+      }).slice(0, 4);
       suggBox.innerHTML = '';
       unique.forEach(function(r) {
         var parts = r.display_name.split(',');
