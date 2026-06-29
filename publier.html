@@ -628,12 +628,19 @@ function handleAddressInput(type, id, value) {
         if (seen.has(key)) return false;
         seen.add(key); return true;
       });
-      suggBox.innerHTML = unique.map(r => {
+      suggBox.innerHTML = '';
+      unique.forEach(function(r) {
         var parts = r.display_name.split(',');
         var label = parts[0].trim();
         if (parts.length > 1) label += ', ' + parts[parts.length-1].trim();
-        return `<div class="suggestion-item" onclick='selectSuggestion("${type}","${id}", ${JSON.stringify(r.display_name)}, ${r.lat}, ${r.lon})'>${label}</div>`;
-      }).join('');
+        var div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.textContent = label;
+        div.onclick = (function(dn, la, lo) {
+          return function() { selectSuggestion(type, id, dn, la, lo); };
+        })(r.display_name, r.lat, r.lon);
+        suggBox.appendChild(div);
+      });
     } catch (e) {
       suggBox.innerHTML = '<div class="suggestion-loading">Erreur de recherche</div>';
     }
