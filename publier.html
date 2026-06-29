@@ -620,9 +620,20 @@ function handleAddressInput(type, id, value) {
         suggBox.innerHTML = '<div class="suggestion-loading">Aucun résultat</div>';
         return;
       }
-      suggBox.innerHTML = results.map(r =>
-        `<div class="suggestion-item" onclick='selectSuggestion("${type}","${id}", ${JSON.stringify(r.display_name)}, ${r.lat}, ${r.lon})'>${r.display_name}</div>`
-      ).join('');
+      // Dédupliquer et simplifier l'affichage
+      var seen = new Set();
+      var unique = results.filter(function(r) {
+        var parts = r.display_name.split(',');
+        var key = (parts[0] + ',' + parts[parts.length-1]).trim();
+        if (seen.has(key)) return false;
+        seen.add(key); return true;
+      });
+      suggBox.innerHTML = unique.map(r => {
+        var parts = r.display_name.split(',');
+        var label = parts[0].trim();
+        if (parts.length > 1) label += ', ' + parts[parts.length-1].trim();
+        return `<div class="suggestion-item" onclick='selectSuggestion("${type}","${id}", ${JSON.stringify(r.display_name)}, ${r.lat}, ${r.lon})'>${label}</div>`;
+      }).join('');
     } catch (e) {
       suggBox.innerHTML = '<div class="suggestion-loading">Erreur de recherche</div>';
     }
