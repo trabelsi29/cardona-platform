@@ -555,6 +555,25 @@ function render() {
 async function updateStatut(reservationId, statut) {
   const { error } = await sb.from('reservations').update({ statut }).eq('id', reservationId);
   if (error) { alert('Erreur : ' + error.message); return; }
+  // Remboursement automatique si refus
+  if (statut === 'refuse') {
+    try {
+      var { data: resaData } = await sb.from('reservations').select('payment_intent_id, expediteur_id').eq('id', reservationId).single();
+      if (resaData && resaData.payment_intent_id) {
+        await fetch('https://cardona-stripe.trabelsi-med-amine.workers.dev', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'refund', payment_intent_id: resaData.payment_intent_id })
+        });
+        // Notifier l'expéditeur du remboursement
+        await sb.from('notifications').insert({
+          user_id: resaData.expediteur_id,
+          type: 'remboursement',
+          content: 'Votre réservation a été refusée. Les frais de 3€ vous seront remboursés sous 5-10 jours.'
+        }).then(function(){}).catch(function(){});
+      }
+    } catch(e) { console.warn('Remboursement:', e); }
+  }
   if (statut === 'confirme') {
     const { data: resa } = await sb.from('reservations').select('frais_service').eq('id', reservationId).single();
     await sb.from('paiements').insert({ reservation_id: reservationId, montant: resa?.frais_service || 2, methode: 'carte', statut: 'paye' });
