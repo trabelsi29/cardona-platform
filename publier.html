@@ -537,7 +537,7 @@ function renderStops(type) {
       + '<div class="stop-card-head"><span class="stop-card-label">' + label + ' ' + (idx+1) + '</span>' + removeBtn + '</div>'
       + '<div class="field"><input type="text" placeholder="Adresse (ville, aéroport, port...)" value="' + stop.adresse.replace(/"/g,'&quot;') + '"'
       + ' oninput="handleAddressInput(\'' + type + '\',\'' + stop.id + '\', this.value)" onfocus="this.select()">'
-      + '<div class="suggestions" id="sugg-' + stop.id + '"></div></div>'
+      + '</div>'
       + '<div class="field"><label>Date</label>'
       + '<input type="date" value="' + dateVal + '" min="' + new Date().toISOString().slice(0,10) + '"'
       + ' onchange="updateStopDate(\'' + type + '\',\'' + stop.id + '\', this.value)"></div>'
@@ -598,7 +598,8 @@ function handleAddressInput(type, id, value) {
   if (stop) { stop.lat = null; stop.lon = null; }
 
   clearTimeout(debounceTimers[id]);
-  const suggBox = document.getElementById('sugg-' + id);
+  const suggBox = document.getElementById('global-sugg-box');
+  suggBox._currentType = type; suggBox._currentId = id;
   if (value.trim().length < 3) { suggBox.style.display = 'none'; return; }
 
   debounceTimers[id] = setTimeout(async () => {
@@ -655,7 +656,7 @@ function handleAddressInput(type, id, value) {
 function selectSuggestion(type, id, display_name, lat, lon) {
   const stop = getStopsArray(type).find(s => s.id === id);
   if (stop) { stop.adresse = display_name; stop.lat = lat; stop.lon = lon; }
-  document.getElementById('sugg-' + id).style.display = 'none';
+  document.getElementById('global-sugg-box').style.display = 'none';
   renderStops(type);
 }
 
@@ -1014,6 +1015,14 @@ function toggleAutre() {
     if (zone) zone.style.display = "block";
   }
 }
+
+document.addEventListener('click', function(e) {
+  var box = document.getElementById('global-sugg-box');
+  if (box && !box.contains(e.target) && !e.target.matches('input[id^="addr-"]')) {
+    box.style.display = 'none';
+  }
+});
 </script>
+<div class="suggestions" id="global-sugg-box" style="display:none;"></div>
 </body>
 </html>
