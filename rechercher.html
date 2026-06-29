@@ -823,6 +823,8 @@ async function handlePayment() {
     const data = await resp.json();
     if (data.error) throw new Error(data.error);
 
+    // Sauvegarder payment_intent_id (format: pi_XXX_secret_YYY)
+    window._paymentIntentId = data.client_secret ? data.client_secret.split('_secret_')[0] : null;
     // Initialiser Stripe Elements
     stripeElements = stripeInstance.elements({ clientSecret: data.client_secret });
     paymentElement = stripeElements.create('payment');
