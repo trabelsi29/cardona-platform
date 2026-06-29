@@ -636,15 +636,13 @@ function handleAddressInput(type, id, value) {
       }).slice(0, 4);
       suggBox.innerHTML = '';
       unique.forEach(function(r) {
-        var parts = r.display_name.split(',');
-        var label = parts[0].trim();
-        if (parts.length > 1) label += ', ' + parts[parts.length-1].trim();
+        // label déjà dans r.label
         var div = document.createElement('div');
         div.className = 'suggestion-item';
-        div.textContent = label;
-        div.onclick = (function(dn, la, lo) {
-          return function() { selectSuggestion(type, id, dn, la, lo); };
-        })(r.display_name, r.lat, r.lon);
+        div.textContent = r.label;
+        div.onclick = (function(full, la, lo) {
+          return function() { selectSuggestion(type, id, full, la, lo); };
+        })(r.full, r.lat, r.lon);
         suggBox.appendChild(div);
       });
     } catch (e) {
