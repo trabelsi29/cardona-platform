@@ -614,9 +614,37 @@ function handleAddressInput(type, id, value) {
       suggBox.style.width = rect.width + 'px';
     }
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&accept-language=fr&q=${encodeURIComponent(value)}`);
-
-      const results = await res.json();
+      const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(value)}&limit=6&lang=fr`);
+      const json = await res.json();
+      const features = (json.features || []).slice(0, 5);
+      if (!features.length) {
+        suggBox.innerHTML = '<div class="suggestion-loading">Aucun résultat</div>';
+        return;
+      }
+      // Formater les résultats
+      var seen = new Set();
+      suggBox.innerHTML = '';
+      features.forEach(function(f) {
+        var p = f.properties;
+        var city = p.city || p.name || '';
+        var country = p.country || '';
+        var label = city + (country ? ', ' + country : '');
+        if (!label || seen.has(label)) return;
+        seen.add(label);
+        var full = [p.name, p.street, p.city, p.state, p.country].filter(Boolean).join(', ');
+        var div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.textContent = label;
+        var lat = f.geometry.coordinates[1];
+        var lon = f.geometry.coordinates[0];
+        div.onclick = (function(fn, la, lo) {
+          return function() { selectSuggestion(type, id, fn, la, lo); suggBox.style.display='none'; };
+        })(full || label, lat, lon);
+        suggBox.appendChild(div);
+      });
+      if (!suggBox.children.length) { suggBox.innerHTML = '<div class="suggestion-loading">Aucun résultat</div>'; }
+      return;
+      const results = []; // dead code
       if (!results.length) {
         suggBox.innerHTML = '<div class="suggestion-loading">Aucun résultat</div>';
         return;
