@@ -468,15 +468,14 @@ function switchView(v) {}
 let selectedRole = 'expediteur';
 
 function switchView(id) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-' + id).classList.add('active');
-  document.getElementById('login-error').style.display = 'none';
-  document.getElementById('signup-error').style.display = 'none';
+  if (id !== 'home') { window.location.href = '/'; return; }
+  var e1=document.getElementById('login-error'); if(e1) e1.style.display='none';
+  var e2=document.getElementById('signup-error'); if(e2) e2.style.display='none';
 
   // Sur l'accueil, on cache le grand logo central (remplacé par le mini-logo en haut à droite)
   const brandLogo = document.getElementById('brand-logo');
   if (brandLogo) brandLogo.style.display = 'none'; // logo géré par welcome-mascot
-  document.getElementById('bottom-nav').style.display = (id === 'home') ? 'flex' : 'none';
+  var bn=document.getElementById('bottom-nav'); if(bn) bn.style.display='flex';
   if (id === 'home') {
     const trigger = document.getElementById('menu-trigger');
     document.getElementById('dropdown-menu').classList.remove('open');
@@ -907,13 +906,13 @@ sb.auth.getSession().then(function(res) {
   }
 });
 
-document.getElementById('login-password').addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
+var lp=document.getElementById('login-password'); if(lp) lp.addEventListener('keypress', e => { if (e.key === 'Enter') handleLogin(); });
 
 // Cacher le splash : immédiatement si session active, sinon après 2500ms
 sb.auth.getSession().then(function(res) {
   var delay = (res.data && res.data.session) ? 0 : 2500;
   setTimeout(function() {
-    var splash = document.getElementById('splash-screen');
+    var splash = document.getElementById('splash-screen'); if(!splash) return;
     if (splash) { splash.classList.add('fade-out'); setTimeout(function() { if(splash.parentNode) splash.remove(); }, 500); }
   }, delay);
 });
