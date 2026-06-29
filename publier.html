@@ -637,9 +637,17 @@ function handleAddressInput(type, id, value) {
         div.textContent = label;
         var lat = f.geometry.coordinates[1];
         var lon = f.geometry.coordinates[0];
-        div.onclick = (function(fn, la, lo) {
-          return function() { selectSuggestion(type, id, fn, la, lo); suggBox.style.display='none'; };
-        })(full || label, lat, lon);
+        div.onclick = (function(fn, la, lo, lbl) {
+          return function() {
+            // Récupérer le texte saisi par l'utilisateur
+            var inputEl = document.getElementById('addr-' + id) || document.querySelector('input[oninput*="' + id + '"]');
+            var userText = inputEl ? inputEl.value.trim() : '';
+            // Combiner texte saisi + ville, pays
+            var finalAddr = userText || fn;
+            selectSuggestion(type, id, finalAddr, la, lo);
+            suggBox.style.display='none';
+          };
+        })(full || label, lat, lon, label);
         suggBox.appendChild(div);
       });
       if (!suggBox.children.length) { suggBox.innerHTML = '<div class="suggestion-loading">Aucun résultat</div>'; }
