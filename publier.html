@@ -535,7 +535,7 @@ function renderStops(type) {
     var heureFin = stop.date_heure_fin ? stop.date_heure_fin.slice(11,16) : '';
     return '<div class="stop-card">'
       + '<div class="stop-card-head"><span class="stop-card-label">' + label + ' ' + (idx+1) + '</span>' + removeBtn + '</div>'
-      + '<div class="field"><input type="text" placeholder="Adresse (ville, aéroport, port...)" value="' + stop.adresse.replace(/"/g,'&quot;') + '"'
+      + '<div class="field"><input type="text" placeholder="Adresse (ville, aéroport, port...)" value="' + (stop.adresse || '').replace(/"/g,'&quot;') + '"'
       + ' oninput="handleAddressInput(\'' + type + '\',\'' + stop.id + '\', this.value)" onfocus="this.select()">'
       + '</div>'
       + '<div class="field"><label>Date</label>'
