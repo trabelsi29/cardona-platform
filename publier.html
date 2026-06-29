@@ -605,8 +605,8 @@ function handleAddressInput(type, id, value) {
     suggBox.innerHTML = '<div class="suggestion-loading">Recherche…</div>';
     suggBox.style.display = 'block';
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&limit=5&q=${encodeURIComponent(value)}`, { headers: { 'Accept-Language': 'fr' } });
-      const _ = it=5&addressdetails=0`);
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&accept-language=fr&q=${encodeURIComponent(value)}`);
+
       const results = await res.json();
       if (!results.length) {
         suggBox.innerHTML = '<div class="suggestion-loading">Aucun résultat</div>';
