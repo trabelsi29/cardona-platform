@@ -867,7 +867,8 @@ async function confirmerPaiementStripe() {
     categories: selectedCategories,
     description: details,
     prix_transporteur: prixT,
-    frais_service: 3.00
+    frais_service: 3.00,
+    payment_intent_id: window._paymentIntentId || null
   }).select('ncc').single();
 
   btn.disabled = false;
@@ -935,7 +936,8 @@ async function _oldHandlePayment() {
     categories: selectedCategories,
     description: details,
     prix_transporteur: prixT,
-    frais_service: 3.00
+    frais_service: 3.00,
+    payment_intent_id: window._paymentIntentId || null
   }).select('ncc').single();
   // Aucune ligne "paiements" n'est créée ici : la commission n'est prélevée
   // que lorsque le transporteur accepte la demande (voir cardona_publier_trajet.html).
