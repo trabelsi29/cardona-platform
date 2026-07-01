@@ -603,7 +603,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 var allReservations=[];
 var _ola=loadAllData;
 async function loadAllData(){
-  var [pr,tr,rr]=await Promise.all([sb.from('profiles').select('*,email').order('created_at',{ascending:false}),sb.from('trajets').select('*').order('created_at',{ascending:false}),sb.from('reservations').select('expediteur_id,statut')]);
+  var [pr,tr,rr]=await Promise.all([sb.from('profiles').select('*,email').order('created_at',{ascending:false}),sb.from('trajets').select('*').order('created_at',{ascending:false}),sb.from('reservations').select('trajet_id,expediteur_id,statut,prix_transporteur')]);
   allProfiles=pr.data||[];allTrajets=tr.data||[];allReservations=rr.data||[];
   renderDashboard();renderUsers();renderVerif();renderTrajets();
 }
