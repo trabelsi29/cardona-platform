@@ -244,7 +244,7 @@
         <div class="page" id="page-trajets">
           <div class="card" style="padding:0;overflow:hidden;">
             <table class="data-table">
-              <thead><tr><th>NCC</th><th>Transporteur</th><th>Trajet</th><th>Transport</th><th>Date ramassage</th><th>Prix</th><th>Statut</th></tr></thead>
+              <thead><tr><th>Transporteur</th><th>Trajet</th><th>Transport</th><th>Date</th><th>Réservations</th><th>Gains totaux</th><th>Statut</th></tr></thead>
               <tbody id="trajets-tbody"><tr><td colspan="7" class="loading-row">Chargement…</td></tr></tbody>
             </table>
           </div>
@@ -429,7 +429,7 @@ function renderDashboard() {
     return;
   }
   const recent = allProfiles.slice(0, 5);
-  recentBox.innerHTML = `<table class="data-table"><thead><tr><th>Utilisateur</th><th>Rôle</th><th>Statut</th><th>Date</th></tr></thead><tbody>
+  recentBox.innerHTML = `<table class="data-table"><thead><tr><th>Utilisateur</th><th>Contact</th><th>Statut</th><th>Date</th></tr></thead><tbody>
     ${recent.map(p => `
       <tr>
         <td><div class="user-cell"><div class="avatar">${initials(p.full_name)}</div><div class="user-cell-name">${p.full_name || 'Sans nom'}</div></div></td>
@@ -603,7 +603,7 @@ sb.auth.getSession().then(({ data: { session } }) => {
 var allReservations=[];
 var _ola=loadAllData;
 async function loadAllData(){
-  var [pr,tr,rr]=await Promise.all([sb.from('profiles').select('*').order('created_at',{ascending:false}),sb.from('trajets').select('*').order('created_at',{ascending:false}),sb.from('reservations').select('expediteur_id,statut')]);
+  var [pr,tr,rr]=await Promise.all([sb.from('profiles').select('*,email').order('created_at',{ascending:false}),sb.from('trajets').select('*').order('created_at',{ascending:false}),sb.from('reservations').select('expediteur_id,statut')]);
   allProfiles=pr.data||[];allTrajets=tr.data||[];allReservations=rr.data||[];
   renderDashboard();renderUsers();renderVerif();renderTrajets();
 }
