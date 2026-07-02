@@ -288,6 +288,23 @@
         <div class="cat-desc">Documents, médicaments, petit sac (moins de 2 kg)</div>
       </div>
 
+
+<div class="cat-card" id="cat-card-demenagement">
+<div class="cat-row" data-cat="demenagement" onclick="toggleCat('demenagement')">
+<span class="cat-label">🚛 Déménagement</span>
+<div class="cat-check"></div>
+</div>
+<div class="cat-desc">Transport de meubles, cartons, objets volumineux entre deux domiciles</div>
+<div id="stepper-demenagement" style="display:none;margin-top:10px;">
+<span class="cat-stepper-label">Nombre de camions nécessaires</span>
+<div style="display:flex;align-items:center;gap:10px;margin-top:6px;">
+<button class="stepper-btn" onclick="changeCamions(-1)">−</button>
+<input type="number" id="camions-value" value="1" min="1" style="width:60px;text-align:center;border:1px solid var(--border);border-radius:8px;padding:6px;font-size:15px;font-weight:700;">
+<button class="stepper-btn" onclick="changeCamions(1)">+</button>
+</div>
+</div>
+</div>
+
       <button class="btn-primary" onclick="validateStep1()">Suivant</button>
     </div>
 
@@ -528,7 +545,33 @@ document.addEventListener('click', (e) => {
 // ============================================================
 // STEP 1 : CATÉGORIES
 // ============================================================
+function changeCamions(delta) {
+  var el = document.getElementById("camions-value");
+  if (el) el.value = Math.max(1, (parseInt(el.value)||1) + delta);
+}
+
 function toggleCat(cat) {
+  if (cat === "demenagement") {
+    var isActive = selectedCategories.includes("demenagement");
+    if (isActive) {
+      selectedCategories = selectedCategories.filter(function(x){return x!=="demenagement";});
+    } else {
+      selectedCategories = ["demenagement"];
+      document.querySelectorAll(".cat-row").forEach(function(el){
+        el.classList.toggle("active", el.dataset.cat==="demenagement");
+      });
+    }
+    var sd = document.getElementById("stepper-demenagement");
+    if(sd) sd.style.display = selectedCategories.includes("demenagement") ? "block" : "none";
+    var dem = document.querySelector('.cat-row[data-cat="demenagement"]');
+    if(dem) dem.classList.toggle("active", selectedCategories.includes("demenagement"));
+    return;
+  }
+  selectedCategories = selectedCategories.filter(function(x){return x!=="demenagement";});
+  var dem = document.querySelector('.cat-row[data-cat="demenagement"]');
+  if(dem) dem.classList.remove("active");
+  var sd = document.getElementById("stepper-demenagement");
+  if(sd) sd.style.display = "none";
   const idx = selectedCategories.indexOf(cat);
   if (idx > -1) selectedCategories.splice(idx, 1); else selectedCategories.push(cat);
   document.querySelectorAll('.cat-row').forEach(el => {
@@ -870,6 +913,8 @@ async function confirmerPaiementStripe() {
     poids_kg: weight,
     categorie: selectedCategories[0] || 'autre',
     categories: selectedCategories,
+    is_demenagement: selectedCategories.includes('demenagement'),
+    nb_camions: selectedCategories.includes('demenagement') ? (parseInt((document.getElementById('camions-value')||{}).value)||1) : null,
     description: details,
     prix_transporteur: prixT,
     frais_service: 3.00,
@@ -939,6 +984,8 @@ async function _oldHandlePayment() {
     poids_kg: weight,
     categorie: selectedCategories[0] || 'autre',
     categories: selectedCategories,
+    is_demenagement: selectedCategories.includes('demenagement'),
+    nb_camions: selectedCategories.includes('demenagement') ? (parseInt((document.getElementById('camions-value')||{}).value)||1) : null,
     description: details,
     prix_transporteur: prixT,
     frais_service: 3.00,
@@ -1048,6 +1095,10 @@ async function checkAndBuildNav() {
 
 // Calculer le prix transporteur depuis prix_categories
 function calcPrix(trajet, categories, poids) {
+  if (trajet.is_demenagement && (categories||[]).includes("demenagement")) {
+    var nb = parseInt((document.getElementById("camions-value")||{}).value||1);
+    return (parseFloat(trajet.prix_par_camion)||0) * nb;
+  }
   var prixCat = trajet.prix_categories;
   if (!prixCat || Object.keys(prixCat).length === 0) {
     // Fallback ancien format
