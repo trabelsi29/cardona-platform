@@ -658,7 +658,10 @@ async function searchTransporteurs() {
       ? Math.min(...distributions.map(e => distanceKm(searchReception.lat, searchReception.lon, e.latitude, e.longitude)))
       : null;
 
-    var matchCategorie = selectedCategories.length === 0 || (t.categories_acceptees || []).some(function(cat) { return selectedCategories.includes(cat); });
+    var isDemSearch = selectedCategories.includes('demenagement');
+    var matchCategorie = isDemSearch
+      ? (t.is_demenagement === true)
+      : (selectedCategories.length === 0 || (t.categories_acceptees || []).some(function(cat) { return selectedCategories.includes(cat); }));
     var MAX_DIST = 60; // km
     // Matching géo strict : envoi ↔ ramassage ET réception ↔ distribution
     var geoMatch = distEnvoi !== null && distEnvoi <= MAX_DIST
