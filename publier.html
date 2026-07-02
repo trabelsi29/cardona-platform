@@ -323,6 +323,18 @@
       <div class="category-pill" data-cat="fragile" onclick="toggleCategory('fragile')"><div class="category-check"></div>🔔 Produits fragiles</div>
       <div class="category-pill" data-cat="electronique" onclick="toggleCategory('electronique')"><div class="category-check"></div>💻 Produits électroniques</div>
       <div class="category-pill" data-cat="autre" onclick="toggleAutre()"><div class="category-check"></div>❓ Autre</div>
+      <div class="category-pill" data-cat="demenagement" onclick="toggleCategory('demenagement')"><div class="category-check"></div>🚛 Déménagement</div>
+      <div id="demenagement-zone" style="display:none;margin-top:10px;background:#fdf8f0;border:1.5px solid var(--gold);border-radius:12px;padding:14px 16px;">
+        <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px;">Options déménagement</div>
+        <div class="field" style="margin-bottom:10px;">
+          <label style="font-size:13px;">Prix par camion (€)</label>
+          <input type="number" id="prix-par-camion" min="0" placeholder="ex: 500" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+        </div>
+        <div class="field">
+          <label style="font-size:13px;">Nombre de camions disponibles</label>
+          <input type="number" id="nb-camions-dispo" min="1" value="1" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+        </div>
+      </div>
       <div id="autre-cat-zone" style="display:none;margin-top:8px;">
         <input type="text" id="autre-cat-input" placeholder="Nommez ce type de colis (ex: Animaux, Plantes...)" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:6px;">
         <div id="autre-cat-tags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
@@ -730,6 +742,21 @@ function validateStep3() {
 // STEP 4 : CATÉGORIES
 // ============================================================
 function toggleCategory(cat) {
+  if (cat === "demenagement") {
+    var pill = document.querySelector('.category-pill[data-cat="demenagement"]');
+    var zone = document.getElementById("demenagement-zone");
+    var isActive = pill && pill.classList.contains("active");
+    if (isActive) {
+      pill.classList.remove("active");
+      if (zone) zone.style.display = "none";
+      selectedCategories = selectedCategories.filter(function(c){ return c !== "demenagement"; });
+    } else {
+      pill.classList.add("active");
+      if (zone) zone.style.display = "block";
+      selectedCategories.push("demenagement");
+    }
+    return;
+  }
   const idx = selectedCategories.indexOf(cat);
   if (idx > -1) selectedCategories.splice(idx, 1); else selectedCategories.push(cat);
   document.querySelectorAll('.category-pill').forEach(el => {
@@ -884,6 +911,9 @@ async function publishTrajet() {
         prix_categories: window._prixCategories || {},
     categories_acceptees: selectedCategories,
     categories_labels: window._categoriesLabels || {},
+    is_demenagement: selectedCategories.includes('demenagement'),
+    prix_par_camion: selectedCategories.includes('demenagement') ? (parseFloat(document.getElementById('prix-par-camion').value) || 0) : 0,
+    nb_camions_dispo: selectedCategories.includes('demenagement') ? (parseInt(document.getElementById('nb-camions-dispo').value) || 1) : 0,
     devise: 'EUR'
   }).select('id').single();
 
