@@ -609,7 +609,20 @@ async function handleLogin() {
     return;
   }
 
-  await loadHome();
+  // Récupérer le rôle et rediriger
+  await redirectByRole();
+}
+
+async function redirectByRole() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) { switchView('login'); return; }
+  const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single();
+  var role = profile && profile.role ? profile.role : 'expediteur';
+  if (role === 'transporteur') {
+    window.location.href = 'publier.html';
+  } else {
+    window.location.href = 'rechercher.html';
+  }
 }
 
 async function handleForgotPassword() {
