@@ -1,11 +1,8 @@
 /*
-  Cache-Control: no-store, no-cache, must-revalidate
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
   Pragma: no-cache
+  Surrogate-Control: no-store
 
-/index.html
-  Cache-Control: no-store, no-cache, must-revalidate
-
-/dashboard.html
-  Cache-Control: no-store, no-cache, must-revalidate
-
-# deploy trigger 2026-07-02T16:29:14.244338
+/*.html
+  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
+  Pragma: no-cache
