@@ -555,35 +555,45 @@ function changeCamions(delta) {
 
 function toggleCat(cat) {
   if (cat === "demenagement") {
-    var isActive = selectedCategories.includes("demenagement");
-    if (isActive) {
-      selectedCategories = selectedCategories.filter(function(x){return x!=="demenagement";});
-    } else {
+    var isDem = selectedCategories.includes("demenagement");
+    // Décocher tout
+    selectedCategories = [];
+    document.querySelectorAll(".cat-row").forEach(function(el) {
+      el.classList.remove("active");
+    });
+    document.getElementById("stepper-demenagement").style.display = "none";
+    document.querySelectorAll(".cat-stepper").forEach(function(el) { el.style.display = "none"; });
+    if (!isDem) {
+      // Cocher déménagement
       selectedCategories = ["demenagement"];
-      document.querySelectorAll(".cat-row").forEach(function(el){
-        el.classList.toggle("active", el.dataset.cat==="demenagement");
-      });
+      var dem = document.querySelector('.cat-row[data-cat="demenagement"]');
+      if (dem) dem.classList.add("active");
+      document.getElementById("stepper-demenagement").style.display = "block";
     }
-    var sd = document.getElementById("stepper-demenagement");
-    if(sd) sd.style.display = selectedCategories.includes("demenagement") ? "block" : "none";
-    var dem = document.querySelector('.cat-row[data-cat="demenagement"]');
-    if(dem) dem.classList.toggle("active", selectedCategories.includes("demenagement"));
     return;
   }
-  selectedCategories = selectedCategories.filter(function(x){return x!=="demenagement";});
-  var dem = document.querySelector('.cat-row[data-cat="demenagement"]');
-  if(dem) dem.classList.remove("active");
-  var sd = document.getElementById("stepper-demenagement");
-  if(sd) sd.style.display = "none";
-  const idx = selectedCategories.indexOf(cat);
-  if (idx > -1) selectedCategories.splice(idx, 1); else selectedCategories.push(cat);
-  document.querySelectorAll('.cat-row').forEach(el => {
-    const checked = selectedCategories.includes(el.dataset.cat);
-    el.classList.toggle('selected', checked);
-    el.querySelector('.cat-check').classList.toggle('checked', checked);
-    el.querySelector('.cat-check').textContent = checked ? '✓' : '';
+  // Colis normal — décocher déménagement si actif
+  if (selectedCategories.includes("demenagement")) {
+    selectedCategories = [];
+    var dem = document.querySelector('.cat-row[data-cat="demenagement"]');
+    if (dem) dem.classList.remove("active");
+    document.getElementById("stepper-demenagement").style.display = "none";
+  }
+  // Toggle ce colis
+  var idx = selectedCategories.indexOf(cat);
+  if (idx > -1) {
+    selectedCategories.splice(idx, 1);
+  } else {
+    selectedCategories.push(cat);
+  }
+  // Mettre à jour visuellement
+  document.querySelectorAll(".cat-row[data-cat]").forEach(function(el) {
+    if (el.dataset.cat === "demenagement") return;
+    el.classList.toggle("active", selectedCategories.includes(el.dataset.cat));
   });
-  document.getElementById('stepper-marchandise').style.display = selectedCategories.includes('marchandise') ? 'flex' : 'none';
+  // Stepper poids
+  var stepper = document.getElementById("stepper-" + cat);
+  if (stepper) stepper.style.display = selectedCategories.includes(cat) ? "block" : "none";
 }
 function changeWeight(delta) {
   weight = Math.max(1, weight + delta);
