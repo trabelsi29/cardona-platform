@@ -856,8 +856,11 @@ function modeLabel(m) {
   return m || '—';
 }
 function categoryLabel(c) {
-  const map = { marchandise: '📦 Marchandises', document: '📄 Documents', fragile: '🔔 Fragiles', electronique: '💻 Électronique', autre: '❓ Autre' };
-  return map[c] || c;
+  const map = { marchandise: '📦 Marchandises', document: '📄 Documents', fragile: '🔔 Fragiles', electronique: '💻 Électronique', autre: '❓ Autre', demenagement: '🚛 Déménagement' };
+  if (map[c]) return map[c];
+  // Catégories custom (ex: custom_1 → 'Plantes')
+  if (CAT_INFO && CAT_INFO[c] && CAT_INFO[c].label) return CAT_INFO[c].label;
+  return c;
 }
 function formatDateTime(v) {
   if (!v) return '—';
