@@ -7,7 +7,7 @@
   "background_color": "#e3e0db",
   "theme_color": "#221b16",
   "icons": [
-    { "src": "/assets/cardona-logo-static.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/assets/cardona-logo-static.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/assets/cardona-icon.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/assets/cardona-icon.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
