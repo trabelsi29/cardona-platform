@@ -417,9 +417,12 @@ async function loadAll() {
   render();
 }
 
-function catLabel(cat){
-  var m={marchandise:"Marchandise",document:"Document",fragile:"Fragile",electronique:"Électronique",autre:"Autre"};
-  return m[cat]||cat;
+function catLabel(cat, trajet){
+  var m={marchandise:"📦 Marchandise",document:"📄 Document",fragile:"🔔 Fragile",electronique:"💻 Électronique",autre:"❓ Autre",demenagement:"🚛 Déménagement"};
+  if (m[cat]) return m[cat];
+  // Label custom stocké dans categories_labels du trajet
+  if (trajet && trajet.categories_labels && trajet.categories_labels[cat]) return trajet.categories_labels[cat];
+  return cat;
 }
 function shorten(addr) {
   if (!addr) return '—';
@@ -524,7 +527,7 @@ function render() {
         + "<div class='resa-head'><div><div class='resa-name'>" + (exp.full_name || "Expéditeur") + "</div>"
         + "<div style='font-size:11px;color:var(--text-secondary);'>" + (t ? shorten(t.lieu_ramassage,20)+" → "+shorten(t.lieu_distribution,20) : "") + "</div></div>" + avatarHtml + "</div>"
         + "<div class='resa-status " + r.statut + "'>" + statusLabel + "</div>"
-        + "<div class='resa-details'>Colis : " + (r.categories&&r.categories.length?r.categories.map(catLabel).join(', '):catLabel(r.categorie)) + (r.poids_kg ? " (" + r.poids_kg + " kg)" : "") + "</div>"
+        + "<div class='resa-details'>Colis : " + (r.categories&&r.categories.length?r.categories.map(function(cat){return catLabel(cat,t);}).join(', '):catLabel(r.categorie)) + (r.poids_kg ? " (" + r.poids_kg + " kg)" : "") + "</div>"
         + (r.description ? "<div class='resa-details' style='color:var(--text-secondary);font-style:italic;font-size:12px;'>" + r.description + "</div>" : "")
         + "<div class='resa-price'>" + (r.prix_transporteur || "—") + " €</div>"
         + actions
