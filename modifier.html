@@ -77,7 +77,7 @@
   .add-stop-icon { width: 22px; height: 22px; border-radius: 50%; background: #FAF0D7; color: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
 
   .category-pill { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1px solid #e0ddd8; border-radius: 10px; margin-bottom: 8px; background: white; cursor: pointer; font-size: 13px; color: var(--dark); }
-  .category-pill.selected { border-color: var(--gold); background: #FDF8EE; }
+  .category-pill.selected, .category-pill.active { border-color: var(--gold); background: #FDF8EE; }
   .category-check { width: 18px; height: 18px; border: 2px solid #bbb; border-radius: 5px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; }
   .category-check.checked { border-color: var(--gold); background: var(--gold); }
 
@@ -302,6 +302,18 @@
         <div class="category-pill" data-cat="fragile" onclick="toggleCat('fragile')"><div class="category-check"></div>🔔 Produits fragiles</div>
         <div class="category-pill" data-cat="electronique" onclick="toggleCat('electronique')"><div class="category-check"></div>💻 Produits électroniques</div>
         <div class="category-pill" data-cat="autre" onclick="toggleCat('autre')"><div class="category-check"></div>❓ Autre</div>
+<div class="category-pill" data-cat="demenagement" onclick="toggleDemenagement()"><div class="category-check"></div>🚛 Déménagement</div>
+<div id="demenagement-zone-mod" style="display:none;margin-top:10px;background:#fdf8f0;border:1.5px solid var(--gold);border-radius:12px;padding:14px 16px;">
+  <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px;">Options déménagement</div>
+  <div class="field" style="margin-bottom:10px;">
+    <label style="font-size:13px;">Prix par camion (€)</label>
+    <input type="number" id="prix-par-camion-mod" min="0" placeholder="ex: 500" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+  </div>
+  <div class="field">
+    <label style="font-size:13px;">Nombre de camions disponibles</label>
+    <input type="number" id="nb-camions-dispo-mod" min="1" value="1" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+  </div>
+</div>
       </div>
 
       <!-- PRIX -->
@@ -378,6 +390,16 @@ async function init() {
 
   // Catégories
   selectedCats = Array.isArray(trajetData.categories_acceptees) ? trajetData.categories_acceptees : [];
+  // Pré-remplir déménagement
+  if (trajetData.is_demenagement) {
+    if (!selectedCats.includes("demenagement")) selectedCats.push("demenagement");
+    var dz = document.getElementById("demenagement-zone-mod");
+    if(dz) dz.style.display="block";
+    var pc = document.getElementById("prix-par-camion-mod");
+    var nc = document.getElementById("nb-camions-dispo-mod");
+    if(pc) pc.value = trajetData.prix_par_camion || "";
+    if(nc) nc.value = trajetData.nb_camions_dispo || 1;
+  }
   selectedCats.forEach(function(cat) {
     var el = document.querySelector(".category-pill[data-cat='" + cat + "']");
     if (el) {
@@ -498,7 +520,10 @@ async function sauvegarder() {
     date_ramassage:       document.getElementById("date-ramassage").value || null,
     date_distribution:    document.getElementById("date-distribution").value || null,
     categories_acceptees: selectedCats,
-    prix_categories:      prixCat
+    prix_categories:      prixCat,
+    is_demenagement: selectedCats.includes("demenagement"),
+    prix_par_camion: selectedCats.includes("demenagement") ? (parseFloat((document.getElementById("prix-par-camion-mod")||{}).value)||0) : 0,
+    nb_camions_dispo: selectedCats.includes("demenagement") ? (parseInt((document.getElementById("nb-camions-dispo-mod")||{}).value)||1) : 0
   };
 
   var res = await sb.from("trajets").update(updates).eq("id", trajetId);
@@ -576,6 +601,21 @@ async function buildNav(activePage) {
 }
 
 init();
+
+function toggleDemenagement() {
+  var isActive = selectedCats.includes('demenagement');
+  var pill = document.querySelector('.category-pill[data-cat="demenagement"]');
+  var zone = document.getElementById('demenagement-zone-mod');
+  if (isActive) {
+    selectedCats = selectedCats.filter(function(x){return x!=='demenagement';});
+    if(pill) pill.classList.remove('active','selected');
+    if(zone) zone.style.display='none';
+  } else {
+    selectedCats.push('demenagement');
+    if(pill) pill.classList.add('active');
+    if(zone) zone.style.display='block';
+  }
+}
 </script>
 </body>
 </html>
