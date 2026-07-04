@@ -289,8 +289,17 @@
     <div class="error-box" id="form-error"></div>
 
 
+    <!-- STEP 0 : type de service -->
+    <div class="step active" id="step-0">
+      <div class="title">Publier un trajet</div>
+      <div class="subtitle">Quel type de service proposez-vous ?</div>
+      <div class="radio-item" data-value="colis" onclick="selectService('colis')"><span>📦 Transport de colis</span><div class="radio-circle"></div></div>
+      <div class="radio-item" data-value="demenagement" onclick="selectService('demenagement')"><span>🚛 Déménagement</span><div class="radio-circle"></div></div>
+      <button class="btn-primary" onclick="validateStep0()">Suivant</button>
+    </div>
+
     <!-- STEP 1 : mode de transport -->
-    <div class="step active" id="step-1">
+    <div class="step" id="step-1">
       <div class="title">Publier un trajet de transport</div>
       <div class="subtitle">Sélectionnez votre moyen de transport</div>
       <div class="radio-item" data-value="avion" onclick="selectMode('avion')"><span>✈ Avion</span><div class="radio-circle"></div></div>
@@ -397,6 +406,53 @@
       <button class="btn-primary" id="publish-btn" onclick="publishTrajet()">Publier le trajet</button>
     </div>
 
+    <!-- STEP DEM-1 : villes intervention -->
+    <div class="step" id="step-dem-1">
+      <div class="title">Villes d'intervention</div>
+      <div class="subtitle">Dans quelles villes proposez-vous le déménagement ?</div>
+      <div id="dem-villes-list" style="margin-bottom:8px;"></div>
+      <div style="display:flex;gap:8px;">
+        <div style="flex:1;position:relative;">
+          <input type="text" id="ville-dem-input" placeholder="Ajouter une ville..." oninput="handleDemVilleInput(this.value)"
+            style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+          <div class="suggestions" id="sugg-dem-ville" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;"></div>
+        </div>
+        <button onclick="addDemVille()" style="padding:10px 16px;background:var(--gold);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">+</button>
+      </div>
+      <button class="btn-primary" onclick="validateStepDem1()" style="margin-top:16px;">Suivant</button>
+    </div>
+
+    <!-- STEP DEM-2 : tarif -->
+    <div class="step" id="step-dem-2">
+      <div class="title">Tarification</div>
+      <div class="subtitle">Définissez votre prix par camion</div>
+      <div class="field">
+        <label>Prix par camion (€)</label>
+        <input type="number" id="dem-prix-camion" min="0" placeholder="ex: 800" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label>Nombre de camions disponibles</label>
+        <input type="number" id="dem-nb-camions" min="1" value="1" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+      </div>
+      <button class="btn-primary" onclick="validateStepDem2()" style="margin-top:16px;">Suivant</button>
+    </div>
+
+    <!-- STEP DEM-3 : résumé -->
+    <div class="step" id="step-dem-3">
+      <div class="title">Résumé du service</div>
+      <div class="subtitle">Vérifiez avant de publier</div>
+      <div class="recap-card">
+        <div class="recap-section-title">Villes d'intervention</div>
+        <div class="recap-line" id="dem-recap-villes">—</div>
+      </div>
+      <div class="recap-card">
+        <div class="recap-section-title">Tarif</div>
+        <div class="recap-line" id="dem-recap-prix">—</div>
+        <div class="recap-line" id="dem-recap-camions">—</div>
+      </div>
+      <button class="btn-primary" id="btn-publier-dem" onclick="publierDemenagement()">Publier le service</button>
+    </div>
+
     <!-- STEP 7 : succès -->
     <div class="step" id="step-7">
       <div class="success-icon">✅</div>
@@ -500,7 +556,8 @@ async function handleGateLogout() {
 // ============================================================
 function goStep(n) {
   document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  document.getElementById('step-' + n).classList.add('active');
+  var _el = document.getElementById('step-' + n) || document.getElementById('step-dem-' + String(n).replace('dem-',''));
+  if (_el) _el.classList.add('active');
   if (n <= totalSteps) document.getElementById('progress-fill').style.width = (n / totalSteps * 100) + '%';
   document.getElementById('back-btn').style.display = (n === 1 || n === 7) ? 'none' : 'flex';
   document.getElementById('progress-track').style.display = (n === 7) ? 'none' : 'block';
@@ -1120,6 +1177,132 @@ function toggleTaille(taille) {
   document.querySelectorAll('.category-pill[data-taille]').forEach(function(el) {
     el.classList.toggle('active', selectedTailles.includes(el.dataset.taille));
   });
+}
+
+var selectedService = null;
+var demVilles = [];
+
+function selectService(val) {
+  selectedService = val;
+  document.querySelectorAll('#step-0 .radio-item').forEach(function(el) {
+    el.classList.toggle('selected', el.dataset.value === val);
+    el.querySelector('.radio-circle').classList.toggle('checked', el.dataset.value === val);
+  });
+}
+
+function validateStep0() {
+  if (!selectedService) { showFormError('Choisissez un type de service.'); return; }
+  if (selectedService === 'demenagement') {
+    goStep('dem-1');
+  } else {
+    goStep(1);
+  }
+}
+
+function handleDemVilleInput(value) {
+  var suggBox = document.getElementById('sugg-dem-ville');
+  if (!value || value.trim().length < 2) { suggBox.style.display = 'none'; return; }
+  clearTimeout(window._demDebounce);
+  window._demDebounce = setTimeout(async function() {
+    suggBox.style.display = 'block';
+    suggBox.innerHTML = '<div class="suggestion-loading">Recherche...</div>';
+    try {
+      var res = await fetch('https://photon.komoot.io/api/?q=' + encodeURIComponent(value) + '&limit=5&lang=fr');
+      var data = await res.json();
+      var features = (data.features || []).slice(0, 5);
+      suggBox.innerHTML = '';
+      var seen = new Set();
+      features.forEach(function(f) {
+        var p = f.properties;
+        var city = p.city || p.name || '';
+        var country = p.country || '';
+        var label = city + (country ? ', ' + country : '');
+        if (!label || seen.has(label)) return;
+        seen.add(label);
+        var div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.textContent = label;
+        div.onclick = (function(lbl, la, lo) {
+          return function() {
+            document.getElementById('ville-dem-input').value = lbl;
+            suggBox.style.display = 'none';
+            window._demVilleSelected = { label: lbl, lat: la, lon: lo };
+          };
+        })(label, f.geometry.coordinates[1], f.geometry.coordinates[0]);
+        suggBox.appendChild(div);
+      });
+      if (!suggBox.children.length) suggBox.innerHTML = '<div class="suggestion-loading">Aucun résultat</div>';
+    } catch(e) { suggBox.style.display = 'none'; }
+  }, 350);
+}
+
+function addDemVille() {
+  var input = document.getElementById('ville-dem-input');
+  var val = (input.value || '').trim();
+  if (!val) return;
+  var ville = (window._demVilleSelected && window._demVilleSelected.label === val)
+    ? window._demVilleSelected : { label: val, lat: null, lon: null };
+  if (demVilles.find(function(v){ return v.label === ville.label; })) { input.value = ''; return; }
+  demVilles.push(ville);
+  renderDemVilles();
+  input.value = '';
+  window._demVilleSelected = null;
+}
+
+function removeDemVille(idx) {
+  demVilles.splice(idx, 1);
+  renderDemVilles();
+}
+
+function renderDemVilles() {
+  var list = document.getElementById('dem-villes-list');
+  list.innerHTML = demVilles.map(function(v, i) {
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#fdf8f0;border-radius:10px;margin-bottom:6px;font-size:13px;font-weight:600;">'
+      + v.label
+      + '<span onclick="removeDemVille(' + i + ')" style="cursor:pointer;color:#bbb;margin-left:8px;">&#x2715;</span>'
+      + '</div>';
+  }).join('');
+}
+
+function validateStepDem1() {
+  if (demVilles.length === 0) { showFormError("Ajoutez au moins une ville."); return; }
+  goStep('dem-2');
+}
+
+function validateStepDem2() {
+  var prix = parseFloat(document.getElementById('dem-prix-camion').value);
+  if (!prix || prix <= 0) { showFormError('Indiquez un prix par camion.'); return; }
+  var nb = parseInt(document.getElementById('dem-nb-camions').value) || 1;
+  document.getElementById('dem-recap-villes').textContent = demVilles.map(function(v){return v.label;}).join(' · ');
+  document.getElementById('dem-recap-prix').textContent = prix + ' euros/camion';
+  document.getElementById('dem-recap-camions').textContent = nb + ' camion(s) disponible(s)';
+  goStep('dem-3');
+}
+
+async function publierDemenagement() {
+  var btn = document.getElementById('btn-publier-dem');
+  btn.disabled = true; btn.textContent = 'Publication...';
+  var sess = await sb.auth.getSession();
+  var session = sess.data.session;
+  if (!session) { btn.disabled=false; btn.textContent='Publier le service'; return; }
+  var prix = parseFloat(document.getElementById('dem-prix-camion').value) || 0;
+  var nb = parseInt(document.getElementById('dem-nb-camions').value) || 1;
+  var villesLabel = demVilles.map(function(v){return v.label;}).join(', ');
+  var res = await sb.from('trajets').insert({
+    transporteur_id: session.user.id,
+    is_demenagement: true,
+    villes_intervention: demVilles,
+    prix_par_camion: prix,
+    nb_camions_dispo: nb,
+    categories_acceptees: ['demenagement'],
+    mode_transport: 'camion_fourgon',
+    lieu_ramassage: villesLabel,
+    lieu_distribution: villesLabel,
+    prix: 0, prix_par_kg: 0, devise: 'EUR', statut: 'publie'
+  });
+  btn.disabled=false; btn.textContent='Publier le service';
+  if (res.error) { showFormError('Erreur : ' + res.error.message); return; }
+  goStep(7);
 }
 </script>
 <div class="suggestions" id="global-sugg-box" style="display:none;"></div>
