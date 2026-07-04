@@ -315,16 +315,18 @@
       <button class="btn-primary" onclick="validateStep3()">Suivant</button>
     </div>
 
-    <!-- STEP 4 : catégories acceptées -->
+    <!-- STEP 4 : catégories -->
     <div class="step" id="step-4">
       <div class="title">Colis et services acceptés</div>
       <div class="subtitle">Quels types de colis acceptez-vous sur ce trajet ?</div>
+
       <div class="category-pill" data-cat="marchandise" onclick="toggleCategory('marchandise')"><div class="category-check"></div>📦 Marchandises</div>
       <div class="category-pill" data-cat="document" onclick="toggleCategory('document')"><div class="category-check"></div>📄 Documents</div>
       <div class="category-pill" data-cat="fragile" onclick="toggleCategory('fragile')"><div class="category-check"></div>🔔 Produits fragiles</div>
       <div class="category-pill" data-cat="electronique" onclick="toggleCategory('electronique')"><div class="category-check"></div>💻 Produits électroniques</div>
+
       <div class="category-pill" data-cat="demenagement" onclick="toggleCategory('demenagement')"><div class="category-check"></div>🚛 Déménagement</div>
-      <div id="demenagement-zone" style="display:none;margin-top:10px;background:#fdf8f0;border:1.5px solid var(--gold);border-radius:12px;padding:14px 16px;">
+      <div id="demenagement-zone" style="display:none;margin-top:8px;background:#fdf8f0;border:1.5px solid var(--gold);border-radius:12px;padding:14px 16px;">
         <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px;">Options déménagement</div>
         <div class="field" style="margin-bottom:10px;">
           <label style="font-size:13px;">Prix par camion (€)</label>
@@ -337,6 +339,11 @@
       </div>
 
       <div class="category-pill" data-cat="autre" onclick="toggleAutre()"><div class="category-check"></div>❓ Autre</div>
+      <div id="autre-cat-zone" style="display:none;margin-top:8px;">
+        <input type="text" id="autre-cat-input" placeholder="Nommez ce type de colis (ex: Animaux, Plantes...)" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:6px;">
+        <div id="autre-cat-tags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        <button onclick="addAutreCat()" style="margin-top:8px;padding:8px 14px;background:var(--gold);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">+ Ajouter</button>
+      </div>
 
       <div class="title" style="margin-top:18px;font-size:14px;">Tailles acceptées</div>
       <div class="subtitle">Quelle est la taille maximale des colis que vous acceptez ?</div>
@@ -344,15 +351,11 @@
       <div class="category-pill" data-taille="moyen" onclick="toggleTaille('moyen')"><div class="category-check"></div>📦 Moyen — sac, valise cabine (2–10 kg)</div>
       <div class="category-pill" data-taille="grand" onclick="toggleTaille('grand')"><div class="category-check"></div>📦 Grand — valise, carton (10–30 kg)</div>
       <div class="category-pill" data-taille="tres_grand" onclick="toggleTaille('tres_grand')"><div class="category-check"></div>🏋️ Très grand — meuble, vélo (> 30 kg)</div>
-      <div id="autre-cat-zone" style="display:none;margin-top:8px;">
-        <input type="text" id="autre-cat-input" placeholder="Nommez ce type de colis (ex: Animaux, Plantes...)" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:6px;">
-        <div id="autre-cat-tags" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
-        <button onclick="addAutreCat()" style="margin-top:8px;padding:8px 14px;background:var(--gold);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">+ Ajouter</button>
-      </div>
+
       <button class="btn-primary" onclick="validateStep4()">Suivant</button>
     </div>
 
-    <!-- STEP 5 : prix par categorie -->
+<!-- STEP 5 : prix par categorie -->
     <div class="step" id="step-5">
       <div class="title">Votre prix</div>
       <div class="subtitle">Preciser votre tarif pour chaque type de colis</div>
