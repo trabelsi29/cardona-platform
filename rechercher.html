@@ -709,8 +709,8 @@ async function searchTransporteurs() {
     // Matching géo strict : envoi ↔ ramassage ET réception ↔ distribution
     var geoMatch = distEnvoi !== null && distEnvoi <= MAX_DIST
                 && distReception !== null && distReception <= MAX_DIST;
-    return { trajet: t, etapes: tEtapes, transporteur: transporteurMap[t.transporteur_id], distEnvoi, distReception, geoMatch: geoMatch, matchCategorie: matchCategorie };
-  }).filter(function(m) { return m.matchCategorie && m.geoMatch; });
+    return { trajet: t, etapes: tEtapes, transporteur: transporteurMap[t.transporteur_id], distEnvoi, distReception, geoMatch: geoMatch, matchTaille: matchTaille, matchCategorie: matchCategorie };
+  }).filter(function(m) { return m.matchCategorie && m.geoMatch && m.matchTaille; });
 
   // Trier par distance totale
   matches.sort(function(a, b) { return (a.distEnvoi + a.distReception) - (b.distEnvoi + b.distReception); });
