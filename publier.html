@@ -850,8 +850,10 @@ function validateStep5() {
 // STEP 6 : RÉCAP
 // ============================================================
 function modeLabel(m) {
-  const map = { avion: '✈ Avion', camion_fourgon: '🚛 Camion/fourgon', voiture: '🚗 Voiture', train_bus: '🚆 Train/bus', autre: '❓ Autre' };
-  return map[m] || m;
+  const map = { avion: '✈ Avion', camion_fourgon: '🚛 Camion/fourgon', voiture: '🚗 Voiture', train_bus: '🚆 Train/bus' };
+  if (map[m]) return map[m];
+  if (m === 'autre' && window._autreModeLabel) return '❓ ' + window._autreModeLabel;
+  return m || '—';
 }
 function categoryLabel(c) {
   const map = { marchandise: '📦 Marchandises', document: '📄 Documents', fragile: '🔔 Fragiles', electronique: '💻 Électronique', autre: '❓ Autre' };
@@ -863,7 +865,9 @@ function formatDateTime(v) {
 }
 
 function fillRecap() {
-  document.getElementById('recap-mode').textContent = modeLabel(selectedMode);
+  var mLabel = modeLabel(selectedMode);
+  if (selectedMode === 'autre' && window._autreModeLabel) mLabel = '❓ ' + window._autreModeLabel;
+  document.getElementById('recap-mode').textContent = mLabel;
   document.getElementById('recap-ramassage').innerHTML = ramassageStops.map(function(s) {
     return '<div class="recap-line">' + s.adresse + ' — de ' + formatDateTime(s.date_heure) + ' à ' + formatDateTime(s.date_heure_fin) + '</div>';
   }).join('');
