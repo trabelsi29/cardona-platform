@@ -341,19 +341,6 @@
       <div class="category-pill" data-cat="fragile" onclick="toggleCategory('fragile')"><div class="category-check"></div>🔔 Produits fragiles</div>
       <div class="category-pill" data-cat="electronique" onclick="toggleCategory('electronique')"><div class="category-check"></div>💻 Produits électroniques</div>
 
-      <div class="category-pill" data-cat="demenagement" onclick="toggleCategory('demenagement')"><div class="category-check"></div>🚛 Déménagement</div>
-      <div id="demenagement-zone" style="display:none;margin-top:8px;background:#fdf8f0;border:1.5px solid var(--gold);border-radius:12px;padding:14px 16px;">
-        <div style="font-size:13px;font-weight:700;color:var(--gold);margin-bottom:10px;">Options déménagement</div>
-        <div class="field" style="margin-bottom:10px;">
-          <label style="font-size:13px;">Prix par camion (€)</label>
-          <input type="number" id="prix-par-camion" min="0" placeholder="ex: 500" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
-        </div>
-        <div class="field">
-          <label style="font-size:13px;">Nombre de camions disponibles</label>
-          <input type="number" id="nb-camions-dispo" min="1" value="1" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
-        </div>
-      </div>
-
       <div class="category-pill" data-cat="autre" onclick="toggleAutre()"><div class="category-check"></div>❓ Autre</div>
       <div id="autre-cat-zone" style="display:none;margin-top:8px;">
         <input type="text" id="autre-cat-input" placeholder="Nommez ce type de colis (ex: Animaux, Plantes...)" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;margin-bottom:6px;">
@@ -406,49 +393,52 @@
       <button class="btn-primary" id="publish-btn" onclick="publishTrajet()">Publier le trajet</button>
     </div>
 
-    <!-- STEP DEM-1 : villes intervention -->
+    <!-- STEP DEM-1 : tarif déménagement -->
     <div class="step" id="step-dem-1">
+      <div class="title">Options déménagement</div>
+      <div class="subtitle">Définissez votre tarif</div>
+      <div class="field">
+        <label>Prix par camion (€)</label>
+        <input type="number" id="dem-prix-camion" min="0" placeholder="ex: 800"
+          style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+      </div>
+      <div class="field" style="margin-top:12px;">
+        <label>Nombre de camions disponibles</label>
+        <input type="number" id="dem-nb-camions" min="1" value="1"
+          style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+      </div>
+      <button class="btn-primary" onclick="validateStepDem1()" style="margin-top:16px;">Suivant</button>
+    </div>
+
+    <!-- STEP DEM-2 : villes intervention -->
+    <div class="step" id="step-dem-2">
       <div class="title">Villes d'intervention</div>
       <div class="subtitle">Dans quelles villes proposez-vous le déménagement ?</div>
       <div id="dem-villes-list" style="margin-bottom:8px;"></div>
       <div style="display:flex;gap:8px;">
         <div style="flex:1;position:relative;">
-          <input type="text" id="ville-dem-input" placeholder="Ajouter une ville..." oninput="handleDemVilleInput(this.value)"
+          <input type="text" id="ville-dem-input" placeholder="Ajouter une ville..."
+            oninput="handleDemVilleInput(this.value)"
             style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
-          <div class="suggestions" id="sugg-dem-ville" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;"></div>
+          <div class="suggestions" id="sugg-dem-ville" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:white;border:1px solid var(--border);border-radius:10px;"></div>
         </div>
         <button onclick="addDemVille()" style="padding:10px 16px;background:var(--gold);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">+</button>
-      </div>
-      <button class="btn-primary" onclick="validateStepDem1()" style="margin-top:16px;">Suivant</button>
-    </div>
-
-    <!-- STEP DEM-2 : tarif -->
-    <div class="step" id="step-dem-2">
-      <div class="title">Tarification</div>
-      <div class="subtitle">Définissez votre prix par camion</div>
-      <div class="field">
-        <label>Prix par camion (€)</label>
-        <input type="number" id="dem-prix-camion" min="0" placeholder="ex: 800" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
-      </div>
-      <div class="field" style="margin-top:12px;">
-        <label>Nombre de camions disponibles</label>
-        <input type="number" id="dem-nb-camions" min="1" value="1" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
       </div>
       <button class="btn-primary" onclick="validateStepDem2()" style="margin-top:16px;">Suivant</button>
     </div>
 
-    <!-- STEP DEM-3 : résumé -->
+    <!-- STEP DEM-3 : résumé déménagement -->
     <div class="step" id="step-dem-3">
       <div class="title">Résumé du service</div>
       <div class="subtitle">Vérifiez avant de publier</div>
       <div class="recap-card">
-        <div class="recap-section-title">Villes d'intervention</div>
-        <div class="recap-line" id="dem-recap-villes">—</div>
-      </div>
-      <div class="recap-card">
         <div class="recap-section-title">Tarif</div>
         <div class="recap-line" id="dem-recap-prix">—</div>
         <div class="recap-line" id="dem-recap-camions">—</div>
+      </div>
+      <div class="recap-card">
+        <div class="recap-section-title">Villes d'intervention</div>
+        <div class="recap-line" id="dem-recap-villes">—</div>
       </div>
       <button class="btn-primary" id="btn-publier-dem" onclick="publierDemenagement()">Publier le service</button>
     </div>
@@ -1265,17 +1255,18 @@ function renderDemVilles() {
 }
 
 function validateStepDem1() {
-  if (demVilles.length === 0) { showFormError("Ajoutez au moins une ville."); return; }
+  var prix = parseFloat(document.getElementById('dem-prix-camion').value);
+  if (!prix || prix <= 0) { showFormError('Indiquez un prix par camion.'); return; }
   goStep('dem-2');
 }
 
 function validateStepDem2() {
-  var prix = parseFloat(document.getElementById('dem-prix-camion').value);
-  if (!prix || prix <= 0) { showFormError('Indiquez un prix par camion.'); return; }
+  if (demVilles.length === 0) { showFormError("Ajoutez au moins une ville."); return; }
+  var prix = parseFloat(document.getElementById('dem-prix-camion').value) || 0;
   var nb = parseInt(document.getElementById('dem-nb-camions').value) || 1;
-  document.getElementById('dem-recap-villes').textContent = demVilles.map(function(v){return v.label;}).join(' · ');
-  document.getElementById('dem-recap-prix').textContent = prix + ' euros/camion';
+  document.getElementById('dem-recap-prix').textContent = prix + ' €/camion';
   document.getElementById('dem-recap-camions').textContent = nb + ' camion(s) disponible(s)';
+  document.getElementById('dem-recap-villes').textContent = demVilles.map(function(v){return v.label;}).join(' · ');
   goStep('dem-3');
 }
 
