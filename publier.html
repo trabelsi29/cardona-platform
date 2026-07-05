@@ -1332,6 +1332,40 @@ function prevStep() {
 
 
 
+
+function closeSwitchModal() {
+  document.getElementById('switch-modal-overlay').classList.remove('open');
+}
+
+async function handleSwitchRole() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+  const { data: profile } = await sb.from('profiles').select('role').eq('id', user.id).single();
+  const cur = profile && profile.role;
+  const newRole = cur === 'expediteur' ? 'transporteur' : 'expediteur';
+  const newLabel = newRole === 'expediteur' ? 'Expéditeur' : 'Transporteur';
+  const icon = newRole === 'expediteur' ? '📦' : '🚗';
+  const desc = newRole === 'transporteur'
+    ? 'Vous passerez en mode Transporteur. Vous pourrez publier des trajets et transporter des colis.'
+    : 'Vous passerez en mode Expéditeur. Vous pourrez rechercher des transporteurs et envoyer des colis.';
+  document.getElementById('switch-modal-icon').textContent = icon;
+  document.getElementById('switch-modal-title').textContent = 'Passer en mode ' + newLabel;
+  document.getElementById('switch-modal-desc').textContent = desc;
+  var confirmBtn = document.getElementById('btn-switch-confirm');
+  confirmBtn.textContent = 'Passer en mode ' + newLabel;
+  confirmBtn.onclick = async function() {
+    closeSwitchModal();
+    confirmBtn.disabled = true;
+    const { error } = await sb.from('profiles').update({ role: newRole }).eq('id', user.id);
+    if (error) { alert('Erreur : ' + error.message); confirmBtn.disabled = false; return; }
+    var splashEl = document.createElement('div');
+    splashEl.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;';
+    splashEl.innerHTML = '<img src="assets/cardona-logo.gif" style="width:90px;margin-bottom:16px;"><div style="font-size:20px;font-weight:700;color:var(--dark);">CARDONA</div><div style="font-size:13px;color:var(--text-secondary);margin-top:8px;">Changement de mode…</div>';
+    document.body.appendChild(splashEl);
+    setTimeout(function() { window.location.reload(); }, 2000);
+  };
+  document.getElementById('switch-modal-overlay').classList.add('open');
+}
 </script>
 <div class="suggestions" id="global-sugg-box" style="display:none;"></div>
 <div class="switch-modal-overlay" id="switch-modal-overlay">
