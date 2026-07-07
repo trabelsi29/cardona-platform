@@ -552,16 +552,11 @@ function render() {
         + actions
         + "</div>";
     }).join("");
-    var isDem = t.is_demenagement === true;
-    var demVillesStr = isDem && t.villes_intervention && t.villes_intervention.length
-      ? t.villes_intervention.map(function(v){ return v.label || v; }).join(', ')
-      : '';
-    var cardStyle = isDem ? "border:2px solid #C8902A;" : "";
 
-    return "<div class='trajet-card-main' style='" + cardStyle + "'>";
-      + "<div class='trajet-card-header'>";
-      + "<div class='trajet-info'>";
-      + (isDem ? "<div style='font-size:10px;font-weight:700;color:#C8902A;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;'>🚛 Déménagement</div><div class='trajet-mode-route'>" + demVillesStr + "</div><div class='trajet-meta'>💰 " + (t.prix_par_camion || '—') + " €/camion · " + (t.nb_camions_dispo || 1) + " camion(s)</div>" : "<div class='trajet-mode-route'>" + modeIcon + " " + shorten(t.lieu_ramassage) + " → " + shorten(t.lieu_distribution) + "</div><div class='trajet-meta'>📅 " + dateStr + "</div>") + "</div>"
+    return "<div class='trajet-card-main'>"
+      + "<div class='trajet-card-header'>"
+      + "<div class='trajet-info'><div class='trajet-mode-route'>" + modeIcon + " " + shorten(t.lieu_ramassage) + " → " + shorten(t.lieu_distribution) + "</div><div class='trajet-meta'>📅 " + dateStr + "</div></div>"
+      + "<div class='trajet-right'>" + statusBadge
       + "<button class='trajet-modify-btn' onclick='voirDetail(event,&quot;" + t.id + "&quot;)'>🔍 Détail</button>"
       + (!isExpire ? "<button class='trajet-modify-btn' onclick='modifierTrajet(&quot;" + t.id + "&quot;)'>✏ Modifier</button>" : "")
       + "</div>"
