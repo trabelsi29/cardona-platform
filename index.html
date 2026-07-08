@@ -61,18 +61,8 @@
   .field input:focus { box-shadow: 0 0 0 2px var(--gold); }
 
   .forgot-link { text-align: right; font-size: 12px; color: var(--gold); cursor: pointer; margin: -6px 0 18px; }
-  .btn-primary {
-    width: 100%;
-    padding: 14px;
-    border-radius: 10px;
-    border: none;
-    background: var(--gold);
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-  .btn-primary:hover { background: var(--gold-dark); }
+  .btn-primary { width:100%; padding:14px; background:#BE8C51; color:white; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; transition:background .15s; }
+  .btn-primary:hover { background:#8a6235; }
   .btn-primary:disabled { background: #ccc; cursor: not-allowed; }
   .btn-secondary {
     width: 100%;
@@ -360,7 +350,7 @@
     <div class="field"><label>Mot de passe</label><input type="password" id="login-password" placeholder="••••••••"></div>
     <div class="forgot-link" onclick="handleForgotPassword()">Mot de passe oublié ?</div>
     <button class="btn-primary" id="login-btn" onclick="handleLogin()">Se connecter</button>
-    <div class="switch-text">Vous n'avez pas de compte ? <span onclick="switchView('welcome')">S'inscrire</span></div>
+    <div class="switch-text">Vous n'avez pas de compte ? <span onclick="switchView('welcome')" style="color:#C8902A;font-weight:700;cursor:pointer;transition:color .15s;" onmouseover="this.style.color='#a87a43'" onmouseout="this.style.color='#C8902A'">S'inscrire</span></div>
       <div style="text-align:center;font-size:11px;color:#bbb;margin-top:16px;padding-bottom:4px;">© 2026 CARDONA. Tous droits réservés.</div>
   </div>
 
