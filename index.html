@@ -215,7 +215,7 @@
   .welcome-sep::before, .welcome-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
   .btn-role { display: flex; align-items: center; gap: 14px; width: 100%; background: white; border: 2px solid #C8902A; border-radius: 14px; padding: 16px 18px; margin-bottom: 12px; cursor: pointer; font-family: inherit; transition: none; }
   .btn-role:hover { background: white; }
-  .btn-role-icon { width: 42px; height: 42px; border-radius: 11px; background: #C8902A; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .btn-role-icon { width:42px; height:42px; border-radius:10px; background:transparent; border:1.5px solid var(--gold); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .btn-role-icon img { filter: brightness(0) invert(1); width: 24px; height: 24px; }
   .btn-role-icon img { width: 24px; height: 24px; object-fit: contain; }
   .btn-role-title { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
@@ -341,7 +341,7 @@
       <div class="btn-role-arrow">›</div>
     </button>
     <div class="welcome-login">
-      <button onclick="switchView('login')" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;background:white;border:2px solid #C8902A;border-radius:14px;padding:14px 18px;font-size:14px;font-weight:700;color:var(--dark);cursor:pointer;font-family:inherit;margin-top:4px;">Déjà un compte ? <span style="color:#C8902A;">Se connecter</span></button>
+      <div style="text-align:center;margin-top:10px;font-size:13px;color:var(--text-secondary);">Déjà un compte ? <span onclick="switchView('login')" style="color:#C8902A;font-weight:700;cursor:pointer;">Se connecter</span></div>
       <div style="text-align:center;font-size:11px;color:#bbb;margin-top:16px;padding-bottom:4px;">© 2026 CARDONA. Tous droits réservés.</div>
     </div>
   </div>
