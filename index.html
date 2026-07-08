@@ -213,14 +213,15 @@
   .welcome-tagline strong { color: var(--dark); font-weight: 600; }
   .welcome-sep { display: flex; align-items: center; gap: 10px; margin: 0 0 8px; color: var(--text-secondary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; }
   .welcome-sep::before, .welcome-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-  .btn-role { display: flex; align-items: center; gap: 14px; width: 100%; background: white; border: 2px solid #C8902A; border-radius: 14px; padding: 16px 18px; margin-bottom: 12px; cursor: pointer; font-family: inherit; transition: none; }
+  .btn-role { display:flex; align-items:center; gap:14px; width:100%; background:#BE8C51; border:none; border-radius:14px; padding:16px 18px; margin-bottom:12px; cursor:pointer; font-family:inherit; box-shadow:0 2px 8px rgba(190,140,81,0.3); }
   .btn-role:hover { background: white; }
-  .btn-role-icon { width:42px; height:42px; border-radius:10px; background:transparent; border:1.5px solid var(--gold); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .btn-role-icon img { width:26px; height:26px; object-fit:contain; filter:brightness(0) invert(1); }
+  .btn-role-icon { width:42px; height:42px; border-radius:10px; background:rgba(0,0,0,0.15); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .btn-role-icon img { filter: brightness(0) invert(1); width: 24px; height: 24px; }
   .btn-role-icon img { width: 24px; height: 24px; object-fit: contain; }
-  .btn-role-title { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 2px; }
-  .btn-role-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.35; }
-  .btn-role-arrow { font-size: 20px; color: var(--gold); flex-shrink: 0; margin-left: auto; }
+  .btn-role-title { font-size:15px; font-weight:700; color:white; margin-bottom:2px; text-shadow:0 1px 3px rgba(0,0,0,0.2); }
+  .btn-role-desc { font-size:12px; color:rgba(255,255,255,0.85); line-height:1.35; }
+  .btn-role-arrow { font-size:20px; color:white; margin-left:auto; }
   .welcome-login { text-align: center; margin-top: 8px; font-size: 13px; color: var(--text-secondary); }
   .welcome-login span { color: var(--gold); font-weight: 600; cursor: pointer; }
   @media (max-width: 640px) {
@@ -341,7 +342,7 @@
       <div class="btn-role-arrow">›</div>
     </button>
     <div class="welcome-login">
-      <div style="text-align:center;margin-top:10px;font-size:13px;color:var(--text-secondary);">Déjà un compte ? <span onclick="switchView('login')" style="color:#C8902A;font-weight:700;cursor:pointer;">Se connecter</span></div>
+      <div style="text-align:center;margin-top:12px;font-size:15px;color:var(--text-secondary);">Déjà un compte ? <span onclick="switchView('login')" style="color:#C8902A;font-weight:700;cursor:pointer;">Se connecter</span></div>
       <div style="text-align:center;font-size:11px;color:#bbb;margin-top:16px;padding-bottom:4px;">© 2026 CARDONA. Tous droits réservés.</div>
     </div>
   </div>
