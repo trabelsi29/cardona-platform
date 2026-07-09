@@ -146,6 +146,8 @@
   .trajet-modify-btn { font-size:11px; color:var(--gold); background:none; border:1px solid var(--gold); border-radius:8px; padding:3px 10px; cursor:pointer; white-space:nowrap; }
   .trajet-modify-btn:hover { background:var(--gold); color:white; }
   .trajet-accordion { border-top:1px solid var(--border); }
+  .trajet-accordion-toggle { border-top: 1.5px solid #f0ede8 !important; background:#fafaf8 !important;
+  }
   .trajet-accordion-toggle { display:flex; align-items:center; justify-content:space-between; padding:10px 16px; cursor:pointer; background:#fafaf8; }
   .trajet-accordion-toggle:hover { background:#f5f3ee; }
   .accordion-label { font-size:12px; font-weight:600; color:var(--text-secondary); }
@@ -565,7 +567,7 @@ function render() {
       + "</div>"
       + "<div class='trajet-accordion'>"
       + "<div class='trajet-accordion-toggle' onclick='toggleAccordion(&quot;" + t.id + "&quot;)'>"
-      + "<span><span class='accordion-label'>" + accordionLabel + "</span>" + pendingBadge + "</span>"
+      + "<span style='display:flex;align-items:center;gap:6px;'><span style='font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#BE8C51;'>📦 Réservations</span><span class='accordion-label' style='font-size:12px;color:var(--text-secondary);font-weight:400;'>" + accordionLabel + "</span>" + pendingBadge + "</span>"
       + "<span class='accordion-arrow" + (isOpen ? " open" : "") + "' id='arrow-" + t.id + "'>›</span>"
       + "</div>"
       + "<div class='trajet-reservations" + (isOpen ? " open" : "") + "' id='resa-" + t.id + "'>" + resasHtml + "</div>"
