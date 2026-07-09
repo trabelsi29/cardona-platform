@@ -212,6 +212,12 @@
   .menu-item:last-child { border-bottom:none; }
   .menu-item-logout { color:#c0392b; font-weight:600; padding:13px 18px; font-size:13px; cursor:pointer; }
   .menu-item-logout:hover { background:#fde8e8; }
+
+  .contact-field { position: relative; }
+  .contact-field input.field-error,
+  .contact-field textarea.field-error { border-color: #e53935 !important; }
+  .field-error-msg { color: #e53935; font-size: 11px; margin-top: 4px; display: none; }
+  .field-error-msg.show { display: block; }
 </style>
 </head>
 <body>
@@ -277,18 +283,18 @@ function envoyerMessage() {
 
   // Anti-bot : soumission trop rapide (< 3s) = bot
   if (Date.now() - _formLoadTime < 3000) {
-    alert("Veuillez patienter quelques secondes avant d'envoyer.");
+    showInlineError("Veuillez patienter quelques secondes."); return;
     return;
   }
 
   if (!name || !email || !msg) {
-    alert("Veuillez remplir tous les champs.");
+    showFieldErrors(); return;
     return;
   }
 
   // Validation email basique
   if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
-    alert("Adresse email invalide.");
+    showError("c-email", "err-email"); return;
     return;
   }
 
@@ -312,7 +318,7 @@ function envoyerMessage() {
   }, function(error) {
     btn.disabled = false;
     btn.textContent = "Envoyer le message";
-    alert("Erreur lors de l'envoi : " + (error.text || "Veuillez réessayer."));
+    showInlineError("Erreur : " + (error.text || "Veuillez réessayer.")); return;
     console.error("EmailJS error:", error);
   });
 }
@@ -354,6 +360,37 @@ buildNav();
 async function handleLogout() {
   await sb.auth.signOut();
   window.location.href = "index.html";
+}
+
+function clearError(fieldId) {
+  var el = document.getElementById(fieldId);
+  var err = document.getElementById('err-' + fieldId.replace('c-',''));
+  if (el) el.classList.remove('field-error');
+  if (err) err.classList.remove('show');
+}
+
+function showError(fieldId, errId) {
+  var el = document.getElementById(fieldId);
+  var err = document.getElementById(errId);
+  if (el) el.classList.add('field-error');
+  if (err) err.classList.add('show');
+  if (el) el.focus();
+}
+
+function showFieldErrors() {
+  var name = document.getElementById('c-name').value.trim();
+  var email = document.getElementById('c-email').value.trim();
+  var msg = document.getElementById('c-message').value.trim();
+  var hasError = false;
+  if (!name) { showError('c-name','err-name'); hasError = true; }
+  if (!email) { showError('c-email','err-email'); hasError = true; }
+  if (!msg) { showError('c-message','err-message'); hasError = true; }
+  return hasError;
+}
+
+function showInlineError(msg) {
+  var box = document.getElementById('send-success');
+  if (box) { box.textContent = '❌ ' + msg; box.style.display = 'block'; box.style.background = '#fde8e8'; box.style.color = '#c0392b'; }
 }
 </script>
 </body>
