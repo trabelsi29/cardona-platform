@@ -360,12 +360,14 @@
         <button onclick="addAutreCat()" style="margin-top:8px;padding:8px 14px;background:var(--gold);color:white;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">+ Ajouter</button>
       </div>
 
+      <div id="tailles-zone" style="display:none;">
       <div class="title" style="margin-top:18px;font-size:14px;">Tailles acceptées <span style="font-size:11px;font-weight:400;color:var(--text-secondary);">(optionnel)</span></div>
       <div class="subtitle">Laissez vide si vous n'avez pas de restriction de taille.</div>
       <div class="category-pill" data-taille="petit" onclick="toggleTaille('petit')"><div class="category-check"></div>📦 Petit — enveloppes, documents (< 2 kg)</div>
       <div class="category-pill" data-taille="moyen" onclick="toggleTaille('moyen')"><div class="category-check"></div>📦 Moyen — sac, valise cabine (2–10 kg)</div>
       <div class="category-pill" data-taille="grand" onclick="toggleTaille('grand')"><div class="category-check"></div>📦 Grand — valise, carton (10–30 kg)</div>
       <div class="category-pill" data-taille="tres_grand" onclick="toggleTaille('tres_grand')"><div class="category-check"></div>🏋️ Très grand — meuble, vélo (> 30 kg)</div>
+      </div>
 
       <button class="btn-primary" onclick="validateStep4()">Suivant</button>
     </div>
@@ -804,6 +806,13 @@ function validateStep3() {
 // STEP 4 : CATÉGORIES
 // ============================================================
 function toggleCategory(cat) {
+  // Afficher les tailles uniquement si marchandise est cochée
+  var taillesZone = document.getElementById("tailles-zone");
+  setTimeout(function() {
+    if (taillesZone) taillesZone.style.display = selectedCategories.includes("marchandise") ? "block" : "none";
+    if (!selectedCategories.includes("marchandise")) { selectedTailles = []; document.querySelectorAll(".category-pill[data-taille]").forEach(function(el){el.classList.remove("active","selected");}); }
+  }, 50);
+
   if (cat === "demenagement") {
     var pill = document.querySelector('.category-pill[data-cat="demenagement"]');
     var zone = document.getElementById("demenagement-zone");
