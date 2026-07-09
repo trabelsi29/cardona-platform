@@ -41,11 +41,12 @@
     padding: 0;
   }
   .mascot { width: 130px; height: auto; display: block; margin: 0 auto 24px; }
-  .scroll-area { flex:1; overflow-y:auto; padding:0; box-sizing:border-box; min-height:0; display:flex; flex-direction:column; }
-  .form-inner { flex:1; display:flex; flex-direction:column; }
+  .scroll-area { flex:1; overflow-y:auto; padding:32px 80px; box-sizing:border-box; min-height:0; }
+  .form-inner { }
   .view { display: none; min-height: 0; }
   .view.active { display: block; }
-  #view-welcome { display:flex; flex-direction:column; height:100%; min-height:100%; }
+  #view-welcome { display:flex; flex-direction:column; height:100%; }
+  .scroll-area:has(#view-welcome.active), .scroll-area:has(> .form-inner > #view-welcome.active) { padding:0; display:flex; flex-direction:column; }
 
   .field { margin-bottom: 14px; }
   .field label { display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 5px; font-weight: 500; }
