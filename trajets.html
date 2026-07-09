@@ -555,6 +555,7 @@ function render() {
     }).join("");
 
     return "<div class='trajet-card-main'>"
+      + "<div class='trajet-card-strip'></div>"
       + "<div class='trajet-card-header'>"
       + "<div class='trajet-info'><div class='trajet-mode-route'>" + modeIcon + " " + shorten(t.lieu_ramassage) + " → " + shorten(t.lieu_distribution) + "</div><div class='trajet-meta'>📅 " + dateStr + "</div></div>"
       + "<div class='trajet-right'>" + statusBadge
