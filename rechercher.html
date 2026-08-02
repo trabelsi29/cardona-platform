@@ -765,27 +765,42 @@ async function searchTransporteurs() {
     ? `<div style="font-size:11px;color:var(--text-secondary);margin-bottom:10px;">Aucun transporteur ne correspond à vos critères — voici les plus proches.</div>`
     : '';
 
-  list.innerHTML = fallbackNotice + allMatchingTrajets.map((m, idx) => {
-    const t = m.trajet;
-    const transp = m.transporteur;
-    const ram = m.etapes.filter(e => e.type === 'ramassage').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_ramassage;
-    const dist = m.etapes.filter(e => e.type === 'distribution').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_distribution;
-    const initials = (transp?.full_name || '??').split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
-    const prixEstime = calcPrix(t, selectedCategories, weight).toFixed(2);
-    return `
-      <div class="t-card" onclick="selectTransporteur(${idx})">
-        <div class="t-head">
-          ${transp?.avatar_url ? `<img class="t-avatar" src="${transp.avatar_url}">` : `<div class="t-avatar">${initials}</div>`}
-          <div>
-            <div class="t-name">${transp?.full_name || 'Transporteur'}</div>
-            <div class="t-stars">${transp?.rating ? '⭐ ' + transp.rating : 'Nouveau transporteur'}</div>
-          </div>
-          <div class="t-price">${prixEstime} €</div>
+  list.innerHTML = fallbackNotice + allMatchingTrajets.map((m, idx) => renderTrajetCard(m, idx)).join('');
+}
+
+function renderTrajetCard(m, idx) {
+  const t = m.trajet;
+  const transp = m.transporteur;
+  const ram = m.etapes.filter(e => e.type === 'ramassage').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_ramassage;
+  const dist = m.etapes.filter(e => e.type === 'distribution').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_distribution;
+  const initials = (transp?.full_name || '??').split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+  const prixEstime = calcPrix(t, selectedCategories, weight).toFixed(2);
+  const rating = transp?.rating;
+  const ratingHtml = (rating && parseFloat(rating) > 0)
+    ? `⭐ ${parseFloat(rating).toFixed(1)}`
+    : `<span style="color:#aaa;font-size:11px;">Nouveau transporteur</span>`;
+  return `
+    <div class="t-card" onclick="selectTransporteur(${idx})">
+      <div class="t-head">
+        ${transp?.avatar_url ? `<img class="t-avatar" src="${transp.avatar_url}">` : `<div class="t-avatar">${initials}</div>`}
+        <div>
+          <div class="t-name">${transp?.full_name || 'Transporteur'}</div>
+          <div class="t-stars">${ratingHtml}</div>
         </div>
-        <div class="t-route">${modeLabel(t.mode_transport)} · ${ram} → ${dist}</div>
-        <div class="t-cats">${(t.categories_acceptees || []).map(categoryLabel).join(' · ')} · 📍 ${m.distEnvoi.toFixed(1)} km à parcourir pour le ramassage</div>
-        <button class="t-select-btn">Sélectionner</button>
-      </div>`;
+        <div class="t-price">${prixEstime} €</div>
+      </div>
+      <div class="t-route">${modeLabel(t.mode_transport)} · ${ram} → ${dist}</div>
+      <div class="t-cats">${(t.categories_acceptees || []).map(categoryLabel).join(' · ')} · 📍 ${m.distEnvoi.toFixed(1)} km</div>
+      <button class="t-select-btn">Sélectionner</button>
+    </div>`;
+}
+
+function displayResults(list_data) {
+  var list = document.getElementById('transporteurs-list');
+  list.innerHTML = list_data.map(function(m, idx) {
+    // Retrouver l'index global pour que selectTransporteur fonctionne après filtre
+    var globalIdx = allMatchingTrajets.indexOf(m);
+    return renderTrajetCard(m, globalIdx === -1 ? idx : globalIdx);
   }).join('');
 }
 
