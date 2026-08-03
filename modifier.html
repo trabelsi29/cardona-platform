@@ -435,7 +435,7 @@ function addDemZoneMod() {
   var pays = (window._demPaysModSel && window._demPaysModSel === input.value.trim()) ? window._demPaysModSel : input.value.trim();
   if (!pays) return;
   if (demVillesMod.find(function(z){ return z.pays === pays; })) { input.value=''; return; }
-  demVillesMod.push({ pays: pays, toutLePays: true, villes: [] });
+  demVillesMod.push({ pays: pays, toutLePays: false, villes: [] });
   renderDemZonesMod();
   input.value=''; window._demPaysModSel = null;
 }
@@ -489,7 +489,7 @@ async function init() {
         if (typeof z === 'object' && z.pays) return z; // nouveau format
         // ancien format (juste label/ville)
         var lbl = typeof z === 'object' ? z.label : z;
-        return { pays: lbl, toutLePays: true, villes: [] };
+        return { pays: lbl, toutLePays: false, villes: [] };
       });
       renderDemZonesMod();
     }

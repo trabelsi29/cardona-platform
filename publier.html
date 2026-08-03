@@ -1244,7 +1244,7 @@ function addDemPays() {
     ? window._demPaysSelected : input.value.trim();
   if (!pays) return;
   if (demZones.find(function(z){ return z.pays === pays; })) { input.value=''; return; }
-  demZones.push({ pays: pays, toutLePays: true, villes: [] });
+  demZones.push({ pays: pays, toutLePays: false, villes: [] });
   renderDemZones();
   input.value = '';
   window._demPaysSelected = null;
