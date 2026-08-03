@@ -556,10 +556,21 @@ function render() {
         + "</div>";
     }).join("");
 
+    var isDem = t.is_demenagement === true;
+    var stripColor = isDem ? '#5B7FA6' : '#BE8C51';
+    var routeLine = isDem
+      ? '🚛 Déménagement · ' + (Array.isArray(t.villes_intervention) && t.villes_intervention.length
+          ? t.villes_intervention.map(function(v){ return typeof v === 'object' ? v.label : v; }).join(' · ')
+          : (t.lieu_ramassage || '—'))
+      : modeIcon + ' ' + shorten(t.lieu_ramassage) + ' → ' + shorten(t.lieu_distribution);
+    var demInfoLine = isDem
+      ? '<div class="trajet-meta">🚐 ' + (t.nb_camions_dispo || 1) + ' camion(s) · ' + (t.prix_par_camion || '—') + ' €/camion</div>'
+      : '';
+
     return "<div class='trajet-card-main'>"
-      + "<div class='trajet-card-strip'></div>"
+      + "<div class='trajet-card-strip' style='background:" + stripColor + ";'></div>"
       + "<div class='trajet-card-header'>"
-      + "<div class='trajet-info'><div class='trajet-mode-route'>" + modeIcon + " " + shorten(t.lieu_ramassage) + " → " + shorten(t.lieu_distribution) + "</div><div class='trajet-meta'>📅 " + dateStr + "</div></div>"
+      + "<div class='trajet-info'><div class='trajet-mode-route'>" + routeLine + "</div><div class='trajet-meta'>📅 " + dateStr + "</div>" + demInfoLine + "</div>"
       + "<div class='trajet-right'>" + statusBadge
       + "<button class='trajet-modify-btn' onclick='voirDetail(event,&quot;" + t.id + "&quot;)'>🔍 Détail</button>"
       + (!isExpire ? "<button class='trajet-modify-btn' onclick='modifierTrajet(&quot;" + t.id + "&quot;)'>✏ Modifier</button>" : "")
@@ -567,7 +578,7 @@ function render() {
       + "</div>"
       + "<div class='trajet-accordion'>"
       + "<div class='trajet-accordion-toggle' onclick='toggleAccordion(&quot;" + t.id + "&quot;)'>"
-      + "<span style='display:flex;align-items:center;gap:6px;'><span style='font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#BE8C51;'>📦 Réservations</span><span class='accordion-label' style='font-size:12px;color:var(--text-secondary);font-weight:400;'>" + accordionLabel + "</span>" + pendingBadge + "</span>"
+      + "<span style='display:flex;align-items:center;gap:6px;'><span style='font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#BE8C51;'>" + (isDem ? '🚛 Demandes déménagement' : '📦 Réservations') + "</span><span class='accordion-label' style='font-size:12px;color:var(--text-secondary);font-weight:400;'>" + accordionLabel + "</span>" + pendingBadge + "</span>"
       + "<span class='accordion-arrow" + (isOpen ? " open" : "") + "' id='arrow-" + t.id + "'>›</span>"
       + "</div>"
       + "<div class='trajet-reservations" + (isOpen ? " open" : "") + "' id='resa-" + t.id + "'>" + resasHtml + "</div>"

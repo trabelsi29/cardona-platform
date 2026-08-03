@@ -990,9 +990,10 @@ async function publishTrajet() {
     categories_acceptees: selectedCategories,
     categories_labels: window._categoriesLabels || {},
     tailles_acceptees: selectedTailles,
-    is_demenagement: selectedCategories.includes('demenagement'),
-    prix_par_camion: selectedCategories.includes('demenagement') ? (parseFloat(document.getElementById('prix-par-camion').value) || 0) : 0,
-    nb_camions_dispo: selectedCategories.includes('demenagement') ? (parseInt(document.getElementById('nb-camions-dispo').value) || 1) : 0,
+    is_demenagement: selectedService === 'demenagement',
+    prix_par_camion: selectedService === 'demenagement' ? (parseFloat(document.getElementById('dem-prix-camion').value) || 0) : 0,
+    nb_camions_dispo: selectedService === 'demenagement' ? (parseInt(document.getElementById('dem-nb-camions').value) || 1) : 0,
+    villes_intervention: selectedService === 'demenagement' ? demVilles : [],
     devise: 'EUR'
   }).select('id').single();
 

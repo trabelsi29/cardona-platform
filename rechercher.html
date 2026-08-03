@@ -771,14 +771,30 @@ async function searchTransporteurs() {
 function renderTrajetCard(m, idx) {
   const t = m.trajet;
   const transp = m.transporteur;
-  const ram = m.etapes.filter(e => e.type === 'ramassage').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_ramassage;
-  const dist = m.etapes.filter(e => e.type === 'distribution').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_distribution;
+  const isDem = t.is_demenagement === true;
   const initials = (transp?.full_name || '??').split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
   const prixEstime = calcPrix(t, selectedCategories, weight).toFixed(2);
   const rating = transp?.rating;
   const ratingHtml = (rating && parseFloat(rating) > 0)
     ? `⭐ ${parseFloat(rating).toFixed(1)}`
     : `<span style="color:#aaa;font-size:11px;">Nouveau transporteur</span>`;
+
+  let routeHtml, priceLabel;
+  if (isDem) {
+    const villes = Array.isArray(t.villes_intervention) && t.villes_intervention.length
+      ? t.villes_intervention.map(v => typeof v === 'object' ? v.label : v).join(' · ')
+      : '—';
+    routeHtml = `<div class="t-route">🚛 Déménagement · ${villes}</div>
+      <div class="t-cats">🚐 ${t.nb_camions_dispo || 1} camion(s) disponible(s)</div>`;
+    priceLabel = `${t.prix_par_camion || '—'} €/camion`;
+  } else {
+    const ram = m.etapes.filter(e => e.type === 'ramassage').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_ramassage;
+    const dist = m.etapes.filter(e => e.type === 'distribution').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_distribution;
+    routeHtml = `<div class="t-route">${modeLabel(t.mode_transport)} · ${ram} → ${dist}</div>
+      <div class="t-cats">${(t.categories_acceptees || []).map(categoryLabel).join(' · ')} · 📍 ${m.distEnvoi != null ? m.distEnvoi.toFixed(1) + ' km' : '—'}</div>`;
+    priceLabel = `${prixEstime} €`;
+  }
+
   return `
     <div class="t-card" onclick="selectTransporteur(${idx})">
       <div class="t-head">
@@ -787,12 +803,12 @@ function renderTrajetCard(m, idx) {
           <div class="t-name">${transp?.full_name || 'Transporteur'}</div>
           <div class="t-stars">${ratingHtml}</div>
         </div>
-        <div class="t-price">${prixEstime} €</div>
+        <div class="t-price">${priceLabel}</div>
       </div>
-      <div class="t-route">${modeLabel(t.mode_transport)} · ${ram} → ${dist}</div>
-      <div class="t-cats">${(t.categories_acceptees || []).map(categoryLabel).join(' · ')} · 📍 ${m.distEnvoi.toFixed(1)} km</div>
+      ${routeHtml}
       <button class="t-select-btn">Sélectionner</button>
     </div>`;
+}
 }
 
 function displayResults(list_data) {
