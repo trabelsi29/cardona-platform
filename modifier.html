@@ -278,7 +278,7 @@
       </div>
 
       <!-- LIEUX -->
-      <div class="mod-section">
+      <div class="mod-section" id="section-lieux">
         <div class="mod-section-title">Lieux</div>
         <div class="field">
           <label>Lieu de ramassage</label>
@@ -293,7 +293,7 @@
       </div>
 
       <!-- DATES -->
-      <div class="mod-section">
+      <div class="mod-section" id="section-dates">
         <div class="mod-section-title">Dates</div>
         <div class="form-row">
           <div class="field"><label>Date de ramassage</label><input type="datetime-local" id="date-ramassage"></div>
@@ -301,8 +301,30 @@
         </div>
       </div>
 
+      <!-- SECTION DÉMÉNAGEMENT -->
+      <div class="mod-section" id="section-demenagement" style="display:none;">
+        <div class="mod-section-title">🚛 Déménagement</div>
+        <div class="field">
+          <label>Prix par camion (€)</label>
+          <input type="number" id="prix-par-camion-mod" min="0" placeholder="ex: 500" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+        </div>
+        <div class="field">
+          <label>Nombre de camions disponibles</label>
+          <input type="number" id="nb-camions-dispo-mod" min="1" value="1" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+        </div>
+        <div class="field">
+          <label>Villes d'intervention</label>
+          <div id="dem-villes-mod-list" style="margin-bottom:8px;"></div>
+          <div style="position:relative;">
+            <input type="text" id="ville-dem-mod-input" placeholder="Ajouter une ville…" oninput="handleDemVilleModInput(this.value)" autocomplete="off" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+            <div id="sugg-dem-mod" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+          </div>
+          <button type="button" onclick="addDemVilleMod()" style="margin-top:8px;padding:8px 16px;background:var(--gold);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;">+ Ajouter</button>
+        </div>
+      </div>
+
       <!-- CATEGORIES -->
-      <div class="mod-section">
+      <div class="mod-section" id="section-categories">
         <div class="mod-section-title">Types de colis acceptés</div>
         <div class="category-pill" data-cat="marchandise" onclick="toggleCat('marchandise')"><div class="category-check"></div>📦 Marchandises</div>
         <div class="category-pill" data-cat="document" onclick="toggleCat('document')"><div class="category-check"></div>📄 Documents</div>
@@ -353,6 +375,65 @@ const NAV_ICONS = {
 var trajetId = null, trajetData = null;
 var selectedMode = null;
 var selectedCats = [];
+var demVillesMod = [];
+var _demVilleModSelected = null;
+
+function renderDemVillesMod() {
+  var list = document.getElementById('dem-villes-mod-list');
+  if (!list) return;
+  list.innerHTML = demVillesMod.map(function(v, i) {
+    var lbl = typeof v === 'object' ? v.label : v;
+    return '<div style="display:flex;align-items:center;justify-content:space-between;background:#f5f0e8;border-radius:8px;padding:7px 12px;margin-bottom:6px;font-size:13px;">'
+      + '<span>📍 ' + lbl + '</span>'
+      + '<span onclick="removeDemVilleMod(' + i + ')" style="cursor:pointer;color:#E24B4A;font-weight:700;">✕</span>'
+      + '</div>';
+  }).join('');
+}
+
+function removeDemVilleMod(idx) {
+  demVillesMod.splice(idx, 1);
+  renderDemVillesMod();
+}
+
+var _demVilleModTimer = null;
+function handleDemVilleModInput(val) {
+  _demVilleModSelected = null;
+  clearTimeout(_demVilleModTimer);
+  if (!val || val.length < 2) { document.getElementById('sugg-dem-mod').style.display = 'none'; return; }
+  _demVilleModTimer = setTimeout(function() {
+    fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(val) + '&limit=5&addressdetails=1')
+      .then(function(r){ return r.json(); })
+      .then(function(results) {
+        var box = document.getElementById('sugg-dem-mod');
+        if (!results.length) { box.style.display='none'; return; }
+        box.style.display = 'block';
+        box.innerHTML = results.map(function(r) {
+          var lbl = r.display_name.split(',').slice(0,3).join(',');
+          return '<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onclick="selectDemVilleMod(\'' + lbl.replace(/'/g,"\\'") + '\',' + r.lat + ',' + r.lon + ')">' + lbl + '</div>';
+        }).join('');
+      });
+  }, 350);
+}
+
+function selectDemVilleMod(lbl, lat, lon) {
+  _demVilleModSelected = { label: lbl, lat: lat, lon: lon };
+  document.getElementById('ville-dem-mod-input').value = lbl;
+  document.getElementById('sugg-dem-mod').style.display = 'none';
+}
+
+function addDemVilleMod() {
+  var input = document.getElementById('ville-dem-mod-input');
+  var val = input.value.trim();
+  if (!val) return;
+  var ville = _demVilleModSelected && _demVilleModSelected.label === val
+    ? _demVilleModSelected
+    : { label: val, lat: null, lon: null };
+  if (demVillesMod.find(function(v){ return (typeof v==='object'?v.label:v) === ville.label; })) { input.value=''; return; }
+  demVillesMod.push(ville);
+  renderDemVillesMod();
+  input.value = '';
+  _demVilleModSelected = null;
+}
 var prixTypes = {};
 
 var CAT_INFO = {
@@ -376,47 +457,64 @@ async function init() {
   if (res.error || !res.data) { window.location.href = "trajets.html"; return; }
   trajetData = res.data;
 
-  var ville1 = (trajetData.lieu_ramassage || "").split(",")[0].trim();
-  var ville2 = (trajetData.lieu_distribution || "").split(",")[0].trim();
-  document.getElementById("trajet-subtitle").textContent = ville1 + " → " + ville2;
-
-  // Mode transport
-  if (trajetData.mode_transport) selectMode(trajetData.mode_transport);
-
-  // Lieux
-  document.getElementById("lieu-ramassage").value = trajetData.lieu_ramassage || "";
-  document.getElementById("lieu-distribution").value = trajetData.lieu_distribution || "";
-
-  // Dates
-  if (trajetData.date_ramassage) {
-    document.getElementById("date-ramassage").value = trajetData.date_ramassage.slice(0, 16);
-  }
-  if (trajetData.date_distribution) {
-    document.getElementById("date-distribution").value = trajetData.date_distribution.slice(0, 16);
-  }
-
-  // Catégories
-  selectedCats = Array.isArray(trajetData.categories_acceptees) ? trajetData.categories_acceptees : [];
-  // Pré-remplir déménagement
   if (trajetData.is_demenagement) {
-    if (!selectedCats.includes("demenagement")) selectedCats.push("demenagement");
+    // === MODE DÉMÉNAGEMENT ===
+    document.getElementById("trajet-subtitle").textContent = "🚛 Déménagement";
+
+    // Cacher les sections non pertinentes
+    document.getElementById("section-lieux").style.display = "none";
+    document.getElementById("section-dates").style.display = "none";
+    document.getElementById("section-categories").style.display = "none";
+
+    // Afficher la section déménagement
     var dz = document.getElementById("demenagement-zone-mod");
-    if(dz) dz.style.display="block";
+    if (dz) dz.style.display = "block";
+    document.getElementById("section-demenagement").style.display = "block";
+
+    // Pré-remplir les champs déménagement
     var pc = document.getElementById("prix-par-camion-mod");
     var nc = document.getElementById("nb-camions-dispo-mod");
-    if(pc) pc.value = trajetData.prix_par_camion || "";
-    if(nc) nc.value = trajetData.nb_camions_dispo || 1;
-  }
-  selectedCats.forEach(function(cat) {
-    var el = document.querySelector(".category-pill[data-cat='" + cat + "']");
-    if (el) {
-      el.classList.add("selected");
-      var check = el.querySelector(".category-check");
-      if (check) check.classList.add("checked");
-    }
-  });
+    if (pc) pc.value = trajetData.prix_par_camion || "";
+    if (nc) nc.value = trajetData.nb_camions_dispo || 1;
 
-  buildPrixForm(trajetData.prix_categories);
+    // Pré-remplir les villes
+    if (Array.isArray(trajetData.villes_intervention)) {
+      demVillesMod = trajetData.villes_intervention.map(function(v) {
+        return typeof v === 'object' ? v : { label: v, lat: null, lon: null };
+      });
+      renderDemVillesMod();
+    }
+  } else {
+    // === MODE COLIS ===
+    var ville1 = (trajetData.lieu_ramassage || "").split(",")[0].trim();
+    var ville2 = (trajetData.lieu_distribution || "").split(",")[0].trim();
+    document.getElementById("trajet-subtitle").textContent = ville1 + " → " + ville2;
+    document.getElementById("section-demenagement").style.display = "none";
+
+    // Mode transport
+    if (trajetData.mode_transport) selectMode(trajetData.mode_transport);
+
+    // Lieux
+    document.getElementById("lieu-ramassage").value = trajetData.lieu_ramassage || "";
+    document.getElementById("lieu-distribution").value = trajetData.lieu_distribution || "";
+
+    // Dates
+    if (trajetData.date_ramassage) document.getElementById("date-ramassage").value = trajetData.date_ramassage.slice(0, 16);
+    if (trajetData.date_distribution) document.getElementById("date-distribution").value = trajetData.date_distribution.slice(0, 16);
+
+    // Catégories
+    selectedCats = Array.isArray(trajetData.categories_acceptees) ? trajetData.categories_acceptees : [];
+    selectedCats.forEach(function(cat) {
+      var el = document.querySelector(".category-pill[data-cat='" + cat + "']");
+      if (el) {
+        el.classList.add("selected");
+        var check = el.querySelector(".category-check");
+        if (check) check.classList.add("checked");
+      }
+    });
+    buildPrixForm(trajetData.prix_categories);
+  }
+
   buildNav("mestrajets");
 }
 
@@ -500,43 +598,55 @@ async function sauvegarder() {
   var errEl = document.getElementById("form-error");
   errEl.style.display = "none";
 
-  if (!selectedMode) {
-    errEl.textContent = "Sélectionnez un mode de transport.";
-    errEl.style.display = "block"; return;
-  }
-  if (selectedCats.length === 0) {
-    errEl.textContent = "Sélectionnez au moins un type de colis.";
-    errEl.style.display = "block"; return;
-  }
+  var isDem = trajetData.is_demenagement === true;
 
-  var prixCat = {};
-  for (var i = 0; i < selectedCats.length; i++) {
-    var cat = selectedCats[i];
-    var el = document.getElementById("prix-" + cat);
-    if (!el || el.value === "" || parseFloat(el.value) < 0) {
-      errEl.textContent = "Indiquez un prix pour : " + (CAT_INFO[cat] || {label:cat}).label;
-      errEl.style.display = "block"; return;
+  if (isDem) {
+    // === VALIDATION DÉMÉNAGEMENT ===
+    var prix = parseFloat(document.getElementById("prix-par-camion-mod").value);
+    var nb = parseInt(document.getElementById("nb-camions-dispo-mod").value);
+    if (!prix || prix <= 0) { errEl.textContent = "Indiquez un prix par camion valide."; errEl.style.display = "block"; return; }
+    if (!nb || nb < 1) { errEl.textContent = "Indiquez le nombre de camions disponibles."; errEl.style.display = "block"; return; }
+    if (demVillesMod.length === 0) { errEl.textContent = "Ajoutez au moins une ville d'intervention."; errEl.style.display = "block"; return; }
+
+    var updates = {
+      prix_par_camion: prix,
+      nb_camions_dispo: nb,
+      villes_intervention: demVillesMod,
+      is_demenagement: true
+    };
+
+    var res = await sb.from("trajets").update(updates).eq("id", trajetId);
+    if (res.error) { errEl.textContent = "Erreur : " + res.error.message; errEl.style.display = "block"; return; }
+
+  } else {
+    // === VALIDATION COLIS ===
+    if (!selectedMode) { errEl.textContent = "Sélectionnez un mode de transport."; errEl.style.display = "block"; return; }
+    if (selectedCats.length === 0) { errEl.textContent = "Sélectionnez au moins un type de colis."; errEl.style.display = "block"; return; }
+
+    var prixCat = {};
+    for (var i = 0; i < selectedCats.length; i++) {
+      var cat = selectedCats[i];
+      var el = document.getElementById("prix-" + cat);
+      if (!el || el.value === "" || parseFloat(el.value) < 0) {
+        errEl.textContent = "Indiquez un prix pour : " + (CAT_INFO[cat] || {label:cat}).label;
+        errEl.style.display = "block"; return;
+      }
+      prixCat[cat] = { value: parseFloat(el.value), unit: prixTypes[cat] || "kg" };
     }
-    prixCat[cat] = { value: parseFloat(el.value), unit: prixTypes[cat] || "kg" };
-  }
 
-  var updates = {
-    mode_transport:       selectedMode,
-    lieu_ramassage:       document.getElementById("lieu-ramassage").value,
-    lieu_distribution:    document.getElementById("lieu-distribution").value,
-    date_ramassage:       document.getElementById("date-ramassage").value || null,
-    date_distribution:    document.getElementById("date-distribution").value || null,
-    categories_acceptees: selectedCats,
-    prix_categories:      prixCat,
-    is_demenagement: selectedCats.includes("demenagement"),
-    prix_par_camion: selectedCats.includes("demenagement") ? (parseFloat((document.getElementById("prix-par-camion-mod")||{}).value)||0) : 0,
-    nb_camions_dispo: selectedCats.includes("demenagement") ? (parseInt((document.getElementById("nb-camions-dispo-mod")||{}).value)||1) : 0
-  };
+    var updates = {
+      mode_transport:       selectedMode,
+      lieu_ramassage:       document.getElementById("lieu-ramassage").value,
+      lieu_distribution:    document.getElementById("lieu-distribution").value,
+      date_ramassage:       document.getElementById("date-ramassage").value || null,
+      date_distribution:    document.getElementById("date-distribution").value || null,
+      categories_acceptees: selectedCats,
+      prix_categories:      prixCat,
+      is_demenagement:      false
+    };
 
-  var res = await sb.from("trajets").update(updates).eq("id", trajetId);
-  if (res.error) {
-    errEl.textContent = "Erreur : " + res.error.message;
-    errEl.style.display = "block"; return;
+    var res = await sb.from("trajets").update(updates).eq("id", trajetId);
+    if (res.error) { errEl.textContent = "Erreur : " + res.error.message; errEl.style.display = "block"; return; }
   }
 
   await notifierExpediteurs("modifie");
