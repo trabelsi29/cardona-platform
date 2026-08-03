@@ -704,7 +704,12 @@ function voirDetail(event, trajetId) {
     document.getElementById('modal-trajet-title').textContent = '🚛 Déménagement';
 
     var villes = Array.isArray(t.villes_intervention) && t.villes_intervention.length
-      ? t.villes_intervention.map(function(v){ return typeof v === 'object' ? v.label : v; }).join('<br>')
+      ? t.villes_intervention.map(function(z) {
+          if (typeof z === 'object' && z.pays) {
+            return z.toutLePays ? '🌍 ' + z.pays + ' (tout le pays)' : '🌍 ' + z.pays + ' : ' + (z.villes || []).join(', ');
+          }
+          return typeof z === 'object' ? z.label : z;
+        }).join('<br>')
       : '—';
 
     content = statut

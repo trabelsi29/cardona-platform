@@ -313,13 +313,15 @@
           <input type="number" id="nb-camions-dispo-mod" min="1" value="1" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
         </div>
         <div class="field">
-          <label>Villes d'intervention</label>
-          <div id="dem-villes-mod-list" style="margin-bottom:8px;"></div>
-          <div style="position:relative;">
-            <input type="text" id="ville-dem-mod-input" placeholder="Ajouter une ville…" oninput="handleDemVilleModInput(this.value)" autocomplete="off" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
-            <div id="sugg-dem-mod" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+          <label>Zones d'intervention (pays)</label>
+          <div id="dem-zones-mod-list" style="margin-bottom:8px;"></div>
+          <div style="display:flex;gap:6px;">
+            <div style="flex:1;position:relative;">
+              <input type="text" id="pays-dem-mod-input" placeholder="Ajouter un pays…" oninput="handleDemPaysModInput(this.value)" autocomplete="off" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
+              <div id="sugg-dem-mod-pays" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+            </div>
+            <button type="button" onclick="addDemZoneMod()" style="padding:10px 16px;background:var(--gold);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;">+</button>
           </div>
-          <button type="button" onclick="addDemVilleMod()" style="margin-top:8px;padding:8px 16px;background:var(--gold);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;">+ Ajouter</button>
         </div>
       </div>
 
@@ -375,64 +377,67 @@ const NAV_ICONS = {
 var trajetId = null, trajetData = null;
 var selectedMode = null;
 var selectedCats = [];
-var demVillesMod = [];
-var _demVilleModSelected = null;
+var demVillesMod = []; // réutilisé comme demZonesMod
 
-function renderDemVillesMod() {
-  var list = document.getElementById('dem-villes-mod-list');
+function renderDemZonesMod() {
+  var list = document.getElementById('dem-zones-mod-list');
   if (!list) return;
-  list.innerHTML = demVillesMod.map(function(v, i) {
-    var lbl = typeof v === 'object' ? v.label : v;
-    return '<div style="display:flex;align-items:center;justify-content:space-between;background:#f5f0e8;border-radius:8px;padding:7px 12px;margin-bottom:6px;font-size:13px;">'
-      + '<span>📍 ' + lbl + '</span>'
-      + '<span onclick="removeDemVilleMod(' + i + ')" style="cursor:pointer;color:#E24B4A;font-weight:700;">✕</span>'
+  list.innerHTML = demVillesMod.map(function(z, i) {
+    var villesHtml = '';
+    if (!z.toutLePays) {
+      villesHtml = (z.villes || []).map(function(v, vi) {
+        return '<span style="display:inline-flex;align-items:center;gap:4px;background:#f0edd8;border-radius:20px;padding:3px 10px;font-size:12px;margin:2px;">'
+          + v + '<span onclick="removeVilleZoneMod(' + i + ',' + vi + ')" style="cursor:pointer;color:#bbb;font-weight:700;">×</span></span>';
+      }).join('');
+      villesHtml += '<div style="display:flex;gap:6px;margin-top:6px;">'
+        + '<input id="ville-zone-mod-' + i + '" type="text" placeholder="Ajouter une ville…" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">'
+        + '<button onclick="addVilleZoneMod(' + i + ')" style="padding:7px 12px;background:var(--gold);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;">+</button>'
+        + '</div>';
+    }
+    return '<div style="background:#fdf8f0;border:1.5px solid #e8dcc8;border-radius:12px;padding:12px 14px;margin-bottom:10px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+      + '<span style="font-weight:700;font-size:14px;">🌍 ' + z.pays + '</span>'
+      + '<span onclick="removeDemZoneMod(' + i + ')" style="cursor:pointer;color:#E24B4A;font-size:18px;line-height:1;">×</span>'
+      + '</div>'
+      + '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:' + (z.toutLePays ? '0' : '8px') + ';">'
+      + '<input type="checkbox" ' + (z.toutLePays ? 'checked' : '') + ' onchange="toggleToutLePaysZoneMod(' + i + ')" style="width:16px;height:16px;accent-color:var(--gold);">'
+      + 'Tout le pays</label>'
+      + (!z.toutLePays ? '<div>' + villesHtml + '</div>' : '')
       + '</div>';
   }).join('');
 }
 
-function removeDemVilleMod(idx) {
-  demVillesMod.splice(idx, 1);
-  renderDemVillesMod();
-}
+function toggleToutLePaysZoneMod(idx) { demVillesMod[idx].toutLePays = !demVillesMod[idx].toutLePays; renderDemZonesMod(); }
+function addVilleZoneMod(idx) { var input = document.getElementById('ville-zone-mod-' + idx); var val = (input.value||'').trim(); if (!val) return; if (!demVillesMod[idx].villes) demVillesMod[idx].villes = []; demVillesMod[idx].villes.push(val); input.value=''; renderDemZonesMod(); }
+function removeVilleZoneMod(pi, vi) { demVillesMod[pi].villes.splice(vi, 1); renderDemZonesMod(); }
+function removeDemZoneMod(idx) { demVillesMod.splice(idx, 1); renderDemZonesMod(); }
 
-var _demVilleModTimer = null;
-function handleDemVilleModInput(val) {
-  _demVilleModSelected = null;
-  clearTimeout(_demVilleModTimer);
-  if (!val || val.length < 2) { document.getElementById('sugg-dem-mod').style.display = 'none'; return; }
-  _demVilleModTimer = setTimeout(function() {
-    fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(val) + '&limit=5&addressdetails=1')
-      .then(function(r){ return r.json(); })
-      .then(function(results) {
-        var box = document.getElementById('sugg-dem-mod');
-        if (!results.length) { box.style.display='none'; return; }
-        box.style.display = 'block';
-        box.innerHTML = results.map(function(r) {
-          var lbl = r.display_name.split(',').slice(0,3).join(',');
-          return '<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onclick="selectDemVilleMod(\'' + lbl.replace(/'/g,"\\'") + '\',' + r.lat + ',' + r.lon + ')">' + lbl + '</div>';
-        }).join('');
-      });
+var _demPaysModTimer = null;
+function handleDemPaysModInput(val) {
+  var box = document.getElementById('sugg-dem-mod-pays');
+  if (!val || val.length < 2) { box.style.display='none'; return; }
+  clearTimeout(_demPaysModTimer);
+  _demPaysModTimer = setTimeout(async function() {
+    try {
+      var res = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(val) + '&featureType=country&limit=5&addressdetails=1');
+      var data = await res.json();
+      var seen = new Set();
+      var items = (data||[]).filter(function(r){ var p = r.address&&r.address.country||r.display_name.split(',')[0]; if(seen.has(p)) return false; seen.add(p); return true; }).slice(0,5);
+      box.style.display = items.length ? 'block' : 'none';
+      box.innerHTML = items.map(function(r){ var p = r.address&&r.address.country||r.display_name.split(',')[0]; return '<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onclick="selectDemPaysZoneMod(\'' + p.replace(/'/g,"\\'") + '\')">' + p + '</div>'; }).join('');
+    } catch(e){ box.style.display='none'; }
   }, 350);
 }
 
-function selectDemVilleMod(lbl, lat, lon) {
-  _demVilleModSelected = { label: lbl, lat: lat, lon: lon };
-  document.getElementById('ville-dem-mod-input').value = lbl;
-  document.getElementById('sugg-dem-mod').style.display = 'none';
-}
-
-function addDemVilleMod() {
-  var input = document.getElementById('ville-dem-mod-input');
-  var val = input.value.trim();
-  if (!val) return;
-  var ville = _demVilleModSelected && _demVilleModSelected.label === val
-    ? _demVilleModSelected
-    : { label: val, lat: null, lon: null };
-  if (demVillesMod.find(function(v){ return (typeof v==='object'?v.label:v) === ville.label; })) { input.value=''; return; }
-  demVillesMod.push(ville);
-  renderDemVillesMod();
-  input.value = '';
-  _demVilleModSelected = null;
+function selectDemPaysZoneMod(pays) { document.getElementById('pays-dem-mod-input').value = pays; document.getElementById('sugg-dem-mod-pays').style.display='none'; window._demPaysModSel = pays; }
+function addDemZoneMod() {
+  var input = document.getElementById('pays-dem-mod-input');
+  var pays = (window._demPaysModSel && window._demPaysModSel === input.value.trim()) ? window._demPaysModSel : input.value.trim();
+  if (!pays) return;
+  if (demVillesMod.find(function(z){ return z.pays === pays; })) { input.value=''; return; }
+  demVillesMod.push({ pays: pays, toutLePays: true, villes: [] });
+  renderDemZonesMod();
+  input.value=''; window._demPaysModSel = null;
 }
 var prixTypes = {};
 
@@ -478,12 +483,15 @@ async function init() {
     if (pc) pc.value = trajetData.prix_par_camion || "";
     if (nc) nc.value = trajetData.nb_camions_dispo || 1;
 
-    // Pré-remplir les villes
+    // Pré-remplir les zones pays/villes
     if (Array.isArray(trajetData.villes_intervention)) {
-      demVillesMod = trajetData.villes_intervention.map(function(v) {
-        return typeof v === 'object' ? v : { label: v, lat: null, lon: null };
+      demVillesMod = trajetData.villes_intervention.map(function(z) {
+        if (typeof z === 'object' && z.pays) return z; // nouveau format
+        // ancien format (juste label/ville)
+        var lbl = typeof z === 'object' ? z.label : z;
+        return { pays: lbl, toutLePays: true, villes: [] };
       });
-      renderDemVillesMod();
+      renderDemZonesMod();
     }
   } else {
     // === MODE COLIS ===
@@ -607,7 +615,9 @@ async function sauvegarder() {
     var nb = parseInt(document.getElementById("nb-camions-dispo-mod").value);
     if (!prix || prix <= 0) { errEl.textContent = "Indiquez un prix par camion valide."; errEl.style.display = "block"; return; }
     if (!nb || nb < 1) { errEl.textContent = "Indiquez le nombre de camions disponibles."; errEl.style.display = "block"; return; }
-    if (demVillesMod.length === 0) { errEl.textContent = "Ajoutez au moins une ville d'intervention."; errEl.style.display = "block"; return; }
+    if (demVillesMod.length === 0) { errEl.textContent = "Ajoutez au moins un pays d'intervention."; errEl.style.display = "block"; return; }
+    var invalide = demVillesMod.find(function(z){ return !z.toutLePays && (!z.villes || z.villes.length === 0); });
+    if (invalide) { errEl.textContent = 'Ajoutez au moins une ville pour ' + invalide.pays + ', ou cochez "Tout le pays".'; errEl.style.display = "block"; return; }
 
     var updates = {
       prix_par_camion: prix,

@@ -424,20 +424,25 @@
       <button class="btn-primary" onclick="validateStepDem1()" style="margin-top:16px;">Suivant</button>
     </div>
 
-    <!-- STEP DEM-2 : villes intervention -->
+    <!-- STEP DEM-2 : zones d'intervention (pays + villes) -->
     <div class="step" id="step-dem-2">
-      <div class="title">Villes d'intervention</div>
-      <div class="subtitle">Dans quelles villes proposez-vous le déménagement ?</div>
-      <div id="dem-villes-list" style="margin-bottom:8px;"></div>
-      <div style="display:flex;gap:8px;">
+      <div class="title">Zones d'intervention</div>
+      <div class="subtitle">Dans quels pays proposez-vous le déménagement ?</div>
+
+      <!-- Liste des pays ajoutés -->
+      <div id="dem-pays-list" style="margin-bottom:12px;"></div>
+
+      <!-- Ajout d'un pays -->
+      <div style="display:flex;gap:8px;margin-bottom:8px;">
         <div style="flex:1;position:relative;">
-          <input type="text" id="ville-dem-input" placeholder="Ajouter une ville..."
-            oninput="handleDemVilleInput(this.value)"
+          <input type="text" id="pays-dem-input" placeholder="Ajouter un pays (ex: France)…"
+            oninput="handleDemPaysInput(this.value)"
             style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;">
-          <div class="suggestions" id="sugg-dem-ville" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:white;border:1px solid var(--border);border-radius:10px;"></div>
+          <div id="sugg-dem-pays" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:white;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
         </div>
-        <button onclick="addDemVille()" style="padding:10px 16px;background:var(--gold);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">+</button>
+        <button onclick="addDemPays()" style="padding:10px 16px;background:var(--gold);color:white;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">+</button>
       </div>
+
       <button class="btn-primary" onclick="validateStepDem2()" style="margin-top:16px;">Suivant</button>
     </div>
 
@@ -1181,7 +1186,8 @@ function toggleTaille(taille) {
 }
 
 var selectedService = null;
-var demVilles = [];
+// Structure : [{ pays: 'France', toutLePays: true, villes: [] }, ...]
+var demZones = [];
 
 function selectService(val) {
   selectedService = val;
@@ -1200,67 +1206,99 @@ function validateStep0() {
   }
 }
 
-function handleDemVilleInput(value) {
-  var suggBox = document.getElementById('sugg-dem-ville');
+// ── RECHERCHE PAYS ────────────────────────────────────────────────
+function handleDemPaysInput(value) {
+  var suggBox = document.getElementById('sugg-dem-pays');
   if (!value || value.trim().length < 2) { suggBox.style.display = 'none'; return; }
-  clearTimeout(window._demDebounce);
-  window._demDebounce = setTimeout(async function() {
-    suggBox.style.display = 'block';
-    suggBox.innerHTML = '<div class="suggestion-loading">Recherche...</div>';
+  clearTimeout(window._demPaysDebounce);
+  window._demPaysDebounce = setTimeout(async function() {
     try {
-      var res = await fetch('https://photon.komoot.io/api/?q=' + encodeURIComponent(value) + '&limit=5&lang=fr');
+      var res = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(value) + '&featureType=country&limit=6&addressdetails=1');
       var data = await res.json();
-      var features = (data.features || []).slice(0, 5);
-      suggBox.innerHTML = '';
+      suggBox.style.display = 'block';
       var seen = new Set();
-      features.forEach(function(f) {
-        var p = f.properties;
-        var city = p.city || p.name || '';
-        var country = p.country || '';
-        var label = city + (country ? ', ' + country : '');
-        if (!label || seen.has(label)) return;
-        seen.add(label);
-        var div = document.createElement('div');
-        div.className = 'suggestion-item';
-        div.textContent = label;
-        div.onclick = (function(lbl, la, lo) {
-          return function() {
-            document.getElementById('ville-dem-input').value = lbl;
-            suggBox.style.display = 'none';
-            window._demVilleSelected = { label: lbl, lat: la, lon: lo };
-          };
-        })(label, f.geometry.coordinates[1], f.geometry.coordinates[0]);
-        suggBox.appendChild(div);
-      });
-      if (!suggBox.children.length) suggBox.innerHTML = '<div class="suggestion-loading">Aucun résultat</div>';
+      var items = (data || []).filter(function(r) {
+        var pays = r.address && (r.address.country || r.display_name.split(',')[0]);
+        if (!pays || seen.has(pays)) return false;
+        seen.add(pays);
+        return true;
+      }).slice(0, 6);
+      if (!items.length) { suggBox.innerHTML = '<div style="padding:10px;font-size:13px;color:#aaa;">Aucun résultat</div>'; return; }
+      suggBox.innerHTML = items.map(function(r) {
+        var pays = r.address ? (r.address.country || r.display_name.split(',')[0]) : r.display_name.split(',')[0];
+        return '<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onclick="selectDemPays(\'' + pays.replace(/'/g,"\\'") + '\')">' + pays + '</div>';
+      }).join('');
     } catch(e) { suggBox.style.display = 'none'; }
   }, 350);
 }
 
-function addDemVille() {
-  var input = document.getElementById('ville-dem-input');
+function selectDemPays(pays) {
+  document.getElementById('pays-dem-input').value = pays;
+  document.getElementById('sugg-dem-pays').style.display = 'none';
+  window._demPaysSelected = pays;
+}
+
+function addDemPays() {
+  var input = document.getElementById('pays-dem-input');
+  var pays = (window._demPaysSelected && window._demPaysSelected === input.value.trim())
+    ? window._demPaysSelected : input.value.trim();
+  if (!pays) return;
+  if (demZones.find(function(z){ return z.pays === pays; })) { input.value=''; return; }
+  demZones.push({ pays: pays, toutLePays: true, villes: [] });
+  renderDemZones();
+  input.value = '';
+  window._demPaysSelected = null;
+}
+
+function toggleToutLePays(idx) {
+  demZones[idx].toutLePays = !demZones[idx].toutLePays;
+  renderDemZones();
+}
+
+function addVilleInPays(idx) {
+  var input = document.getElementById('ville-pays-' + idx);
   var val = (input.value || '').trim();
   if (!val) return;
-  var ville = (window._demVilleSelected && window._demVilleSelected.label === val)
-    ? window._demVilleSelected : { label: val, lat: null, lon: null };
-  if (demVilles.find(function(v){ return v.label === ville.label; })) { input.value = ''; return; }
-  demVilles.push(ville);
-  renderDemVilles();
+  if (!demZones[idx].villes.includes(val)) demZones[idx].villes.push(val);
   input.value = '';
-  window._demVilleSelected = null;
+  renderDemZones();
 }
 
-function removeDemVille(idx) {
-  demVilles.splice(idx, 1);
-  renderDemVilles();
+function removeVilleInPays(paysIdx, villeIdx) {
+  demZones[paysIdx].villes.splice(villeIdx, 1);
+  renderDemZones();
 }
 
-function renderDemVilles() {
-  var list = document.getElementById('dem-villes-list');
-  list.innerHTML = demVilles.map(function(v, i) {
-    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#fdf8f0;border-radius:10px;margin-bottom:6px;font-size:13px;font-weight:600;">'
-      + v.label
-      + '<span onclick="removeDemVille(' + i + ')" style="cursor:pointer;color:#bbb;margin-left:8px;">&#x2715;</span>'
+function removeDemZone(idx) {
+  demZones.splice(idx, 1);
+  renderDemZones();
+}
+
+function renderDemZones() {
+  var list = document.getElementById('dem-pays-list');
+  if (!demZones.length) { list.innerHTML = ''; return; }
+  list.innerHTML = demZones.map(function(z, i) {
+    var villesHtml = '';
+    if (!z.toutLePays) {
+      villesHtml = z.villes.map(function(v, vi) {
+        return '<span style="display:inline-flex;align-items:center;gap:4px;background:#f0edd8;border-radius:20px;padding:3px 10px;font-size:12px;margin:2px;">'
+          + v + '<span onclick="removeVilleInPays(' + i + ',' + vi + ')" style="cursor:pointer;color:#bbb;font-weight:700;">×</span></span>';
+      }).join('');
+      villesHtml += '<div style="display:flex;gap:6px;margin-top:6px;">'
+        + '<input id="ville-pays-' + i + '" type="text" placeholder="Ajouter une ville…" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">'
+        + '<button onclick="addVilleInPays(' + i + ')" style="padding:7px 12px;background:var(--gold);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;">+</button>'
+        + '</div>';
+    }
+    return '<div style="background:#fdf8f0;border:1.5px solid #e8dcc8;border-radius:12px;padding:12px 14px;margin-bottom:10px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
+      + '<span style="font-weight:700;font-size:14px;">🌍 ' + z.pays + '</span>'
+      + '<span onclick="removeDemZone(' + i + ')" style="cursor:pointer;color:#E24B4A;font-size:18px;line-height:1;">×</span>'
+      + '</div>'
+      + '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:' + (z.toutLePays ? '0' : '8px') + ';">'
+      + '<input type="checkbox" ' + (z.toutLePays ? 'checked' : '') + ' onchange="toggleToutLePays(' + i + ')" style="width:16px;height:16px;accent-color:var(--gold);">'
+      + 'Tout le pays'
+      + '</label>'
+      + (!z.toutLePays ? '<div>' + villesHtml + '</div>' : '')
       + '</div>';
   }).join('');
 }
@@ -1272,12 +1310,16 @@ function validateStepDem1() {
 }
 
 function validateStepDem2() {
-  if (demVilles.length === 0) { showFormError("Ajoutez au moins une ville."); return; }
+  if (demZones.length === 0) { showFormError("Ajoutez au moins un pays."); return; }
+  var invalide = demZones.find(function(z){ return !z.toutLePays && z.villes.length === 0; });
+  if (invalide) { showFormError('Ajoutez au moins une ville pour ' + invalide.pays + ', ou cochez "Tout le pays".'); return; }
   var prix = parseFloat(document.getElementById('dem-prix-camion').value) || 0;
   var nb = parseInt(document.getElementById('dem-nb-camions').value) || 1;
   document.getElementById('dem-recap-prix').textContent = prix + ' €/camion';
   document.getElementById('dem-recap-camions').textContent = nb + ' camion(s) disponible(s)';
-  document.getElementById('dem-recap-villes').textContent = demVilles.map(function(v){return v.label;}).join(' · ');
+  document.getElementById('dem-recap-villes').textContent = demZones.map(function(z){
+    return z.pays + (z.toutLePays ? ' (tout le pays)' : ' : ' + z.villes.join(', '));
+  }).join(' · ');
   goStep('dem-3');
 }
 
@@ -1289,17 +1331,19 @@ async function publierDemenagement() {
   if (!session) { btn.disabled=false; btn.textContent='Publier le service'; return; }
   var prix = parseFloat(document.getElementById('dem-prix-camion').value) || 0;
   var nb = parseInt(document.getElementById('dem-nb-camions').value) || 1;
-  var villesLabel = demVilles.map(function(v){return v.label;}).join(', ');
+  var zonesLabel = demZones.map(function(z){
+    return z.pays + (z.toutLePays ? '' : ' (' + z.villes.join(', ') + ')');
+  }).join(', ');
   var res = await sb.from('trajets').insert({
     transporteur_id: session.user.id,
     is_demenagement: true,
-    villes_intervention: demVilles,
+    villes_intervention: demZones,
     prix_par_camion: prix,
     nb_camions_dispo: nb,
     categories_acceptees: ['demenagement'],
     mode_transport: 'camion_fourgon',
-    lieu_ramassage: villesLabel,
-    lieu_distribution: villesLabel,
+    lieu_ramassage: zonesLabel,
+    lieu_distribution: zonesLabel,
     prix: 0, prix_par_kg: 0, devise: 'EUR', statut: 'publie'
   });
   btn.disabled=false; btn.textContent='Publier le service';
