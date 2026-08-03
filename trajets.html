@@ -575,7 +575,7 @@ function render() {
     return "<div class='trajet-card-main'>"
       + "<div class='trajet-card-strip' style='background:" + stripColor + ";'></div>"
       + "<div class='trajet-card-header'>"
-      + "<div class='trajet-info'><div class='trajet-mode-route'>" + routeLine + "</div><div class='trajet-meta'>📅 " + dateStr + "</div>" + demInfoLine + "</div>"
+      + "<div class='trajet-info'><div class='trajet-mode-route'>" + routeLine + "</div>" + (!isDem ? "<div class='trajet-meta'>📅 " + dateStr + "</div>" : "") + demInfoLine + "</div>"
       + "<div class='trajet-right'>" + statusBadge
       + "<button class='trajet-modify-btn' onclick='voirDetail(event,&quot;" + t.id + "&quot;)'>🔍 Détail</button>"
       + (!isExpire ? "<button class='trajet-modify-btn' onclick='modifierTrajet(&quot;" + t.id + "&quot;)'>✏ Modifier</button>" : "")
