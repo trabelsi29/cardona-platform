@@ -493,27 +493,27 @@ async function checkAccess() {
   }
 
   const { data: profile } = await sb.from('profiles').select('*').eq('id', session.user.id).single();
-  if (!profile || profile.verification_status !== 'verifie') {
-    const messages = {
-      non_soumis: "Votre profil n'est pas encore vérifié. Envoyez une pièce d'identité depuis votre profil pour activer votre compte.",
-      en_attente: 'Votre profil est en cours de vérification par notre équipe. Vous pourrez réserver dès validation.',
-      refuse: "Votre vérification a été refusée. Renvoyez une pièce d'identité lisible depuis votre profil.",
-      incomplet: 'Votre dossier de vérification est incomplet. Complétez-le depuis votre profil.'
-    };
-    document.getElementById('gate-title').textContent = 'Vérification requise';
-    document.getElementById('gate-desc').textContent = messages[profile?.verification_status] || messages.non_soumis;
-    document.getElementById('gate-action-link').textContent = 'Aller à mon profil';
-    document.getElementById('gate-action-link').href = 'index.html';
-    document.getElementById('step-gate').classList.add('active');
-    document.getElementById('form-wrapper').style.display = 'none';
-    buildNav('rechercher');
-    return;
-  }
 
   currentUser = session.user;
+  currentUser._profile = profile;
   document.getElementById('step-gate').classList.remove('active');
   document.getElementById('form-wrapper').style.display = 'block';
-  // nav buildNav
+
+  // Avertissement si non vérifié (sans bloquer la navigation)
+  if (!profile || profile.verification_status !== 'verifie') {
+    const messages = {
+      non_soumis: "Votre profil n'est pas encore vérifié. Vous pouvez rechercher, mais devrez vous vérifier avant de réserver.",
+      en_attente: 'Votre vérification est en cours. Vous pourrez réserver dès validation.',
+      refuse: "Votre vérification a été refusée. Renvoyez un document depuis votre profil.",
+      incomplet: 'Votre dossier est incomplet. Complétez-le depuis votre profil.'
+    };
+    const msg = messages[profile?.verification_status] || messages.non_soumis;
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#FFF3CD;border:1px solid #FFD93D;border-radius:8px;padding:10px 14px;font-size:12px;color:#856404;margin-bottom:12px;';
+    banner.innerHTML = '⚠️ ' + msg + ' <a href="index.html" style="color:var(--gold);font-weight:600;">Mon profil →</a>';
+    document.getElementById('form-error').after(banner);
+  }
+
   buildNav('rechercher');
   goStep(1);
 }
