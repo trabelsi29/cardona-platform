@@ -297,7 +297,7 @@
         </div>
       </div>
     </div>
-    <div class="progress-track" id="progress-track"><div class="progress-fill" id="progress-fill" style="width:16%"></div></div>
+    <div class="progress-track" id="progress-track"><div class="progress-fill" id="progress-fill" style="width:5%"></div></div>
     <div class="error-box" id="form-error"></div>
 
 
@@ -1310,25 +1310,29 @@ var _currentStep = 0;
 var _stepHistory = [0];
 
 function goStep(n) {
-  // Effacer les erreurs
   var errEl = document.getElementById("form-error");
   if (errEl) errEl.style.display = "none";
-  // Masquer/afficher bouton retour selon le step
   var bb = document.getElementById("back-btn");
   if (bb) bb.style.visibility = (n === 0 || n === "0") ? "hidden" : "visible";
   document.querySelectorAll('.step').forEach(function(s) { s.classList.remove('active'); });
   var el = document.getElementById('step-' + n) || document.getElementById('step-dem-' + String(n).replace('dem-',''));
   if (!el && typeof n === 'string') el = document.getElementById('step-' + n);
   if (el) { el.classList.add('active'); _currentStep = n; _stepHistory.push(n); }
-  // Mise à jour barre de progression (étapes 1 à 7, step 0 = gate ignoré)
+
+  // Mise à jour barre de progression
   var fill = document.getElementById('progress-fill');
-  if (fill && typeof n === 'number' && n >= 1) {
+  if (!fill) return;
+  var pct = 0;
+  if (typeof n === 'number') {
+    // Étapes colis : 0 à 7 → 0% à 100%
     var totalSteps = 7;
-    var pct = n >= totalSteps ? 100 : Math.round(n / totalSteps * 100);
-    fill.style.width = pct + '%';
-  } else if (fill && n === 0) {
-    fill.style.width = '0%';
+    pct = n === 0 ? 5 : (n >= totalSteps ? 100 : Math.round(n / totalSteps * 100));
+  } else if (typeof n === 'string' && n.startsWith('dem-')) {
+    // Étapes déménagement : dem-1, dem-2, dem-3
+    var demNum = parseInt(n.replace('dem-', '')) || 1;
+    pct = Math.round(demNum / 3 * 100);
   }
+  fill.style.width = pct + '%';
 }
 
 function prevStep() {
