@@ -268,7 +268,7 @@
       <div class="error-box" id="form-error" style="display:none;"></div>
 
       <!-- MODE TRANSPORT -->
-      <div class="mod-section">
+      <div class="mod-section" id="section-mode">
         <div class="mod-section-title">Mode de transport</div>
         <div class="radio-item" data-value="avion" onclick="selectMode('avion')"><span>✈ Avion</span><div class="radio-circle"></div></div>
         <div class="radio-item" data-value="camion_fourgon" onclick="selectMode('camion_fourgon')"><span>🚛 Camion / Fourgon</span><div class="radio-circle"></div></div>
@@ -462,6 +462,7 @@ async function init() {
     document.getElementById("trajet-subtitle").textContent = "🚛 Déménagement";
 
     // Cacher les sections non pertinentes
+    document.getElementById("section-mode").style.display = "none";
     document.getElementById("section-lieux").style.display = "none";
     document.getElementById("section-dates").style.display = "none";
     document.getElementById("section-categories").style.display = "none";
