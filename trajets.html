@@ -692,49 +692,65 @@ function voirDetail(event, trajetId) {
   var t = myTrajets.find(function(x) { return x.id === trajetId; });
   if (!t) return;
 
+  var statutLabel = { publie: '🟢 Publié', complet: '🔵 Complet', termine: '⚫ Terminé', annule: '🔴 Annulé' };
   var modeLabels = { avion: '✈ Avion', camion_fourgon: '🚛 Camion/Fourgon', voiture: '🚗 Voiture', train_bus: '🚆 Train/Bus', autre: '❓ Autre' };
   var catLabels = { marchandise: 'Marchandises', document: 'Documents', fragile: 'Produits fragiles', electronique: 'Produits électroniques', autre: 'Autre' };
-  var dateRam = t.date_ramassage ? new Date(t.date_ramassage).toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '—';
-  var dateDist = t.date_distribution ? new Date(t.date_distribution).toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '—';
 
-  document.getElementById('modal-trajet-title').textContent = shorten(t.lieu_ramassage) + ' → ' + shorten(t.lieu_distribution);
+  var statut = '<div class="modal-section"><div class="modal-label">Statut</div><div class="modal-value">' + (statutLabel[t.statut] || t.statut || '—') + '</div></div>';
+  var content = '';
 
-  var cats = Array.isArray(t.categories_acceptees) ? t.categories_acceptees : [];
-  var prixCat = t.prix_categories || {};
+  if (t.is_demenagement) {
+    // === AFFICHAGE DÉMÉNAGEMENT ===
+    document.getElementById('modal-trajet-title').textContent = '🚛 Déménagement';
 
-  var prixHtml = '';
-  if (Object.keys(prixCat).length > 0) {
-    prixHtml = '<div class="modal-section"><div class="modal-label">Tarifs par catégorie</div>';
-    Object.keys(prixCat).forEach(function(cat) {
-      var p = prixCat[cat];
-      var label = catLabels[cat] || cat;
-      var prix;
-      // Format ancien : {unit:"kg", value:5} ou Format nouveau : {type:"kg", prix:5}
-      if (typeof p === 'object') {
-        var val = p.value !== undefined ? p.value : p.prix;
-        var unit = p.unit || p.type || 'kg';
-        prix = val + (unit === 'forfait' ? ' € (forfait)' : ' €/kg');
-      } else {
-        prix = p + ' €';
-      }
-      prixHtml += '<div class="prix-cat-ligne"><span>' + label + '</span><span style="font-weight:600;color:var(--gold);">' + prix + '</span></div>';
-    });
-    prixHtml += '</div>';
-  } else if (cats.length > 0) {
-    prixHtml = '<div class="modal-section"><div class="modal-label">Catégories acceptées</div><div class="modal-value">' + cats.map(function(cat){return catLabels[cat]||cat;}).join(', ') + '</div></div>';
+    var villes = Array.isArray(t.villes_intervention) && t.villes_intervention.length
+      ? t.villes_intervention.map(function(v){ return typeof v === 'object' ? v.label : v; }).join('<br>')
+      : '—';
+
+    content = statut
+      + '<div class="modal-section"><div class="modal-label">📍 Villes d\'intervention</div><div class="modal-value">' + villes + '</div></div>'
+      + '<div class="modal-row">'
+      + '<div class="modal-section"><div class="modal-label">💰 Prix par camion</div><div class="modal-value" style="color:var(--gold);font-weight:700;">' + (t.prix_par_camion ? t.prix_par_camion + ' €' : '—') + '</div></div>'
+      + '<div class="modal-section"><div class="modal-label">🚐 Camions dispo</div><div class="modal-value">' + (t.nb_camions_dispo || 1) + '</div></div>'
+      + '</div>';
+
   } else {
-    prixHtml = '<div class="modal-section"><div class="modal-label">Tarifs</div><div class="modal-value" style="color:var(--text-secondary);">Non renseignés</div></div>';
-  }
+    // === AFFICHAGE COLIS ===
+    var ville1 = t.lieu_ramassage ? t.lieu_ramassage.split(',')[0] : '—';
+    var ville2 = t.lieu_distribution ? t.lieu_distribution.split(',')[0] : '—';
+    document.getElementById('modal-trajet-title').textContent = ville1 + ' → ' + ville2;
 
-  var content = '<div class="modal-row">'
-    + '<div class="modal-section"><div class="modal-label">Mode de transport</div><div class="modal-value">' + (modeLabels[t.mode_transport] || t.mode_transport || '—') + '</div></div>'
-    + '<div class="modal-section"><div class="modal-label">Statut</div><div class="modal-value">' + (t.statut || '—') + '</div></div>'
-    + '</div>'
-    + '<div class="modal-row">'
-    + '<div class="modal-section"><div class="modal-label">🟢 Ramassage</div><div class="modal-value">' + (t.stops_ramassage && t.stops_ramassage.length > 1 ? t.stops_ramassage.map(function(s,idx){return (idx+1)+'. '+s.adresse;}).join('<br>') : (t.lieu_ramassage || '—')) + '</div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">📅 ' + dateRam + '</div></div>'
-    + '<div class="modal-section"><div class="modal-label">🔴 Distribution</div><div class="modal-value">' + (t.stops_distribution && t.stops_distribution.length > 1 ? t.stops_distribution.map(function(s,idx){return (idx+1)+'. '+s.adresse;}).join('<br>') : (t.lieu_distribution || '—')) + '</div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">📅 ' + dateDist + '</div></div>'
-    + '</div>'
-    + prixHtml;
+    var dateRam = t.date_ramassage ? new Date(t.date_ramassage).toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '—';
+    var dateDist = t.date_distribution ? new Date(t.date_distribution).toLocaleDateString('fr-FR', {weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '—';
+
+    var cats = Array.isArray(t.categories_acceptees) ? t.categories_acceptees : [];
+    var prixCat = t.prix_categories || {};
+    var prixHtml = '';
+    if (Object.keys(prixCat).length > 0) {
+      prixHtml = '<div class="modal-section"><div class="modal-label">💰 Tarifs par catégorie</div>';
+      Object.keys(prixCat).forEach(function(cat) {
+        var p = prixCat[cat];
+        var label = catLabels[cat] || cat;
+        var val = typeof p === 'object' ? (p.value !== undefined ? p.value : p.prix) : p;
+        var unit = typeof p === 'object' ? (p.unit || p.type || 'kg') : 'kg';
+        var prix = val + (unit === 'forfait' ? ' € (forfait)' : ' €/kg');
+        prixHtml += '<div class="prix-cat-ligne"><span>' + label + '</span><span style="font-weight:600;color:var(--gold);">' + prix + '</span></div>';
+      });
+      prixHtml += '</div>';
+    } else if (cats.length > 0) {
+      prixHtml = '<div class="modal-section"><div class="modal-label">Catégories acceptées</div><div class="modal-value">' + cats.map(function(cat){return catLabels[cat]||cat;}).join(', ') + '</div></div>';
+    }
+
+    content = '<div class="modal-row">'
+      + '<div class="modal-section"><div class="modal-label">Mode de transport</div><div class="modal-value">' + (modeLabels[t.mode_transport] || '—') + '</div></div>'
+      + statut
+      + '</div>'
+      + '<div class="modal-row">'
+      + '<div class="modal-section"><div class="modal-label">🟢 Ramassage</div><div class="modal-value">' + (t.stops_ramassage && t.stops_ramassage.length > 1 ? t.stops_ramassage.map(function(s,idx){return (idx+1)+'. '+s.adresse;}).join('<br>') : (t.lieu_ramassage || '—')) + '</div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">📅 ' + dateRam + '</div></div>'
+      + '<div class="modal-section"><div class="modal-label">🔴 Distribution</div><div class="modal-value">' + (t.stops_distribution && t.stops_distribution.length > 1 ? t.stops_distribution.map(function(s,idx){return (idx+1)+'. '+s.adresse;}).join('<br>') : (t.lieu_distribution || '—')) + '</div><div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">📅 ' + dateDist + '</div></div>'
+      + '</div>'
+      + prixHtml;
+  }
 
   document.getElementById('modal-trajet-content').innerHTML = content;
   document.getElementById('modal-detail').classList.add('open');
