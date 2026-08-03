@@ -560,7 +560,12 @@ function render() {
     var stripColor = isDem ? '#5B7FA6' : '#BE8C51';
     var routeLine = isDem
       ? '🚛 Déménagement · ' + (Array.isArray(t.villes_intervention) && t.villes_intervention.length
-          ? t.villes_intervention.map(function(v){ return typeof v === 'object' ? v.label : v; }).join(' · ')
+          ? t.villes_intervention.map(function(z) {
+              if (typeof z === 'object' && z.pays) {
+                return z.toutLePays ? z.pays : z.pays + ' (' + (z.villes || []).join(', ') + ')';
+              }
+              return typeof z === 'object' ? (z.label || '—') : z;
+            }).join(' · ')
           : (t.lieu_ramassage || '—'))
       : modeIcon + ' ' + shorten(t.lieu_ramassage) + ' → ' + shorten(t.lieu_distribution);
     var demInfoLine = isDem
