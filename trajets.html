@@ -473,53 +473,96 @@ function renderReservationCard(r, person, personLabel, showActions) {
   const st = statusInfo(r.statut);
   const isDem = r.is_demenagement === true || (Array.isArray(r.categories) && r.categories.includes('demenagement'));
 
-  // Route
-  let routeLabel;
-  if (isDem) {
-    // Reconstruit depuis description ou données de la réservation
-    const vD = r.ville_depart || '';
-    const vA = r.ville_arrivee || '';
-    const pays = r.pays_demenagement || (t ? (t.villes_intervention||[]).map(z=>typeof z==='object'?paysLabel(z.pays):z).join(', ') : '');
-    routeLabel = pays ? pays + (vD ? ' : ' + vD + (vA ? ' → ' + vA : '') : '') : (t ? t.lieu_ramassage : '—');
-  } else {
-    routeLabel = (t ? t.lieu_ramassage : '—') + ' → ' + (t ? t.lieu_distribution : '—');
-  }
+  const routeLabel = isDem
+    ? (r.pays_demenagement || '') + (r.ville_depart ? ' : ' + r.ville_depart + (r.ville_arrivee ? ' → ' + r.ville_arrivee : '') : '')
+    : ((t ? t.lieu_ramassage : '—') + ' → ' + (t ? t.lieu_distribution : '—'));
 
-  // Bloc colis
-  let colisHtml;
-  if (isDem) {
-    colisHtml = `<div class="trip-detail"><span class="trip-detail-label">🚛 Déménagement</span>${r.nb_camions ? r.nb_camions + ' camion(s)' : '—'}</div>`;
-  } else {
-    const catLabel = r.categories && r.categories.length ? r.categories.map(categoryLabel).join(', ') : categoryLabel(r.categorie);
-    colisHtml = `<div class="trip-detail"><span class="trip-detail-label">Colis</span>${catLabel}${r.poids_kg ? ' (' + r.poids_kg + ' kg)' : ''}</div>`;
-  }
+  const canCancel = r.statut === 'en_attente';
 
-  const prixLabel = isDem ? 'Prix convenu avec le déménageur' : 'Cash à la livraison';
-
+  // Carte cliquable → ouvre modal
   return `
-    <div class="trip-card">
+    <div class="trip-card" onclick="ouvrirDetailEnvoi('${r.id}')" style="cursor:pointer;">
       <div class="trip-head">
         <div>
-          <div class="trip-ncc">🔐 Code : ${r.ncc}</div>
+          <div class="trip-ncc">🔐 ${r.ncc}</div>
           <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">${routeLabel}</div>
         </div>
         ${person?.avatar_url ? `<img class="trip-avatar" src="${person.avatar_url}">` : `<div class="trip-avatar">${initials(person?.full_name)}</div>`}
       </div>
       <div class="trip-person">${person?.full_name || personLabel}</div>
       <div class="trip-status ${st.cls}">${st.label}</div>
-      <div class="trip-divider"></div>
-      ${colisHtml}
-      ${r.description ? `<div class="trip-detail"><span class="trip-detail-label">Note</span>${r.description}</div><div class="trip-divider"></div>` : ''}
-      <div class="trip-price-row">
-        <span class="trip-price-label">${prixLabel}</span>
+      <div class="trip-price-row" style="margin-top:10px;">
+        <span class="trip-price-label">${isDem ? '💰 Prix convenu' : '💵 Cash à la livraison'}</span>
         <span class="trip-price-value">${r.prix_transporteur} €</span>
       </div>
       ${showActions && r.statut === 'en_attente' ? `
         <div class="reservation-actions">
-          <button class="btn-accept" onclick="updateReservation('${r.id}', 'confirme')">Accepter</button>
-          <button class="btn-refuse" onclick="updateReservation('${r.id}', 'refuse')">Refuser</button>
+          <button class="btn-accept" onclick="event.stopPropagation();updateReservation('${r.id}', 'confirme')">Accepter</button>
+          <button class="btn-refuse" onclick="event.stopPropagation();updateReservation('${r.id}', 'refuse')">Refuser</button>
         </div>` : ''}
     </div>`;
+}
+
+function ouvrirDetailEnvoi(resaId) {
+  const r = expediteurReservations.find(x => x.id === resaId);
+  if (!r) return;
+  const t = r._trajet;
+  const person = r._transporteur;
+  const st = statusInfo(r.statut);
+  const isDem = r.is_demenagement === true || (Array.isArray(r.categories) && r.categories.includes('demenagement'));
+  const catLabels = { marchandise:'Marchandises', document:'Documents', fragile:'Produits fragiles', electronique:'Électronique', autre:'Autre', demenagement:'Déménagement' };
+  const canCancel = r.statut === 'en_attente';
+
+  let infoHtml;
+  if (isDem) {
+    infoHtml = `
+      <div class="modal-row">
+        <div class="modal-section"><div class="modal-label">Pays</div><div class="modal-value">${r.pays_demenagement || '—'}</div></div>
+        <div class="modal-section"><div class="modal-label">Camions</div><div class="modal-value">${r.nb_camions || 1} camion(s)</div></div>
+      </div>
+      <div class="modal-row">
+        <div class="modal-section"><div class="modal-label">Départ</div><div class="modal-value">${r.ville_depart || '—'}</div></div>
+        <div class="modal-section"><div class="modal-label">Arrivée</div><div class="modal-value">${r.ville_arrivee || 'Même ville'}</div></div>
+      </div>`;
+  } else {
+    const cats = Array.isArray(r.categories) && r.categories.length ? r.categories.map(c => catLabels[c]||c).join(', ') : (catLabels[r.categorie]||r.categorie||'—');
+    infoHtml = `
+      <div class="modal-row">
+        <div class="modal-section"><div class="modal-label">Colis</div><div class="modal-value">${cats}</div></div>
+        <div class="modal-section"><div class="modal-label">Poids</div><div class="modal-value">${r.poids_kg ? r.poids_kg + ' kg' : '—'}</div></div>
+      </div>
+      ${t ? `<div class="modal-row">
+        <div class="modal-section"><div class="modal-label">🟢 Ramassage</div><div class="modal-value">${t.lieu_ramassage || '—'}</div></div>
+        <div class="modal-section"><div class="modal-label">🔴 Distribution</div><div class="modal-value">${t.lieu_distribution || '—'}</div></div>
+      </div>` : ''}`;
+  }
+
+  const cancelBtn = canCancel
+    ? `<button onclick="annulerReservation('${r.id}')" style="width:100%;margin-top:14px;padding:11px;border-radius:10px;border:1.5px solid #E24B4A;background:transparent;color:#E24B4A;font-size:13px;font-weight:600;cursor:pointer;">Annuler la réservation</button>`
+    : '';
+
+  document.getElementById('modal-envoi-title').textContent = isDem ? '🚛 Déménagement' : (t ? (t.lieu_ramassage||'').split(',')[0] + ' → ' + (t.lieu_distribution||'').split(',')[0] : 'Détail');
+  document.getElementById('modal-envoi-content').innerHTML = `
+    <div class="modal-row">
+      <div class="modal-section"><div class="modal-label">Code</div><div class="modal-value">🔐 ${r.ncc}</div></div>
+      <div class="modal-section"><div class="modal-label">Statut</div><div class="modal-value"><span class="trip-status ${st.cls}" style="display:inline-block;">${st.label}</span></div></div>
+    </div>
+    <div class="modal-section"><div class="modal-label">Transporteur</div><div class="modal-value">${person?.full_name || '—'}</div></div>
+    ${infoHtml}
+    ${r.description ? `<div class="modal-section"><div class="modal-label">Note</div><div class="modal-value">${r.description}</div></div>` : ''}
+    <div class="modal-row" style="margin-top:12px;padding-top:12px;border-top:1px solid #e8e4de;">
+      <div class="modal-section"><div class="modal-label">${isDem ? 'Prix convenu' : 'Cash à la livraison'}</div><div class="modal-value" style="color:var(--gold);font-size:16px;font-weight:700;">${r.prix_transporteur} €</div></div>
+    </div>
+    ${cancelBtn}`;
+  document.getElementById('modal-envoi').classList.add('open');
+}
+
+async function annulerReservation(resaId) {
+  if (!confirm('Confirmer l\'annulation de cette réservation ?')) return;
+  const { error } = await sb.from('reservations').update({ statut: 'annule' }).eq('id', resaId);
+  if (error) { alert('Erreur : ' + error.message); return; }
+  document.getElementById('modal-envoi').classList.remove('open');
+  await loadAll();
 }
 
 function render() {
@@ -932,5 +975,13 @@ async function updateSwitchLabel() {
       </div>
     </div>
   </div>
+<div class="modal-overlay" id="modal-envoi" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-sheet">
+    <button class="modal-close" onclick="document.getElementById('modal-envoi').classList.remove('open')">×</button>
+    <div class="modal-title" id="modal-envoi-title">Détail de l'envoi</div>
+    <div id="modal-envoi-content"></div>
+  </div>
+</div>
+
 </body>
 </html>
