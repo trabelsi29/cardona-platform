@@ -301,10 +301,7 @@
       <div class="tab" id="tab-transporteur" onclick="switchTab('transporteur')">Transporteur (<span id="count-transporteur">0</span>)</div>
     </div>
 
-    <div class="content-area" id="content-area">
-      <div id="zone-expediteur"><div style="text-align:center;padding:40px;"><div style="width:24px;height:24px;border:3px solid #e0ddd8;border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;"></div></div></div>
-      <div id="zone-transporteur" style="display:none;"></div>
-    </div>
+    <div class="content-area" id="content-area"><div style="text-align:center;padding:40px;"><div style="width:24px;height:24px;border:3px solid #e0ddd8;border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;"></div></div></div>
   </div>
 
   </div>
@@ -400,8 +397,7 @@ function switchTab(tab) {
   activeTab = tab;
   document.getElementById('tab-expediteur').classList.toggle('active', tab === 'expediteur');
   document.getElementById('tab-transporteur').classList.toggle('active', tab === 'transporteur');
-  document.getElementById('zone-expediteur').style.display = tab === 'expediteur' ? 'block' : 'none';
-  document.getElementById('zone-transporteur').style.display = tab === 'transporteur' ? 'block' : 'none';
+  render();
 }
 
 function modeLabel(m) {
@@ -509,7 +505,7 @@ function renderReservationCard(r, person, personLabel, showActions) {
 
   // Carte cliquable → ouvre modal
   return `
-    <div class="trip-card" data-id="${r.id}" onclick="ouvrirDetailEnvoi(this.dataset.id)" style="cursor:pointer;">
+    <div class="trip-card" onclick="ouvrirDetailEnvoi('${r.id}')" style="cursor:pointer;">
       <div class="trip-head">
         <div>
           <div class="trip-ncc">🔐 ${r.ncc}</div>
@@ -635,24 +631,22 @@ async function annulerReservation(resaId) {
 }
 
 function render() {
-  // Zone expéditeur
-  var zoneExp = document.getElementById("zone-expediteur");
-  if (zoneExp) {
+  var area = document.getElementById("content-area");
+  if (!area) return;
+
+  if (activeTab === "expediteur") {
     if (expediteurReservations.length === 0) {
-      zoneExp.innerHTML = "<div class='empty-state'><div class='empty-state-icon'>📦</div>Aucun envoi pour l'instant.</div>";
-    } else {
-      zoneExp.innerHTML = expediteurReservations.map(function(r) {
-        return renderReservationCard(r, r._transporteur, "Transporteur", false);
-      }).join("");
+      area.innerHTML = "<div class='empty-state'><div class='empty-state-icon'>📦</div>Aucun envoi pour l'instant.</div>";
+      return;
     }
+    area.innerHTML = expediteurReservations.map(function(r) {
+      return renderReservationCard(r, r._transporteur, "Transporteur", false);
+    }).join("");
+    return;
   }
 
-  // Zone transporteur
-  var zoneTransp = document.getElementById("zone-transporteur");
-  if (!zoneTransp) return;
-
   if (myTrajets.length === 0) {
-    zoneTransp.innerHTML = "<div class='empty-state'><div class='empty-state-icon'>🚛</div>Aucun trajet publié.<br><br><a href='publier.html' style='color:var(--gold);font-weight:600;'>Publier un trajet →</a></div>";
+    area.innerHTML = "<div class='empty-state'><div class='empty-state-icon'>🚛</div>Aucun trajet publié.<br><br><a href='publier.html' style='color:var(--gold);font-weight:600;'>Publier un trajet →</a></div>";
     return;
   }
 
@@ -731,7 +725,7 @@ function render() {
       + "</div>";
   }).join("");
 
-  zoneTransp.innerHTML = html;
+  area.innerHTML = html;
 }
 
 async function updateStatut(reservationId, statut) {
