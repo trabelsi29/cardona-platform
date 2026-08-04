@@ -1284,9 +1284,12 @@ function renderDemZones() {
         return '<span style="display:inline-flex;align-items:center;gap:4px;background:#f0edd8;border-radius:20px;padding:3px 10px;font-size:12px;margin:2px;">'
           + v + '<span onclick="removeVilleInPays(' + i + ',' + vi + ')" style="cursor:pointer;color:#bbb;font-weight:700;">×</span></span>';
       }).join('');
-      villesHtml += '<div style="display:flex;gap:6px;margin-top:6px;">'
-        + '<input id="ville-pays-' + i + '" type="text" placeholder="Ajouter une ville…" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">'
+      villesHtml += '<div style="position:relative;margin-top:8px;">'
+        + '<div style="display:flex;gap:6px;">'
+        + '<input id="ville-pays-' + i + '" type="text" placeholder="Rechercher une ville en ' + z.pays + '…" oninput="handleVilleInput(' + i + ', this.value)" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">'
         + '<button onclick="addVilleInPays(' + i + ')" style="padding:7px 12px;background:var(--gold);color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;">+</button>'
+        + '</div>'
+        + '<div id="sugg-ville-' + i + '" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:white;border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>'
         + '</div>';
     }
     return '<div style="background:#fdf8f0;border:1.5px solid #e8dcc8;border-radius:12px;padding:12px 14px;margin-bottom:10px;">'
@@ -1301,6 +1304,39 @@ function renderDemZones() {
       + (!z.toutLePays ? '<div>' + villesHtml + '</div>' : '')
       + '</div>';
   }).join('');
+}
+
+function handleVilleInput(idx, val) {
+  var box = document.getElementById('sugg-ville-' + idx);
+  if (!val || val.length < 2) { box.style.display='none'; return; }
+  clearTimeout(window['_villeTimer_' + idx]);
+  var pays = demZones[idx] ? demZones[idx].pays : '';
+  window['_villeTimer_' + idx] = setTimeout(function() {
+    fetch('https://photon.komoot.io/api/?q=' + encodeURIComponent(val + ' ' + pays) + '&limit=5&lang=fr')
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        var features = (data.features || []).filter(function(f) {
+          var c = (f.properties.country || '').toLowerCase();
+          var norm = pays.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+          return c.normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(norm) || norm.includes(c.normalize('NFD').replace(/[\u0300-\u036f]/g,''));
+        }).slice(0, 5);
+        if (!features.length) { box.style.display='none'; return; }
+        var seen = new Set();
+        box.innerHTML = features.map(function(f) {
+          var city = f.properties.city || f.properties.name || '';
+          if (!city || seen.has(city)) return '';
+          seen.add(city);
+          return '<div style="padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onclick="selectVilleInPays(' + idx + ',\'' + city.replace(/'/g,"\\'") + '\')">' + city + '</div>';
+        }).filter(Boolean).join('');
+        box.style.display = box.innerHTML ? 'block' : 'none';
+      }).catch(function(){ box.style.display='none'; });
+  }, 350);
+}
+
+function selectVilleInPays(idx, ville) {
+  document.getElementById('ville-pays-' + idx).value = ville;
+  var box = document.getElementById('sugg-ville-' + idx);
+  if (box) box.style.display = 'none';
 }
 
 function validateStepDem1() {
