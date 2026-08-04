@@ -332,19 +332,56 @@
 
     <!-- STEP 2 : adresses -->
     <div class="step" id="step-2">
-      <div class="title">Trouver un transporteur</div>
-      <div class="subtitle">Où souhaitez-vous envoyer ?</div>
-      <div class="field">
-        <label>Où se trouve votre envoi ? <span style="font-size:11px;color:var(--text-secondary);">(ville de départ)</span></label>
-        <input type="text" id="adresse-envoi" placeholder="Ville, adresse, aéroport…" oninput="handleSearchAddressInput('envoi', this.value)">
-        <div class="suggestions" id="sugg-envoi"></div>
+      <!-- MODE COLIS -->
+      <div id="step2-colis">
+        <div class="title">Trouver un transporteur</div>
+        <div class="subtitle">Où souhaitez-vous envoyer ?</div>
+        <div class="field">
+          <label>Ville de départ <span style="font-size:11px;color:var(--text-secondary);">(où se trouve le colis)</span></label>
+          <input type="text" id="adresse-envoi" placeholder="Ville, adresse, aéroport…" oninput="handleSearchAddressInput('envoi', this.value)">
+          <div class="suggestions" id="sugg-envoi"></div>
+        </div>
+        <div class="field">
+          <label>Ville d'arrivée <span style="font-size:11px;color:var(--text-secondary);">(destination du colis)</span></label>
+          <input type="text" id="adresse-reception" placeholder="Ville, adresse, aéroport…" oninput="handleSearchAddressInput('reception', this.value)">
+          <div class="suggestions" id="sugg-reception"></div>
+        </div>
+        <button class="btn-primary" onclick="searchTransporteurs()">Rechercher</button>
       </div>
-      <div class="field">
-        <label>Où doit arriver votre envoi ? <span style="font-size:11px;color:var(--text-secondary);">(ville d'arrivée)</span></label>
-        <input type="text" id="adresse-reception" placeholder="Ville, adresse, aéroport…" oninput="handleSearchAddressInput('reception', this.value)">
-        <div class="suggestions" id="sugg-reception"></div>
+
+      <!-- MODE DÉMÉNAGEMENT -->
+      <div id="step2-dem" style="display:none;">
+        <div class="title">Déménagement</div>
+        <div class="subtitle">D'où vers où souhaitez-vous déménager ?</div>
+        <div class="field">
+          <label>Pays de départ</label>
+          <input type="text" id="dem-pays-depart" placeholder="ex: France" oninput="handleDemPaysInput('depart', this.value)" autocomplete="off">
+          <div class="suggestions" id="sugg-dem-depart"></div>
+        </div>
+        <div class="field" id="dem-region-depart-field" style="display:none;">
+          <label>Ville ou région de départ <span style="font-size:11px;color:var(--text-secondary);">(optionnel)</span></label>
+          <input type="text" id="dem-region-depart" placeholder="ex: Paris, Île-de-France…">
+        </div>
+        <div class="field" style="margin-top:4px;">
+          <label>Pays d'arrivée</label>
+          <input type="text" id="dem-pays-arrivee" placeholder="ex: Belgique" oninput="handleDemPaysInput('arrivee', this.value)" autocomplete="off">
+          <div class="suggestions" id="sugg-dem-arrivee"></div>
+        </div>
+        <div class="field" id="dem-region-arrivee-field" style="display:none;">
+          <label>Ville ou région d'arrivée <span style="font-size:11px;color:var(--text-secondary);">(optionnel)</span></label>
+          <input type="text" id="dem-region-arrivee" placeholder="ex: Bruxelles, Wallonie…">
+        </div>
+        <div class="field">
+          <label>Nombre de camions nécessaires</label>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
+            <button onclick="changeCamions(-1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--gold);background:white;font-size:18px;cursor:pointer;color:var(--gold);">−</button>
+            <span id="dem-camions-val" style="font-size:18px;font-weight:700;min-width:24px;text-align:center;">1</span>
+            <button onclick="changeCamions(1)" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--gold);background:white;font-size:18px;cursor:pointer;color:var(--gold);">+</button>
+            <span style="font-size:13px;color:var(--text-secondary);">camion(s)</span>
+          </div>
+        </div>
+        <button class="btn-primary" onclick="searchDemenageurs()">Rechercher</button>
       </div>
-      <button class="btn-primary" onclick="searchTransporteurs()">Rechercher</button>
     </div>
 
     <!-- STEP 3 : transporteurs disponibles -->
@@ -458,6 +495,94 @@ let weight = 1;
 let searchEnvoi = { adresse: '', lat: null, lon: null };
 let searchReception = { adresse: '', lat: null, lon: null };
 let allMatchingTrajets = [];
+let demNbCamions = 1;
+
+function changeCamions(delta) {
+  demNbCamions = Math.max(1, demNbCamions + delta);
+  document.getElementById('dem-camions-val').textContent = demNbCamions;
+}
+
+function handleDemPaysInput(side, val) {
+  const suggId = 'sugg-dem-' + (side === 'depart' ? 'depart' : 'arrivee');
+  const regionFieldId = 'dem-region-' + (side === 'depart' ? 'depart' : 'arrivee') + '-field';
+  const suggBox = document.getElementById(suggId);
+  if (!val || val.length < 2) { suggBox.style.display = 'none'; return; }
+  clearTimeout(window['_demPaysTimer_' + side]);
+  window['_demPaysTimer_' + side] = setTimeout(async function() {
+    try {
+      const res = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(val) + '&featureType=country&limit=5&addressdetails=1');
+      const data = await res.json();
+      const seen = new Set();
+      const items = (data || []).filter(r => {
+        const p = (r.address && r.address.country) || r.display_name.split(',')[0];
+        if (seen.has(p)) return false; seen.add(p); return true;
+      }).slice(0, 5);
+      suggBox.style.display = items.length ? 'block' : 'none';
+      suggBox.innerHTML = items.map(r => {
+        const p = (r.address && r.address.country) || r.display_name.split(',')[0];
+        return `<div class="suggestion-item" onclick="selectDemPays('${side}','${p.replace(/'/g,"\\'")}','${regionFieldId}')">${p}</div>`;
+      }).join('');
+    } catch(e) { suggBox.style.display = 'none'; }
+  }, 350);
+}
+
+function selectDemPays(side, pays, regionFieldId) {
+  const inputId = 'dem-pays-' + (side === 'depart' ? 'depart' : 'arrivee');
+  document.getElementById(inputId).value = pays;
+  document.getElementById('sugg-dem-' + (side === 'depart' ? 'depart' : 'arrivee')).style.display = 'none';
+  document.getElementById(regionFieldId).style.display = 'block';
+}
+
+async function searchDemenageurs() {
+  const paysDepart = document.getElementById('dem-pays-depart').value.trim();
+  const paysArrivee = document.getElementById('dem-pays-arrivee').value.trim();
+  if (!paysDepart) { showFormError('Indiquez le pays de départ.'); return; }
+  if (!paysArrivee) { showFormError('Indiquez le pays d\'arrivée.'); return; }
+
+  goStep(3);
+  const list = document.getElementById('transporteurs-list');
+  list.innerHTML = '<div class="empty-state">Recherche en cours…</div>';
+
+  const { data: trajets } = await sb.from('trajets').select('*').eq('statut', 'publie').eq('is_demenagement', true);
+  if (!trajets || trajets.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🚛</div>Aucun déménageur disponible pour l\'instant.</div>';
+    allMatchingTrajets = []; return;
+  }
+
+  const transporteurIds = [...new Set(trajets.map(t => t.transporteur_id))];
+  const { data: transporteurs } = await sb.from('profiles').select('*').in('id', transporteurIds);
+  const transporteurMap = {};
+  (transporteurs || []).forEach(t => transporteurMap[t.id] = t);
+
+  // Normalise un texte pour comparaison insensible aux accents/casse
+  const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const normDepart = norm(paysDepart);
+  const normArrivee = norm(paysArrivee);
+
+  allMatchingTrajets = trajets.filter(t => {
+    const zones = t.villes_intervention || [];
+    // Le transporteur doit couvrir SOIT le pays de départ SOIT le pays d'arrivée (ou les deux)
+    return zones.some(z => {
+      const pays = norm(typeof z === 'object' ? z.pays : (z.label || z));
+      return pays.includes(normDepart) || pays.includes(normArrivee) || normDepart.includes(pays) || normArrivee.includes(pays);
+    });
+  }).map(t => ({
+    trajet: t,
+    etapes: [],
+    transporteur: transporteurMap[t.transporteur_id],
+    distEnvoi: 0,
+    distReception: 0,
+    geoMatch: true,
+    matchCategorie: true,
+    demMatch: { paysDepart, paysArrivee }
+  }));
+
+  if (!allMatchingTrajets.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🚛</div>Aucun déménageur disponible de <strong>${paysDepart}</strong> vers <strong>${paysArrivee}</strong>.</div>`;
+    return;
+  }
+  list.innerHTML = allMatchingTrajets.map((m, idx) => renderTrajetCard(m, idx)).join('');
+}
 // Villes de dépôt (multi-saisie)
 var villesDepot = [];
 
@@ -529,6 +654,12 @@ function goStep(n) {
   document.getElementById('progress-track').style.display = (n === 7 || n === 8) ? 'none' : 'block';
   document.getElementById('form-error').style.display = 'none';
   currentStep = n;
+  // Affiche le bon formulaire en étape 2 selon le mode
+  if (n === 2) {
+    const isDem = selectedCategories.includes('demenagement');
+    document.getElementById('step2-colis').style.display = isDem ? 'none' : 'block';
+    document.getElementById('step2-dem').style.display = isDem ? 'block' : 'none';
+  }
   if (n === 5 && selectedTrajet) fillRecapEnvoi();
 }
 function prevStep() { if (currentStep > 1 && currentStep < 7) goStep(currentStep - 1); }
