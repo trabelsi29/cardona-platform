@@ -179,16 +179,40 @@
   /* ── Modale détail trajet ── */
   .modal-overlay { display:none; position:fixed; inset:0; background:rgba(34,27,22,0.55); z-index:200; align-items:center; justify-content:center; padding:20px; }
   .modal-overlay.open { display:flex; }
-  .modal-sheet { background:#F3F1EC; border-radius:16px; width:100%; max-width:520px; max-height:80vh; overflow-y:auto; padding:28px 28px 28px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.25); }
+  .modal-sheet { background:white; border-radius:20px; width:100%; max-width:480px; max-height:85vh; overflow-y:auto; position:relative; box-shadow:0 24px 64px rgba(0,0,0,0.28); }
   .modal-handle { display:none; }
-  .modal-title { font-size:17px; font-weight:700; color:var(--dark); margin-bottom:18px; padding-right:30px; }
-  .modal-close { position:absolute; top:14px; right:16px; background:#e8e4de; border:none; font-size:18px; cursor:pointer; color:var(--text-secondary); width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; line-height:1; }
-  .modal-close:hover { background:#ddd8d0; }
-  .modal-section { margin-bottom:14px; }
-  .modal-label { font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-secondary); margin-bottom:4px; }
-  .modal-value { font-size:14px; color:var(--dark); font-weight:500; }
+  .modal-close { position:absolute; top:14px; right:14px; background:rgba(0,0,0,0.07); border:none; font-size:16px; cursor:pointer; color:#888; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; z-index:10; }
+  .modal-close:hover { background:rgba(0,0,0,0.12); }
+
+  /* Header du modal */
+  .modal-header { padding:22px 24px 18px; border-bottom:1px solid #f0ece6; }
+  .modal-title { font-size:16px; font-weight:700; color:var(--dark); padding-right:32px; line-height:1.3; margin-bottom:8px; }
+  .modal-status-row { display:flex; align-items:center; gap:8px; }
+
+  /* Blocs de contenu */
+  .modal-body { padding:0 24px 8px; }
+  .modal-block { padding:14px 0; border-bottom:1px solid #f0ece6; }
+  .modal-block:last-child { border-bottom:none; }
+  .modal-block-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:var(--gold); margin-bottom:10px; }
+  .modal-field { margin-bottom:8px; }
+  .modal-field:last-child { margin-bottom:0; }
+  .modal-label { font-size:11px; color:var(--text-secondary); margin-bottom:2px; }
+  .modal-value { font-size:14px; color:var(--dark); font-weight:600; }
+  .modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
   .modal-row { display:flex; gap:24px; margin-bottom:12px; }
   .modal-row .modal-section { flex:1; }
+  .modal-section { margin-bottom:14px; }
+
+  /* Bloc prix */
+  .modal-prix-block { background:#FDF8EE; border-radius:12px; margin:14px 24px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; }
+  .modal-prix-label { font-size:12px; color:var(--text-secondary); }
+  .modal-prix-value { font-size:22px; font-weight:800; color:var(--gold); }
+
+  /* Bouton annuler */
+  .modal-footer { padding:0 24px 22px; }
+  .btn-annuler { width:100%; padding:12px; border-radius:12px; border:1.5px solid #E24B4A; background:transparent; color:#E24B4A; font-size:13px; font-weight:700; cursor:pointer; transition:all 0.2s; }
+  .btn-annuler:hover { background:#E24B4A; color:white; }
+
   .prix-cat-ligne { display:flex; justify-content:space-between; font-size:13px; padding:6px 0; border-bottom:1px solid #e8e4de; }
   .prix-cat-ligne:last-child { border-bottom:none; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -543,17 +567,58 @@ function ouvrirDetailEnvoi(resaId) {
 
   document.getElementById('modal-envoi-title').textContent = isDem ? '🚛 Déménagement' : (t ? (t.lieu_ramassage||'').split(',')[0] + ' → ' + (t.lieu_distribution||'').split(',')[0] : 'Détail');
   document.getElementById('modal-envoi-content').innerHTML = `
-    <div class="modal-row">
-      <div class="modal-section"><div class="modal-label">Code</div><div class="modal-value">🔐 ${r.ncc}</div></div>
-      <div class="modal-section"><div class="modal-label">Statut</div><div class="modal-value"><span class="trip-status ${st.cls}" style="display:inline-block;">${st.label}</span></div></div>
+    <div class="modal-header">
+      <div class="modal-title" id="modal-envoi-title-inner">${isDem ? '🚛 Déménagement' : (t ? (t.lieu_ramassage||'').split(',')[0] + ' → ' + (t.lieu_distribution||'').split(',')[0] : 'Détail')}</div>
+      <div class="modal-status-row">
+        <span class="trip-status ${st.cls}">${st.label}</span>
+        <span style="font-size:11px;color:var(--text-secondary);">Code : <strong>${r.ncc}</strong></span>
+      </div>
     </div>
-    <div class="modal-section"><div class="modal-label">Transporteur</div><div class="modal-value">${person?.full_name || '—'}</div></div>
-    ${infoHtml}
-    ${r.description ? `<div class="modal-section"><div class="modal-label">Note</div><div class="modal-value">${r.description}</div></div>` : ''}
-    <div class="modal-row" style="margin-top:12px;padding-top:12px;border-top:1px solid #e8e4de;">
-      <div class="modal-section"><div class="modal-label">${isDem ? 'Prix convenu' : 'Cash à la livraison'}</div><div class="modal-value" style="color:var(--gold);font-size:16px;font-weight:700;">${r.prix_transporteur} €</div></div>
+
+    <div class="modal-body">
+      <div class="modal-block">
+        <div class="modal-block-title">Transporteur</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          ${person?.avatar_url ? `<img src="${person.avatar_url}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;">` : `<div style="width:38px;height:38px;border-radius:50%;background:#e8dcc8;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--gold);">${initials(person?.full_name)}</div>`}
+          <span style="font-size:14px;font-weight:700;color:var(--dark);">${person?.full_name || '—'}</span>
+        </div>
+      </div>
+
+      ${isDem ? `
+      <div class="modal-block">
+        <div class="modal-block-title">Déménagement</div>
+        <div class="modal-grid">
+          <div class="modal-field"><div class="modal-label">Pays</div><div class="modal-value">${r.pays_demenagement || '—'}</div></div>
+          <div class="modal-field"><div class="modal-label">Camions</div><div class="modal-value">${r.nb_camions || 1} camion(s)</div></div>
+          <div class="modal-field"><div class="modal-label">Ville de départ</div><div class="modal-value">${r.ville_depart || '—'}</div></div>
+          <div class="modal-field"><div class="modal-label">Ville d'arrivée</div><div class="modal-value">${r.ville_arrivee || 'Même ville'}</div></div>
+        </div>
+      </div>` : `
+      <div class="modal-block">
+        <div class="modal-block-title">Colis</div>
+        <div class="modal-grid">
+          <div class="modal-field"><div class="modal-label">Type</div><div class="modal-value">${Array.isArray(r.categories)&&r.categories.length ? r.categories.map(c=>catLabels[c]||c).join(', ') : (catLabels[r.categorie]||r.categorie||'—')}</div></div>
+          <div class="modal-field"><div class="modal-label">Poids</div><div class="modal-value">${r.poids_kg ? r.poids_kg+' kg' : '—'}</div></div>
+        </div>
+      </div>
+      ${t ? `<div class="modal-block">
+        <div class="modal-block-title">Trajet</div>
+        <div class="modal-grid">
+          <div class="modal-field"><div class="modal-label">🟢 Ramassage</div><div class="modal-value">${(t.lieu_ramassage||'—').split(',').slice(0,2).join(',')}</div></div>
+          <div class="modal-field"><div class="modal-label">🔴 Distribution</div><div class="modal-value">${(t.lieu_distribution||'—').split(',').slice(0,2).join(',')}</div></div>
+        </div>
+      </div>` : ''}`}
+
+      ${r.description ? `<div class="modal-block"><div class="modal-block-title">Note</div><div style="font-size:13px;color:var(--text-secondary);font-style:italic;">${r.description}</div></div>` : ''}
     </div>
-    ${cancelBtn}`;
+
+    <div class="modal-prix-block">
+      <span class="modal-prix-label">${isDem ? '💰 Prix convenu avec le déménageur' : '💵 Cash à la livraison'}</span>
+      <span class="modal-prix-value">${r.prix_transporteur} €</span>
+    </div>
+
+    ${canCancel ? `<div class="modal-footer"><button class="btn-annuler" onclick="annulerReservation('${r.id}')">Annuler la réservation</button></div>` : '<div style="height:8px;"></div>'}
+  `;
   document.getElementById('modal-envoi').classList.add('open');
 }
 
@@ -957,8 +1022,10 @@ async function updateSwitchLabel() {
   <div class="modal-sheet" id="modal-sheet">
     <div class="modal-handle"></div>
     <button class="modal-close" onclick="document.getElementById('modal-detail').classList.remove('open')">×</button>
-    <div class="modal-title" id="modal-trajet-title">Détail du trajet</div>
-    <div id="modal-trajet-content"></div>
+    <div style="padding:22px 24px 24px;">
+      <div class="modal-title" id="modal-trajet-title" style="margin-bottom:16px;">Détail du trajet</div>
+      <div id="modal-trajet-content"></div>
+    </div>
   </div>
 </div>
       </div>
@@ -978,7 +1045,6 @@ async function updateSwitchLabel() {
 <div class="modal-overlay" id="modal-envoi" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal-sheet">
     <button class="modal-close" onclick="document.getElementById('modal-envoi').classList.remove('open')">×</button>
-    <div class="modal-title" id="modal-envoi-title">Détail de l'envoi</div>
     <div id="modal-envoi-content"></div>
   </div>
 </div>
