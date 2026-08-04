@@ -491,7 +491,7 @@ let allMatchingTrajets = [];
 
 const PAYS_FLAGS = {'Afghanistan':'🇦🇫','Afrique du Sud':'🇿🇦','Albanie':'🇦🇱','Algérie':'🇩🇿','Allemagne':'🇩🇪','Andorre':'🇦🇩','Angola':'🇦🇴','Arabie saoudite':'🇸🇦','Argentine':'🇦🇷','Arménie':'🇦🇲','Australie':'🇦🇺','Autriche':'🇦🇹','Azerbaïdjan':'🇦🇿','Bahreïn':'🇧🇭','Bangladesh':'🇧🇩','Belgique':'🇧🇪','Biélorussie':'🇧🇾','Bolivie':'🇧🇴','Bosnie-Herzégovine':'🇧🇦','Brésil':'🇧🇷','Bulgarie':'🇧🇬','Burkina Faso':'🇧🇫','Burundi':'🇧🇮','Cambodge':'🇰🇭','Cameroun':'🇨🇲','Canada':'🇨🇦','Chili':'🇨🇱','Chine':'🇨🇳','Chypre':'🇨🇾','Colombie':'🇨🇴','Congo':'🇨🇬','Côte d\'Ivoire':'🇨🇮','Croatie':'🇭🇷','Cuba':'🇨🇺','Danemark':'🇩🇰','Égypte':'🇪🇬','Émirats arabes unis':'🇦🇪','Espagne':'🇪🇸','Estonie':'🇪🇪','États-Unis':'🇺🇸','Éthiopie':'🇪🇹','Finlande':'🇫🇮','France':'🇫🇷','Gabon':'🇬🇦','Géorgie':'🇬🇪','Ghana':'🇬🇭','Grèce':'🇬🇷','Guatemala':'🇬🇹','Guinée':'🇬🇳','Haïti':'🇭🇹','Hongrie':'🇭🇺','Inde':'🇮🇳','Indonésie':'🇮🇩','Irak':'🇮🇶','Iran':'🇮🇷','Irlande':'🇮🇪','Islande':'🇮🇸','Israël':'🇮🇱','Italie':'🇮🇹','Japon':'🇯🇵','Jordanie':'🇯🇴','Kazakhstan':'🇰🇿','Kenya':'🇰🇪','Kosovo':'🇽🇰','Koweït':'🇰🇼','Lettonie':'🇱🇻','Liban':'🇱🇧','Libye':'🇱🇾','Liechtenstein':'🇱🇮','Lituanie':'🇱🇹','Luxembourg':'🇱🇺','Macédoine':'🇲🇰','Madagascar':'🇲🇬','Mali':'🇲🇱','Malte':'🇲🇹','Maroc':'🇲🇦','Mauritanie':'🇲🇷','Mexique':'🇲🇽','Moldavie':'🇲🇩','Monaco':'🇲🇨','Mongolie':'🇲🇳','Monténégro':'🇲🇪','Mozambique':'🇲🇿','Namibie':'🇳🇦','Népal':'🇳🇵','Niger':'🇳🇪','Nigéria':'🇳🇬','Norvège':'🇳🇴','Nouvelle-Zélande':'🇳🇿','Oman':'🇴🇲','Ouganda':'🇺🇬','Pakistan':'🇵🇰','Palestine':'🇵🇸','Panama':'🇵🇦','Paraguay':'🇵🇾','Pays-Bas':'🇳🇱','Pérou':'🇵🇪','Philippines':'🇵🇭','Pologne':'🇵🇱','Portugal':'🇵🇹','Qatar':'🇶🇦','République tchèque':'🇨🇿','Roumanie':'🇷🇴','Royaume-Uni':'🇬🇧','Russie':'🇷🇺','Rwanda':'🇷🇼','Sénégal':'🇸🇳','Serbie':'🇷🇸','Singapour':'🇸🇬','Slovaquie':'🇸🇰','Slovénie':'🇸🇮','Somalie':'🇸🇴','Soudan':'🇸🇩','Sri Lanka':'🇱🇰','Suède':'🇸🇪','Suisse':'🇨🇭','Syrie':'🇸🇾','Taïwan':'🇹🇼','Tanzanie':'🇹🇿','Tchad':'🇹🇩','Thaïlande':'🇹🇭','Tunisie':'🇹🇳','Turquie':'🇹🇷','Ukraine':'🇺🇦','Uruguay':'🇺🇾','Venezuela':'🇻🇪','Vietnam':'🇻🇳','Yémen':'🇾🇪'};
 const PAYS_LIST = Object.keys(PAYS_FLAGS);
-function flagOf(pays) { return (PAYS_FLAGS[pays] || '🌍') + ' '; }
+function flagOf(pays) { return ' ' + (PAYS_FLAGS[pays] || '🌍'); }
 
 function handleDemPaysInput(val) {
   const box = document.getElementById('sugg-dem-pays');
@@ -500,11 +500,11 @@ function handleDemPaysInput(val) {
   const matches = PAYS_LIST.filter(p => p.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').startsWith(normVal)).slice(0, 6);
   if (!matches.length) { box.style.display = 'none'; return; }
   box.style.display = 'block';
-  box.innerHTML = matches.map(p => `<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onmousedown="selectDemPays('${p.replace(/'/g,"\\'")}')"> ${flagOf(p)}${p}</div>`).join('');
+  box.innerHTML = matches.map(p => `<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onmousedown="selectDemPays('${p.replace(/'/g,"\\'")}')"> ${p}${flagOf(p)}</div>`).join('');
 }
 
 function selectDemPays(pays) {
-  document.getElementById('dem-pays').value = flagOf(pays) + pays;
+  document.getElementById('dem-pays').value = pays + flagOf(pays);
   document.getElementById('sugg-dem-pays').style.display = 'none';
 }
 
@@ -942,7 +942,7 @@ function renderTrajetCard(m, idx) {
   let routeHtml, priceLabel;
   if (isDem) {
     const villes = Array.isArray(t.villes_intervention) && t.villes_intervention.length
-      ? t.villes_intervention.map(v => typeof v === 'object' ? v.label : v).join(' · ')
+      ? t.villes_intervention.map(v => { if (typeof v === 'object' && v.pays) return v.toutLePays ? (v.pays + ' ' + (flagOf(v.pays)||'')) : (v.pays + ' ' + (flagOf(v.pays)||'') + ' (' + (v.villes||[]).join(', ') + ')'); return typeof v === 'object' ? (v.label||'') : v; }).join(' · ')
       : '—';
     routeHtml = `<div class="t-route">🚛 Déménagement · ${villes}</div>
       <div class="t-cats">🚐 ${t.nb_camions_dispo || 1} camion(s) disponible(s)</div>`;
@@ -1049,7 +1049,7 @@ function fillRecapEnvoi() {
     document.getElementById('recap-dem-arrivee').textContent = va || 'Même ville';
     document.getElementById('recap-dem-camions').textContent = demNbCamions + ' camion(s)';
     const zones = Array.isArray(t.villes_intervention) ? t.villes_intervention : [];
-    const zonesLabel = zones.map(z => typeof z === 'object' ? z.pays : z).join(', ') || '—';
+    const zonesLabel = zones.map(z => typeof z === 'object' && z.pays ? z.pays + ' ' + (flagOf(z.pays)||'') : (typeof z === 'object' ? z.label : z)).join(', ') || '—';
     document.getElementById('recap-de').textContent = document.getElementById('dem-ville-depart')?.value || '—';
     document.getElementById('recap-vers').textContent = document.getElementById('dem-ville-arrivee')?.value || 'Même ville';
   } else {

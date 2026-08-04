@@ -287,6 +287,9 @@
 
 <script>
 const SUPABASE_URL = 'https://daptohjruyxafskpmqeb.supabase.co';
+const PAYS_FLAGS_T = {'Afghanistan':'🇦🇫','Afrique du Sud':'🇿🇦','Albanie':'🇦🇱','Algérie':'🇩🇿','Allemagne':'🇩🇪','Andorre':'🇦🇩','Angola':'🇦🇴','Arabie saoudite':'🇸🇦','Argentine':'🇦🇷','Arménie':'🇦🇲','Australie':'🇦🇺','Autriche':'🇦🇹','Azerbaïdjan':'🇦🇿','Bahreïn':'🇧🇭','Bangladesh':'🇧🇩','Belgique':'🇧🇪','Biélorussie':'🇧🇾','Bolivie':'🇧🇴','Bosnie-Herzégovine':'🇧🇦','Brésil':'🇧🇷','Bulgarie':'🇧🇬','Burkina Faso':'🇧🇫','Burundi':'🇧🇮','Cambodge':'🇰🇭','Cameroun':'🇨🇲','Canada':'🇨🇦','Chili':'🇨🇱','Chine':'🇨🇳','Chypre':'🇨🇾','Colombie':'🇨🇴','Congo':'🇨🇬',"Côte d'Ivoire":'🇨🇮','Croatie':'🇭🇷','Cuba':'🇨🇺','Danemark':'🇩🇰','Égypte':'🇪🇬','Émirats arabes unis':'🇦🇪','Espagne':'🇪🇸','Estonie':'🇪🇪','États-Unis':'🇺🇸','Éthiopie':'🇪🇹','Finlande':'🇫🇮','France':'🇫🇷','Gabon':'🇬🇦','Géorgie':'🇬🇪','Ghana':'🇬🇭','Grèce':'🇬🇷','Guatemala':'🇬🇹','Guinée':'🇬🇳','Haïti':'🇭🇹','Hongrie':'🇭🇺','Inde':'🇮🇳','Indonésie':'🇮🇩','Irak':'🇮🇶','Iran':'🇮🇷','Irlande':'🇮🇪','Islande':'🇮🇸','Israël':'🇮🇱','Italie':'🇮🇹','Japon':'🇯🇵','Jordanie':'🇯🇴','Kazakhstan':'🇰🇿','Kenya':'🇰🇪','Kosovo':'🇽🇰','Koweït':'🇰🇼','Lettonie':'🇱🇻','Liban':'🇱🇧','Libye':'🇱🇾','Liechtenstein':'🇱🇮','Lituanie':'🇱🇹','Luxembourg':'🇱🇺','Macédoine':'🇲🇰','Madagascar':'🇲🇬','Mali':'🇲🇱','Malte':'🇲🇹','Maroc':'🇲🇦','Mauritanie':'🇲🇷','Mexique':'🇲🇽','Moldavie':'🇲🇩','Monaco':'🇲🇨','Mongolie':'🇲🇳','Monténégro':'🇲🇪','Mozambique':'🇲🇿','Namibie':'🇳🇦','Népal':'🇳🇵','Niger':'🇳🇪','Nigéria':'🇳🇬','Norvège':'🇳🇴','Nouvelle-Zélande':'🇳🇿','Oman':'🇴🇲','Ouganda':'🇺🇬','Pakistan':'🇵🇰','Palestine':'🇵🇸','Panama':'🇵🇦','Paraguay':'🇵🇾','Pays-Bas':'🇳🇱','Pérou':'🇵🇪','Philippines':'🇵🇭','Pologne':'🇵🇱','Portugal':'🇵🇹','Qatar':'🇶🇦','République tchèque':'🇨🇿','Roumanie':'🇷🇴','Royaume-Uni':'🇬🇧','Russie':'🇷🇺','Rwanda':'🇷🇼','Sénégal':'🇸🇳','Serbie':'🇷🇸','Singapour':'🇸🇬','Slovaquie':'🇸🇰','Slovénie':'🇸🇮','Somalie':'🇸🇴','Soudan':'🇸🇩','Sri Lanka':'🇱🇰','Suède':'🇸🇪','Suisse':'🇨🇭','Syrie':'🇸🇾','Taïwan':'🇹🇼','Tanzanie':'🇹🇿','Tchad':'🇹🇩','Thaïlande':'🇹🇭','Tunisie':'🇹🇳','Turquie':'🇹🇷','Ukraine':'🇺🇦','Uruguay':'🇺🇾','Venezuela':'🇻🇪','Vietnam':'🇻🇳','Yémen':'🇾🇪'};
+function flagT(p) { return (PAYS_FLAGS_T[p] || '') + ' '; }
+function paysLabel(p) { var f = PAYS_FLAGS_T[p]; return f ? p + ' ' + f : p; }
 const SUPABASE_ANON_KEY = 'sb_publishable_plDYJLGRhTIPT-kwPW2ljA_-48Mv7S3';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -475,7 +478,7 @@ function renderReservationCard(r, person, personLabel, showActions) {
     // Reconstruit depuis description ou données de la réservation
     const vD = r.ville_depart || '';
     const vA = r.ville_arrivee || '';
-    const pays = r.pays_demenagement || (t ? (t.villes_intervention||[]).map(z=>typeof z==='object'?z.pays:z).join(', ') : '');
+    const pays = r.pays_demenagement || (t ? (t.villes_intervention||[]).map(z=>typeof z==='object'?paysLabel(z.pays):z).join(', ') : '');
     routeLabel = pays ? pays + (vD ? ' : ' + vD + (vA ? ' → ' + vA : '') : '') : (t ? t.lieu_ramassage : '—');
   } else {
     routeLabel = (t ? t.lieu_ramassage : '—') + ' → ' + (t ? t.lieu_distribution : '—');
@@ -585,7 +588,7 @@ function render() {
       ? '🚛 Déménagement · ' + (Array.isArray(t.villes_intervention) && t.villes_intervention.length
           ? t.villes_intervention.map(function(z) {
               if (typeof z === 'object' && z.pays) {
-                return z.toutLePays ? z.pays : z.pays + ' (' + (z.villes || []).join(', ') + ')';
+                return z.toutLePays ? paysLabel(z.pays) : paysLabel(z.pays) + ' (' + (z.villes || []).join(', ') + ')';
               }
               return typeof z === 'object' ? (z.label || '—') : z;
             }).join(' · ')
@@ -734,7 +737,7 @@ function voirDetail(event, trajetId) {
     var villes = Array.isArray(t.villes_intervention) && t.villes_intervention.length
       ? t.villes_intervention.map(function(z) {
           if (typeof z === 'object' && z.pays) {
-            return z.toutLePays ? '🌍 ' + z.pays + ' (tout le pays)' : '🌍 ' + z.pays + ' : ' + (z.villes || []).join(', ');
+            return z.toutLePays ? paysLabel(z.pays) + ' (tout le pays)' : paysLabel(z.pays) + ' : ' + (z.villes || []).join(', ');
           }
           return typeof z === 'object' ? z.label : z;
         }).join('<br>')
