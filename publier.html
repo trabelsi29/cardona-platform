@@ -1207,43 +1207,35 @@ function validateStep0() {
 }
 
 // ── RECHERCHE PAYS ────────────────────────────────────────────────
+const PAYS_FLAGS_PUB = {'Afghanistan':'🇦🇫','Afrique du Sud':'🇿🇦','Albanie':'🇦🇱','Algérie':'🇩🇿','Allemagne':'🇩🇪','Andorre':'🇦🇩','Angola':'🇦🇴','Arabie saoudite':'🇸🇦','Argentine':'🇦🇷','Arménie':'🇦🇲','Australie':'🇦🇺','Autriche':'🇦🇹','Azerbaïdjan':'🇦🇿','Bahreïn':'🇧🇭','Bangladesh':'🇧🇩','Belgique':'🇧🇪','Biélorussie':'🇧🇾','Bolivie':'🇧🇴','Bosnie-Herzégovine':'🇧🇦','Brésil':'🇧🇷','Bulgarie':'🇧🇬','Burkina Faso':'🇧🇫','Burundi':'🇧🇮','Cambodge':'🇰🇭','Cameroun':'🇨🇲','Canada':'🇨🇦','Chili':'🇨🇱','Chine':'🇨🇳','Chypre':'🇨🇾','Colombie':'🇨🇴','Congo':'🇨🇬',"Côte d'Ivoire":'🇨🇮','Croatie':'🇭🇷','Cuba':'🇨🇺','Danemark':'🇩🇰','Égypte':'🇪🇬','Émirats arabes unis':'🇦🇪','Espagne':'🇪🇸','Estonie':'🇪🇪','États-Unis':'🇺🇸','Éthiopie':'🇪🇹','Finlande':'🇫🇮','France':'🇫🇷','Gabon':'🇬🇦','Géorgie':'🇬🇪','Ghana':'🇬🇭','Grèce':'🇬🇷','Guatemala':'🇬🇹','Guinée':'🇬🇳','Haïti':'🇭🇹','Hongrie':'🇭🇺','Inde':'🇮🇳','Indonésie':'🇮🇩','Irak':'🇮🇶','Iran':'🇮🇷','Irlande':'🇮🇪','Islande':'🇮🇸','Israël':'🇮🇱','Italie':'🇮🇹','Japon':'🇯🇵','Jordanie':'🇯🇴','Kazakhstan':'🇰🇿','Kenya':'🇰🇪','Kosovo':'🇽🇰','Koweït':'🇰🇼','Lettonie':'🇱🇻','Liban':'🇱🇧','Libye':'🇱🇾','Liechtenstein':'🇱🇮','Lituanie':'🇱🇹','Luxembourg':'🇱🇺','Macédoine':'🇲🇰','Madagascar':'🇲🇬','Mali':'🇲🇱','Malte':'🇲🇹','Maroc':'🇲🇦','Mauritanie':'🇲🇷','Mexique':'🇲🇽','Moldavie':'🇲🇩','Monaco':'🇲🇨','Mongolie':'🇲🇳','Monténégro':'🇲🇪','Mozambique':'🇲🇿','Namibie':'🇳🇦','Népal':'🇳🇵','Niger':'🇳🇪','Nigéria':'🇳🇬','Norvège':'🇳🇴','Nouvelle-Zélande':'🇳🇿','Oman':'🇴🇲','Ouganda':'🇺🇬','Pakistan':'🇵🇰','Palestine':'🇵🇸','Panama':'🇵🇦','Paraguay':'🇵🇾','Pays-Bas':'🇳🇱','Pérou':'🇵🇪','Philippines':'🇵🇭','Pologne':'🇵🇱','Portugal':'🇵🇹','Qatar':'🇶🇦','République tchèque':'🇨🇿','Roumanie':'🇷🇴','Royaume-Uni':'🇬🇧','Russie':'🇷🇺','Rwanda':'🇷🇼','Sénégal':'🇸🇳','Serbie':'🇷🇸','Singapour':'🇸🇬','Slovaquie':'🇸🇰','Slovénie':'🇸🇮','Somalie':'🇸🇴','Soudan':'🇸🇩','Sri Lanka':'🇱🇰','Suède':'🇸🇪','Suisse':'🇨🇭','Syrie':'🇸🇾','Taïwan':'🇹🇼','Tanzanie':'🇹🇿','Tchad':'🇹🇩','Thaïlande':'🇹🇭','Tunisie':'🇹🇳','Turquie':'🇹🇷','Ukraine':'🇺🇦','Uruguay':'🇺🇾','Venezuela':'🇻🇪','Vietnam':'🇻🇳','Yémen':'🇾🇪'};
+var PAYS_LIST_PUB = Object.keys(PAYS_FLAGS_PUB);
+function flagPub(p) { return (PAYS_FLAGS_PUB[p] || '🌍') + ' '; }
+
 function handleDemPaysInput(value) {
   var suggBox = document.getElementById('sugg-dem-pays');
-  if (!value || value.trim().length < 2) { suggBox.style.display = 'none'; return; }
-  clearTimeout(window._demPaysDebounce);
-  window._demPaysDebounce = setTimeout(async function() {
-    try {
-      var res = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(value) + '&featureType=country&limit=6&addressdetails=1');
-      var data = await res.json();
-      suggBox.style.display = 'block';
-      var seen = new Set();
-      var items = (data || []).filter(function(r) {
-        var pays = r.address && (r.address.country || r.display_name.split(',')[0]);
-        if (!pays || seen.has(pays)) return false;
-        seen.add(pays);
-        return true;
-      }).slice(0, 6);
-      if (!items.length) { suggBox.innerHTML = '<div style="padding:10px;font-size:13px;color:#aaa;">Aucun résultat</div>'; return; }
-      suggBox.innerHTML = items.map(function(r) {
-        var pays = r.address ? (r.address.country || r.display_name.split(',')[0]) : r.display_name.split(',')[0];
-        return '<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onclick="selectDemPays(\'' + pays.replace(/'/g,"\\'") + '\')">' + pays + '</div>';
-      }).join('');
-    } catch(e) { suggBox.style.display = 'none'; }
-  }, 350);
+  if (!value || value.trim().length < 1) { suggBox.style.display = 'none'; return; }
+  var normVal = value.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  var matches = PAYS_LIST_PUB.filter(function(p) {
+    return p.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').startsWith(normVal);
+  }).slice(0, 6);
+  if (!matches.length) { suggBox.style.display = 'none'; return; }
+  suggBox.style.display = 'block';
+  suggBox.innerHTML = matches.map(function(p) {
+    return '<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onclick="selectDemPays(\'' + p.replace(/'/g,"\\'") + '\')">' + flagPub(p) + p + '</div>';
+  }).join('');
 }
 
 function selectDemPays(pays) {
-  document.getElementById('pays-dem-input').value = pays;
+  document.getElementById('pays-dem-input').value = flagPub(pays) + pays;
   document.getElementById('sugg-dem-pays').style.display = 'none';
   window._demPaysSelected = pays;
 }
 
 function addDemPays() {
   var input = document.getElementById('pays-dem-input');
-  var pays = (window._demPaysSelected && window._demPaysSelected === input.value.trim())
-    ? window._demPaysSelected : input.value.trim();
+  var pays = window._demPaysSelected || input.value.replace(/[\u{1F1E0}-\u{1F1FF}]{2}/gu,'').trim();
   if (!pays) return;
-  if (demZones.find(function(z){ return z.pays === pays; })) { input.value=''; return; }
+  if (demZones.find(function(z){ return z.pays === pays; })) { input.value=''; window._demPaysSelected=null; return; }
   demZones.push({ pays: pays, toutLePays: false, villes: [] });
   renderDemZones();
   input.value = '';
@@ -1294,7 +1286,7 @@ function renderDemZones() {
     }
     return '<div style="background:#fdf8f0;border:1.5px solid #e8dcc8;border-radius:12px;padding:12px 14px;margin-bottom:10px;">'
       + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'
-      + '<span style="font-weight:700;font-size:14px;">🌍 ' + z.pays + '</span>'
+      + '<span style="font-weight:700;font-size:14px;">' + flagPub(z.pays) + z.pays + '</span>'
       + '<span onclick="removeDemZone(' + i + ')" style="cursor:pointer;color:#E24B4A;font-size:18px;line-height:1;">×</span>'
       + '</div>'
       + '<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;margin-bottom:' + (z.toutLePays ? '0' : '8px') + ';">'

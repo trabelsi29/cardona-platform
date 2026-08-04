@@ -489,7 +489,9 @@ let searchEnvoi = { adresse: '', lat: null, lon: null };
 let searchReception = { adresse: '', lat: null, lon: null };
 let allMatchingTrajets = [];
 
-const PAYS_LIST = ['Afghanistan','Afrique du Sud','Albanie','Algérie','Allemagne','Andorre','Angola','Arabie saoudite','Argentine','Arménie','Australie','Autriche','Azerbaïdjan','Bahreïn','Bangladesh','Belgique','Biélorussie','Bolivie','Bosnie-Herzégovine','Brésil','Bulgarie','Burkina Faso','Burundi','Cambodge','Cameroun','Canada','Chili','Chine','Chypre','Colombie','Congo','Côte d\'Ivoire','Croatie','Cuba','Danemark','Égypte','Émirats arabes unis','Espagne','Estonie','États-Unis','Éthiopie','Finlande','France','Gabon','Géorgie','Ghana','Grèce','Guatemala','Guinée','Haïti','Hongrie','Inde','Indonésie','Irak','Iran','Irlande','Islande','Israël','Italie','Japon','Jordanie','Kazakhstan','Kenya','Kosovo','Koweït','Lettonie','Liban','Libye','Liechtenstein','Lituanie','Luxembourg','Macédoine','Madagascar','Mali','Malte','Maroc','Mauritanie','Mexique','Moldavie','Monaco','Mongolie','Monténégro','Mozambique','Namibie','Népal','Niger','Nigéria','Norvège','Nouvelle-Zélande','Oman','Ouganda','Pakistan','Palestine','Panama','Paraguay','Pays-Bas','Pérou','Philippines','Pologne','Portugal','Qatar','République tchèque','Roumanie','Royaume-Uni','Russie','Rwanda','Sénégal','Serbie','Singapour','Slovaquie','Slovénie','Somalie','Soudan','Sri Lanka','Suède','Suisse','Syrie','Taïwan','Tanzanie','Tchad','Thaïlande','Tunisie','Turquie','Ukraine','Uruguay','Venezuela','Vietnam','Yémen'];
+const PAYS_FLAGS = {'Afghanistan':'🇦🇫','Afrique du Sud':'🇿🇦','Albanie':'🇦🇱','Algérie':'🇩🇿','Allemagne':'🇩🇪','Andorre':'🇦🇩','Angola':'🇦🇴','Arabie saoudite':'🇸🇦','Argentine':'🇦🇷','Arménie':'🇦🇲','Australie':'🇦🇺','Autriche':'🇦🇹','Azerbaïdjan':'🇦🇿','Bahreïn':'🇧🇭','Bangladesh':'🇧🇩','Belgique':'🇧🇪','Biélorussie':'🇧🇾','Bolivie':'🇧🇴','Bosnie-Herzégovine':'🇧🇦','Brésil':'🇧🇷','Bulgarie':'🇧🇬','Burkina Faso':'🇧🇫','Burundi':'🇧🇮','Cambodge':'🇰🇭','Cameroun':'🇨🇲','Canada':'🇨🇦','Chili':'🇨🇱','Chine':'🇨🇳','Chypre':'🇨🇾','Colombie':'🇨🇴','Congo':'🇨🇬','Côte d\'Ivoire':'🇨🇮','Croatie':'🇭🇷','Cuba':'🇨🇺','Danemark':'🇩🇰','Égypte':'🇪🇬','Émirats arabes unis':'🇦🇪','Espagne':'🇪🇸','Estonie':'🇪🇪','États-Unis':'🇺🇸','Éthiopie':'🇪🇹','Finlande':'🇫🇮','France':'🇫🇷','Gabon':'🇬🇦','Géorgie':'🇬🇪','Ghana':'🇬🇭','Grèce':'🇬🇷','Guatemala':'🇬🇹','Guinée':'🇬🇳','Haïti':'🇭🇹','Hongrie':'🇭🇺','Inde':'🇮🇳','Indonésie':'🇮🇩','Irak':'🇮🇶','Iran':'🇮🇷','Irlande':'🇮🇪','Islande':'🇮🇸','Israël':'🇮🇱','Italie':'🇮🇹','Japon':'🇯🇵','Jordanie':'🇯🇴','Kazakhstan':'🇰🇿','Kenya':'🇰🇪','Kosovo':'🇽🇰','Koweït':'🇰🇼','Lettonie':'🇱🇻','Liban':'🇱🇧','Libye':'🇱🇾','Liechtenstein':'🇱🇮','Lituanie':'🇱🇹','Luxembourg':'🇱🇺','Macédoine':'🇲🇰','Madagascar':'🇲🇬','Mali':'🇲🇱','Malte':'🇲🇹','Maroc':'🇲🇦','Mauritanie':'🇲🇷','Mexique':'🇲🇽','Moldavie':'🇲🇩','Monaco':'🇲🇨','Mongolie':'🇲🇳','Monténégro':'🇲🇪','Mozambique':'🇲🇿','Namibie':'🇳🇦','Népal':'🇳🇵','Niger':'🇳🇪','Nigéria':'🇳🇬','Norvège':'🇳🇴','Nouvelle-Zélande':'🇳🇿','Oman':'🇴🇲','Ouganda':'🇺🇬','Pakistan':'🇵🇰','Palestine':'🇵🇸','Panama':'🇵🇦','Paraguay':'🇵🇾','Pays-Bas':'🇳🇱','Pérou':'🇵🇪','Philippines':'🇵🇭','Pologne':'🇵🇱','Portugal':'🇵🇹','Qatar':'🇶🇦','République tchèque':'🇨🇿','Roumanie':'🇷🇴','Royaume-Uni':'🇬🇧','Russie':'🇷🇺','Rwanda':'🇷🇼','Sénégal':'🇸🇳','Serbie':'🇷🇸','Singapour':'🇸🇬','Slovaquie':'🇸🇰','Slovénie':'🇸🇮','Somalie':'🇸🇴','Soudan':'🇸🇩','Sri Lanka':'🇱🇰','Suède':'🇸🇪','Suisse':'🇨🇭','Syrie':'🇸🇾','Taïwan':'🇹🇼','Tanzanie':'🇹🇿','Tchad':'🇹🇩','Thaïlande':'🇹🇭','Tunisie':'🇹🇳','Turquie':'🇹🇷','Ukraine':'🇺🇦','Uruguay':'🇺🇾','Venezuela':'🇻🇪','Vietnam':'🇻🇳','Yémen':'🇾🇪'};
+const PAYS_LIST = Object.keys(PAYS_FLAGS);
+function flagOf(pays) { return (PAYS_FLAGS[pays] || '🌍') + ' '; }
 
 function handleDemPaysInput(val) {
   const box = document.getElementById('sugg-dem-pays');
@@ -498,11 +500,11 @@ function handleDemPaysInput(val) {
   const matches = PAYS_LIST.filter(p => p.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').startsWith(normVal)).slice(0, 6);
   if (!matches.length) { box.style.display = 'none'; return; }
   box.style.display = 'block';
-  box.innerHTML = matches.map(p => `<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onmousedown="selectDemPays('${p.replace(/'/g,"\\'")}')">🌍 ${p}</div>`).join('');
+  box.innerHTML = matches.map(p => `<div style="padding:10px 14px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onmousedown="selectDemPays('${p.replace(/'/g,"\\'")}')"> ${flagOf(p)}${p}</div>`).join('');
 }
 
 function selectDemPays(pays) {
-  document.getElementById('dem-pays').value = pays;
+  document.getElementById('dem-pays').value = flagOf(pays) + pays;
   document.getElementById('sugg-dem-pays').style.display = 'none';
 }
 
