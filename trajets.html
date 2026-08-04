@@ -467,24 +467,47 @@ function modifierTrajet(trajetId) {
 function renderReservationCard(r, person, personLabel, showActions) {
   const t = r._trajet;
   const st = statusInfo(r.statut);
-  const ram = t ? t.lieu_ramassage : '—';
-  const dist = t ? t.lieu_distribution : '—';
+  const isDem = r.is_demenagement === true || (Array.isArray(r.categories) && r.categories.includes('demenagement'));
+
+  // Route
+  let routeLabel;
+  if (isDem) {
+    // Reconstruit depuis description ou données de la réservation
+    const vD = r.ville_depart || '';
+    const vA = r.ville_arrivee || '';
+    const pays = r.pays_demenagement || (t ? (t.villes_intervention||[]).map(z=>typeof z==='object'?z.pays:z).join(', ') : '');
+    routeLabel = pays ? pays + (vD ? ' : ' + vD + (vA ? ' → ' + vA : '') : '') : (t ? t.lieu_ramassage : '—');
+  } else {
+    routeLabel = (t ? t.lieu_ramassage : '—') + ' → ' + (t ? t.lieu_distribution : '—');
+  }
+
+  // Bloc colis
+  let colisHtml;
+  if (isDem) {
+    colisHtml = `<div class="trip-detail"><span class="trip-detail-label">🚛 Déménagement</span>${r.nb_camions ? r.nb_camions + ' camion(s)' : '—'}</div>`;
+  } else {
+    const catLabel = r.categories && r.categories.length ? r.categories.map(categoryLabel).join(', ') : categoryLabel(r.categorie);
+    colisHtml = `<div class="trip-detail"><span class="trip-detail-label">Colis</span>${catLabel}${r.poids_kg ? ' (' + r.poids_kg + ' kg)' : ''}</div>`;
+  }
+
+  const prixLabel = isDem ? 'Prix convenu avec le déménageur' : 'Cash à la livraison';
+
   return `
     <div class="trip-card">
       <div class="trip-head">
         <div>
           <div class="trip-ncc">🔐 Code : ${r.ncc}</div>
-          <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">${ram} → ${dist}</div>
+          <div style="font-size:11px;color:var(--text-secondary);margin-top:2px;">${routeLabel}</div>
         </div>
         ${person?.avatar_url ? `<img class="trip-avatar" src="${person.avatar_url}">` : `<div class="trip-avatar">${initials(person?.full_name)}</div>`}
       </div>
       <div class="trip-person">${person?.full_name || personLabel}</div>
       <div class="trip-status ${st.cls}">${st.label}</div>
       <div class="trip-divider"></div>
-      <div class="trip-detail"><span class="trip-detail-label">Colis</span>${(r.categories&&r.categories.length?r.categories.map(categoryLabel).join(', '):categoryLabel(r.categorie))} (${r.poids_kg || '—'}Kg)</div>
+      ${colisHtml}
       ${r.description ? `<div class="trip-detail"><span class="trip-detail-label">Note</span>${r.description}</div><div class="trip-divider"></div>` : ''}
       <div class="trip-price-row">
-        <span class="trip-price-label">Cash à la livraison</span>
+        <span class="trip-price-label">${prixLabel}</span>
         <span class="trip-price-value">${r.prix_transporteur} €</span>
       </div>
       ${showActions && r.statut === 'en_attente' ? `

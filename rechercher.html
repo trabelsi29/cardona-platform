@@ -1154,11 +1154,14 @@ async function confirmerPaiementStripe() {
     trajet_id: t.id,
     expediteur_id: session.user.id,
     ncc: reservationCode,
-    poids_kg: weight,
+    poids_kg: selectedCategories.includes('demenagement') ? null : weight,
     categorie: (['marchandise','document','fragile','electronique','autre','demenagement'].includes(selectedCategories[0]) ? selectedCategories[0] : 'autre'),
     categories: selectedCategories,
     is_demenagement: selectedCategories.includes('demenagement'),
     nb_camions: selectedCategories.includes('demenagement') ? demNbCamions : null,
+    pays_demenagement: selectedCategories.includes('demenagement') ? (document.getElementById('dem-pays')?.value || null) : null,
+    ville_depart: selectedCategories.includes('demenagement') ? (document.getElementById('dem-ville-depart')?.value || null) : null,
+    ville_arrivee: selectedCategories.includes('demenagement') ? (document.getElementById('dem-ville-arrivee')?.value || null) : null,
     description: details,
     prix_transporteur: prixT,
     frais_service: 3.00,
@@ -1184,8 +1187,22 @@ async function confirmerPaiementStripe() {
   // Email au transporteur
   try {
     var { data: transProfile } = await sb.from('profiles').select('full_name, email').eq('id', t.transporteur_id).single();
-    var emailColis = selectedCategories.join(', ') || '—';
-    var emailTrajet = (t.lieu_ramassage || '') + ' → ' + (t.lieu_distribution || '');
+    var isDem = selectedCategories.includes('demenagement');
+    var emailColis, emailPoids, emailTrajet;
+    if (isDem) {
+      var vD = document.getElementById('dem-ville-depart')?.value || '';
+      var vA = document.getElementById('dem-ville-arrivee')?.value || '';
+      var pays = document.getElementById('dem-pays')?.value || '';
+      emailColis = 'Déménagement (' + demNbCamions + ' camion(s))';
+      emailPoids = '—';
+      emailTrajet = pays + ' : ' + vD + (vA ? ' → ' + vA : '');
+    } else {
+      emailColis = selectedCategories.map(categoryLabel).join(', ') || '—';
+      emailPoids = weight + ' kg';
+      var ram = etapes.filter(e => e.type === 'ramassage').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_ramassage || '—';
+      var dist = etapes.filter(e => e.type === 'distribution').map(e => e.adresse.split(',')[0]).join(' + ') || t.lieu_distribution || '—';
+      emailTrajet = ram + ' → ' + dist;
+    }
     var transName = (transProfile && transProfile.full_name) || 'Transporteur';
     emailjs.init('dWk-YgDI36JADXSGN');
     await emailjs.send('service_f9sp7vz', 'template_4zhpb6k', {
@@ -1194,7 +1211,7 @@ async function confirmerPaiementStripe() {
       expediteur: session.user.email,
       transporteur: transName,
       colis: emailColis,
-      poids: weight || '—',
+      poids: emailPoids,
       prix: prixT || '—'
     });
     console.log('Email notification envoyé');
@@ -1225,11 +1242,14 @@ async function _oldHandlePayment() {
     trajet_id: t.id,
     expediteur_id: session.user.id,
     ncc: reservationCode,
-    poids_kg: weight,
+    poids_kg: selectedCategories.includes('demenagement') ? null : weight,
     categorie: (['marchandise','document','fragile','electronique','autre','demenagement'].includes(selectedCategories[0]) ? selectedCategories[0] : 'autre'),
     categories: selectedCategories,
     is_demenagement: selectedCategories.includes('demenagement'),
     nb_camions: selectedCategories.includes('demenagement') ? demNbCamions : null,
+    pays_demenagement: selectedCategories.includes('demenagement') ? (document.getElementById('dem-pays')?.value || null) : null,
+    ville_depart: selectedCategories.includes('demenagement') ? (document.getElementById('dem-ville-depart')?.value || null) : null,
+    ville_arrivee: selectedCategories.includes('demenagement') ? (document.getElementById('dem-ville-arrivee')?.value || null) : null,
     description: details,
     prix_transporteur: prixT,
     frais_service: 3.00,
