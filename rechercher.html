@@ -352,24 +352,19 @@
       <!-- MODE DÉMÉNAGEMENT -->
       <div id="step2-dem" style="display:none;">
         <div class="title">Déménagement</div>
-        <div class="subtitle">D'où vers où souhaitez-vous déménager ?</div>
+        <div class="subtitle">Dans quel pays et entre quelles villes ?</div>
         <div class="field">
-          <label>Pays de départ</label>
-          <input type="text" id="dem-pays-depart" placeholder="ex: France" oninput="handleDemPaysInput('depart', this.value)" autocomplete="off">
-          <div class="suggestions" id="sugg-dem-depart"></div>
+          <label>Pays</label>
+          <input type="text" id="dem-pays" placeholder="ex: France, Belgique…" oninput="handleDemPaysInput('pays', this.value)" autocomplete="off">
+          <div class="suggestions" id="sugg-dem-pays"></div>
         </div>
-        <div class="field" id="dem-region-depart-field" style="display:none;">
-          <label>Ville ou région de départ <span style="font-size:11px;color:var(--text-secondary);">(optionnel)</span></label>
-          <input type="text" id="dem-region-depart" placeholder="ex: Paris, Île-de-France…">
+        <div class="field">
+          <label>Ville de départ</label>
+          <input type="text" id="dem-ville-depart" placeholder="ex: Paris, Lyon…">
         </div>
-        <div class="field" style="margin-top:4px;">
-          <label>Pays d'arrivée</label>
-          <input type="text" id="dem-pays-arrivee" placeholder="ex: Belgique" oninput="handleDemPaysInput('arrivee', this.value)" autocomplete="off">
-          <div class="suggestions" id="sugg-dem-arrivee"></div>
-        </div>
-        <div class="field" id="dem-region-arrivee-field" style="display:none;">
-          <label>Ville ou région d'arrivée <span style="font-size:11px;color:var(--text-secondary);">(optionnel)</span></label>
-          <input type="text" id="dem-region-arrivee" placeholder="ex: Bruxelles, Wallonie…">
+        <div class="field">
+          <label>Ville d'arrivée</label>
+          <input type="text" id="dem-ville-arrivee" placeholder="ex: Marseille, Bordeaux…">
         </div>
         <div class="field">
           <label>Nombre de camions nécessaires</label>
@@ -503,12 +498,10 @@ function changeCamions(delta) {
 }
 
 function handleDemPaysInput(side, val) {
-  const suggId = 'sugg-dem-' + (side === 'depart' ? 'depart' : 'arrivee');
-  const regionFieldId = 'dem-region-' + (side === 'depart' ? 'depart' : 'arrivee') + '-field';
-  const suggBox = document.getElementById(suggId);
+  const suggBox = document.getElementById('sugg-dem-pays');
   if (!val || val.length < 2) { suggBox.style.display = 'none'; return; }
-  clearTimeout(window['_demPaysTimer_' + side]);
-  window['_demPaysTimer_' + side] = setTimeout(async function() {
+  clearTimeout(window._demPaysTimer);
+  window._demPaysTimer = setTimeout(async function() {
     try {
       const res = await fetch('https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(val) + '&featureType=country&limit=5&addressdetails=1');
       const data = await res.json();
@@ -520,24 +513,24 @@ function handleDemPaysInput(side, val) {
       suggBox.style.display = items.length ? 'block' : 'none';
       suggBox.innerHTML = items.map(r => {
         const p = (r.address && r.address.country) || r.display_name.split(',')[0];
-        return `<div class="suggestion-item" onclick="selectDemPays('${side}','${p.replace(/'/g,"\\'")}','${regionFieldId}')">${p}</div>`;
+        return `<div class="suggestion-item" onclick="selectDemPays('${p.replace(/'/g,"\\'")}')"> ${p}</div>`;
       }).join('');
     } catch(e) { suggBox.style.display = 'none'; }
   }, 350);
 }
 
-function selectDemPays(side, pays, regionFieldId) {
-  const inputId = 'dem-pays-' + (side === 'depart' ? 'depart' : 'arrivee');
-  document.getElementById(inputId).value = pays;
-  document.getElementById('sugg-dem-' + (side === 'depart' ? 'depart' : 'arrivee')).style.display = 'none';
-  document.getElementById(regionFieldId).style.display = 'block';
+function selectDemPays(pays) {
+  document.getElementById('dem-pays').value = pays;
+  document.getElementById('sugg-dem-pays').style.display = 'none';
 }
 
 async function searchDemenageurs() {
-  const paysDepart = document.getElementById('dem-pays-depart').value.trim();
-  const paysArrivee = document.getElementById('dem-pays-arrivee').value.trim();
-  if (!paysDepart) { showFormError('Indiquez le pays de départ.'); return; }
-  if (!paysArrivee) { showFormError('Indiquez le pays d\'arrivée.'); return; }
+  const pays = document.getElementById('dem-pays').value.trim();
+  const villeDepart = document.getElementById('dem-ville-depart').value.trim();
+  const villeArrivee = document.getElementById('dem-ville-arrivee').value.trim();
+  if (!pays) { showFormError('Indiquez le pays.'); return; }
+  if (!villeDepart) { showFormError('Indiquez la ville de départ.'); return; }
+  if (!villeArrivee) { showFormError('Indiquez la ville d\'arrivée.'); return; }
 
   goStep(3);
   const list = document.getElementById('transporteurs-list');
@@ -554,31 +547,32 @@ async function searchDemenageurs() {
   const transporteurMap = {};
   (transporteurs || []).forEach(t => transporteurMap[t.id] = t);
 
-  // Normalise un texte pour comparaison insensible aux accents/casse
   const norm = s => (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const normDepart = norm(paysDepart);
-  const normArrivee = norm(paysArrivee);
+  const normPays = norm(pays);
 
   allMatchingTrajets = trajets.filter(t => {
     const zones = t.villes_intervention || [];
-    // Le transporteur doit couvrir SOIT le pays de départ SOIT le pays d'arrivée (ou les deux)
     return zones.some(z => {
-      const pays = norm(typeof z === 'object' ? z.pays : (z.label || z));
-      return pays.includes(normDepart) || pays.includes(normArrivee) || normDepart.includes(pays) || normArrivee.includes(pays);
+      const zPays = norm(typeof z === 'object' ? z.pays : (z.label || z));
+      if (!zPays.includes(normPays) && !normPays.includes(zPays)) return false;
+      // Si tout le pays est couvert → OK
+      if (typeof z === 'object' && z.toutLePays) return true;
+      // Sinon, cherche si villeDepart ou villeArrivee est dans les villes couvertes
+      const villes = (typeof z === 'object' ? z.villes : []) || [];
+      if (!villes.length) return true; // pas de restriction de ville → OK
+      const normVD = norm(villeDepart);
+      const normVA = norm(villeArrivee);
+      return villes.some(v => norm(v).includes(normVD) || normVD.includes(norm(v)) || norm(v).includes(normVA) || normVA.includes(norm(v)));
     });
   }).map(t => ({
-    trajet: t,
-    etapes: [],
+    trajet: t, etapes: [],
     transporteur: transporteurMap[t.transporteur_id],
-    distEnvoi: 0,
-    distReception: 0,
-    geoMatch: true,
-    matchCategorie: true,
-    demMatch: { paysDepart, paysArrivee }
+    distEnvoi: 0, distReception: 0, geoMatch: true, matchCategorie: true,
+    demInfo: { pays, villeDepart, villeArrivee }
   }));
 
   if (!allMatchingTrajets.length) {
-    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🚛</div>Aucun déménageur disponible de <strong>${paysDepart}</strong> vers <strong>${paysArrivee}</strong>.</div>`;
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🚛</div>Aucun déménageur disponible en <strong>${pays}</strong> (${villeDepart} → ${villeArrivee}).</div>`;
     return;
   }
   list.innerHTML = allMatchingTrajets.map((m, idx) => renderTrajetCard(m, idx)).join('');
