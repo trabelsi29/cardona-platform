@@ -317,14 +317,6 @@
 <div class="cat-check"></div>
 </div>
 <div class="cat-desc">Trouvez un transporteur avec camion disponible pour votre déménagement.</div>
-<div id="stepper-demenagement" style="display:none;margin-top:12px;padding:12px;background:#fdf8f0;border-radius:10px;">
-<div style="font-size:13px;font-weight:600;color:var(--dark);margin-bottom:8px;">Nombre de camions nécessaires</div>
-<div style="display:flex;align-items:center;gap:12px;">
-<button class="stepper-btn" onclick="changeCamions(-1)">−</button>
-<input type="number" id="camions-value" value="1" min="1" style="width:60px;text-align:center;border:1px solid var(--border);border-radius:8px;padding:6px;font-size:15px;font-weight:700;">
-<button class="stepper-btn" onclick="changeCamions(1)">+</button>
-</div>
-</div>
 </div>
 
       <button class="btn-primary" onclick="validateStep1()">Suivant</button>
@@ -360,11 +352,13 @@
         </div>
         <div class="field">
           <label>Ville de départ</label>
-          <input type="text" id="dem-ville-depart" placeholder="ex: Paris" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;box-sizing:border-box;outline:none;">
+          <input type="text" id="dem-ville-depart" placeholder="ex: Paris" oninput="handleDemVilleInput('depart', this.value)" autocomplete="off" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;box-sizing:border-box;outline:none;">
+          <div id="sugg-dem-ville-depart" style="display:none;background:white;border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);margin-top:2px;"></div>
         </div>
         <div class="field">
           <label>Ville d'arrivée <span style="font-size:11px;color:var(--text-secondary);">(optionnel si même ville)</span></label>
-          <input type="text" id="dem-ville-arrivee" placeholder="ex: Lyon" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;box-sizing:border-box;outline:none;">
+          <input type="text" id="dem-ville-arrivee" placeholder="ex: Lyon" oninput="handleDemVilleInput('arrivee', this.value)" autocomplete="off" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;box-sizing:border-box;outline:none;">
+          <div id="sugg-dem-ville-arrivee" style="display:none;background:white;border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);margin-top:2px;"></div>
         </div>
         <div class="field">
           <label>Nombre de camions nécessaires</label>
@@ -512,13 +506,51 @@ function selectDemPays(pays) {
   document.getElementById('sugg-dem-pays').style.display = 'none';
 }
 
+function handleDemVilleInput(side, val) {
+  var pays = (document.getElementById('dem-pays') || {}).value || '';
+  var boxId = 'sugg-dem-ville-' + side;
+  var box = document.getElementById(boxId);
+  if (!box) return;
+  if (!val || val.length < 2) { box.style.display = 'none'; return; }
+  clearTimeout(window['_dvTimer_' + side]);
+  window['_dvTimer_' + side] = setTimeout(function() {
+    fetch('https://photon.komoot.io/api/?q=' + encodeURIComponent(val + (pays ? ' ' + pays : '')) + '&limit=6&lang=fr')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var normPays = pays.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        var seen = new Set();
+        var items = (data.features || []).filter(function(f) {
+          var city = f.properties.city || f.properties.name || '';
+          if (!city || seen.has(city)) return false;
+          if (pays) {
+            var fc = (f.properties.country || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            if (!fc.includes(normPays) && !normPays.includes(fc)) return false;
+          }
+          seen.add(city); return true;
+        }).slice(0, 5);
+        if (!items.length) { box.style.display = 'none'; return; }
+        box.style.display = 'block';
+        box.innerHTML = items.map(function(f) {
+          var city = f.properties.city || f.properties.name || '';
+          return '<div style="padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0ece6;" onmousedown="selectDemVille(\'' + side + '\',\'' + city.replace(/'/g, "\\'") + '\')">' + city + '</div>';
+        }).join('');
+      }).catch(function() { box.style.display = 'none'; });
+  }, 350);
+}
+
+function selectDemVille(side, ville) {
+  var input = document.getElementById('dem-ville-' + side);
+  if (input) input.value = ville;
+  var box = document.getElementById('sugg-dem-ville-' + side);
+  if (box) box.style.display = 'none';
+}
+
 async function searchDemenageurs() {
   const pays = document.getElementById('dem-pays').value.trim();
   const villeDepart = document.getElementById('dem-ville-depart').value.trim();
   const villeArrivee = document.getElementById('dem-ville-arrivee').value.trim();
   if (!pays) { showFormError('Indiquez le pays.'); return; }
   if (!villeDepart) { showFormError('Indiquez la ville de départ.'); return; }
-  if (!villeArrivee) { showFormError('Indiquez la ville d\'arrivée.'); return; }
 
   goStep(3);
   const list = document.getElementById('transporteurs-list');
@@ -706,14 +738,14 @@ function toggleCat(cat) {
     document.querySelectorAll(".cat-row").forEach(function(el) {
       el.classList.remove("active");
     });
-    document.getElementById("stepper-demenagement").style.display = "none";
+    
     document.querySelectorAll(".cat-stepper").forEach(function(el) { el.style.display = "none"; });
     if (!isDem) {
       // Cocher déménagement
       selectedCategories = ["demenagement"];
       var dem = document.querySelector('.cat-row[data-cat="demenagement"]');
       if (dem) dem.classList.add("active");
-      document.getElementById("stepper-demenagement").style.display = "block";
+      
     }
     return;
   }
@@ -722,7 +754,7 @@ function toggleCat(cat) {
     selectedCategories = [];
     var dem = document.querySelector('.cat-row[data-cat="demenagement"]');
     if (dem) dem.classList.remove("active");
-    document.getElementById("stepper-demenagement").style.display = "none";
+    
   }
   // Toggle ce colis
   var idx = selectedCategories.indexOf(cat);
@@ -1126,7 +1158,7 @@ async function confirmerPaiementStripe() {
     categorie: (['marchandise','document','fragile','electronique','autre','demenagement'].includes(selectedCategories[0]) ? selectedCategories[0] : 'autre'),
     categories: selectedCategories,
     is_demenagement: selectedCategories.includes('demenagement'),
-    nb_camions: selectedCategories.includes('demenagement') ? (parseInt((document.getElementById('camions-value')||{}).value)||1) : null,
+    nb_camions: selectedCategories.includes('demenagement') ? demNbCamions : null,
     description: details,
     prix_transporteur: prixT,
     frais_service: 3.00,
@@ -1197,7 +1229,7 @@ async function _oldHandlePayment() {
     categorie: (['marchandise','document','fragile','electronique','autre','demenagement'].includes(selectedCategories[0]) ? selectedCategories[0] : 'autre'),
     categories: selectedCategories,
     is_demenagement: selectedCategories.includes('demenagement'),
-    nb_camions: selectedCategories.includes('demenagement') ? (parseInt((document.getElementById('camions-value')||{}).value)||1) : null,
+    nb_camions: selectedCategories.includes('demenagement') ? demNbCamions : null,
     description: details,
     prix_transporteur: prixT,
     frais_service: 3.00,
