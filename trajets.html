@@ -505,7 +505,7 @@ function renderReservationCard(r, person, personLabel, showActions) {
 
   // Carte cliquable → ouvre modal
   return `
-    <div class="trip-card" onclick="ouvrirDetailEnvoi('${r.id}')" style="cursor:pointer;">
+    <div class="trip-card" data-resa-id="${r.id}" style="cursor:pointer;">
       <div class="trip-head">
         <div>
           <div class="trip-ncc">🔐 ${r.ncc}</div>
@@ -758,6 +758,14 @@ async function updateStatut(reservationId, statut) {
 }
 
 checkAccess();
+
+// Délégation de clic pour les cartes expéditeur (évite les problèmes d'UUID dans onclick inline)
+document.addEventListener('click', function(e) {
+  const card = e.target.closest('.trip-card[data-resa-id]');
+  if (!card) return;
+  if (e.target.closest('button')) return; // ignore les clics sur boutons internes
+  ouvrirDetailEnvoi(card.dataset.resaId);
+});
 
 // ── NAV DYNAMIQUE SELON ROLE ──────────────────────────────────────
 const NAV_ICONS = {
