@@ -506,6 +506,10 @@ function renderReservationCard(r, person, personLabel, showActions) {
   // Carte cliquable → ouvre modal
   return `
     <div class="trip-card" data-resa-id="${r.id}" style="cursor:pointer;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;${isDem ? 'background:#EAF0F8;color:#4A6E99;' : 'background:#FDF3E3;color:#BE8C51;'}">${isDem ? '🚛 Déménagement' : '📦 Transport'}</span>
+        <span class="trip-status ${st.cls}">${st.label}</span>
+      </div>
       <div class="trip-head">
         <div>
           <div class="trip-ncc">🔐 ${r.ncc}</div>
@@ -514,7 +518,6 @@ function renderReservationCard(r, person, personLabel, showActions) {
         ${person?.avatar_url ? `<img class="trip-avatar" src="${person.avatar_url}">` : `<div class="trip-avatar">${initials(person?.full_name)}</div>`}
       </div>
       <div class="trip-person">${person?.full_name || personLabel}</div>
-      <div class="trip-status ${st.cls}">${st.label}</div>
       <div class="trip-price-row" style="margin-top:10px;">
         <span class="trip-price-label">${isDem ? '💰 Prix convenu' : '💵 Cash à la livraison'}</span>
         <span class="trip-price-value">${r.prix_transporteur} €</span>
